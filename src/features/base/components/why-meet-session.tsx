@@ -6,6 +6,7 @@ import { MsFolderIcon } from "@/components/icons/why-ms-folder-icon";
 import { MsAccessIcon } from "@/components/icons/why-ms-access-icon";
 import { MsSecureIcon } from "@/components/icons/why-ms-secure-icon";
 import { MsTranscriptIcon } from "@/components/icons/why-ms-transcript-icon";
+import { MicVocalIcon } from "lucide-react";
 
 export function WhyMeetSession() {
   return (
@@ -71,4 +72,5 @@ const reasons: TWhyMeetSession[] = [
   { id: 3, title: "Coss-Examination Mode", description: "Tailored settings for courtroom questioning.", icon: <MsExamIcon className="h-8 w-8" />, },
   { id: 4, title: "Secure & Private", description: "Your data stays encrypted and confidential.", icon: <MsSecureIcon className="h-8 w-8" />, },
   { id: 5, title: "On-The-Go Access", description: "Work from anywhere, without missing a beat.", icon: <MsAccessIcon className="h-8 w-8" />, },
+  { id: 6, title: "Microphone compatibility", description: "MeetSession is compatible with any pin microphone.", icon: <MicVocalIcon className="h-8 w-8" />, },
 ];

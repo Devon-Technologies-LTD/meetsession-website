@@ -1,4 +1,5 @@
 import { LogoDynamic } from "@/components/icons/logo-dynamic";
+import Link from "next/link";
 
 export function Footer() {
   return (
@@ -28,8 +29,12 @@ export function Footer() {
       <div className="h-full flex flex-col gap-4 font-montserrat">
         <p className="font-semibold text-base">Legal</p>
         <ul className="flex flex-col gap-2">
-          <li>Term and conditions</li>
-          <li>Privacy policy</li>
+          <li>
+            <Link href="#">Term and conditions</Link>
+          </li>
+          <li>
+            <Link href="/policy">Privacy policy</Link>
+          </li>
         </ul>
       </div>
     </footer>
