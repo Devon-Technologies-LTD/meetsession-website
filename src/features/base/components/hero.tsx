@@ -1,6 +1,9 @@
-import { Button } from "@/components/ui/button";
+import { AppleStoreLogo } from "@/components/icons/apple-store-logo";
+import { PlayStoreLogo } from "@/components/icons/play-store-logo";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -15,15 +18,24 @@ export function Hero() {
       )}>
         <div className="text-5xl font-bold font-dm-sans">
           <p>Your Legal Transcription,</p>
-          <p>Organized and Reader -</p>
+          <p>Organized and Ready </p>
           <p className="text-brand-green-dark">Anytime, Anywhere.</p>
         </div>
 
         <p className="text-sm font-light max-w-96">Meet session helps lawyers and organizations record meetings or cross-examinations and stores them neatly in folders for instant access.</p>
 
-        <div className="flex items-center gap-2">
-          <Button>Apple App Store</Button>
-          <Button>Google Play Store</Button>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+          <Button size="icon" variant="brand-blue">
+            <AppleStoreLogo className="w-7 h-7" />
+          </Button>
+
+          <Button size="icon" variant="brand-green">
+            <PlayStoreLogo className="w-9 h-9" />
+          </Button>
+          </div>
+
+          <Link href="/waitlist" className={cn(buttonVariants({ variant: "brand-blue", size: "lg" }), "h-12")}>Join Waitlist</Link>
         </div>
       </div>
 

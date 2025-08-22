@@ -2,7 +2,10 @@ import { cn } from "@/lib/utils";
 import { TNavItem } from "../lib/types";
 import { Logo } from "@/components/icons/logo";
 import { NavbarItems } from "./navbar-items";
-import { Button } from "@/components/ui/button";
+import {
+  // Button,
+  buttonVariants,
+} from "@/components/ui/button";
 import Link from "next/link";
 
 export function Navbar() {
@@ -51,13 +54,16 @@ const navItems: TNavItem[] = [
   { id: 6, label: "Support", render: "Support", type: "links", link: "/#support", },
   {
     id: 7, label: "Download", render: (
+      <Link href="/waitlist" className={cn(buttonVariants({ variant: "default" }))}>Join Waitlist</Link>
+    ), type: "buttons",
+    link: "/#download",
+  },
+];
+/*
       <Button
         variant="default"
         className="font-semibold"
       >
         Download App
       </Button>
-    ), type: "buttons",
-    link: "/#download",
-  },
-];
+      */
