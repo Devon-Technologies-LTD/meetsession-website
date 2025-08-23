@@ -1,16 +1,21 @@
 import { LogoDynamic } from "@/components/icons/logo-dynamic";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="text-white w-full flex items-start gap-32 bg-brand-blue p-20">
-      <div className="h-full flex flex-col gap-6">
+    <footer className={cn(
+      "flex flex-col md:flex-row items-start gap-12 md:gap-32",
+      "w-full bg-brand-blue p-10 md:p-20",
+      "text-white text-sm md:text-base",
+    )}>
+      <div className="h-full flex flex-col gap-4 md:gap-6">
         <div className="flex items-center gap-2">
           <LogoDynamic className="h-8 w-8" />
           <span className="font-semibold text-sm">MeetSession</span>
         </div>
 
-        <p className="text-sm font-semibold font-inter">Copyright 2025 Devon Technologies LTD. All rights reserved.</p>
+        <p className="text-xs md:text-sm font-semibold font-inter">Copyright 2025 Devon Technologies LTD. All rights reserved.</p>
 
         <div className="h-6 w-auto">
           socials

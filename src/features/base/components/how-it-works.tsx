@@ -1,55 +1,101 @@
+"use client";
+
+
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { THowItWorks } from "../lib/types";
+import { motion as m, Variants } from "motion/react";
+import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function HowItWorks() {
+  const [hoverState, setHoverState] = useState<"open" | "close">("close");
+  const isMobile = useIsMobile("desktop");
+
+  const rightItemVariant: Variants = {
+    open: { right: "0%", transition: { type: "spring", stiffness: 40, bounceStiffness: 100, } },
+    close: { right: "50%", translateX: "50%", transition: { type: "spring", stiffness: 40, } },
+  };
+  const leftItemVariant: Variants = {
+    open: { left: "0%", transition: { type: "spring", stiffness: 40, bounceStiffness: 100, } },
+    close: { left: "50%", translateX: "-50%", transition: { type: "spring", stiffness: 40, } },
+  };
+
   return (
-    <div
-    id="how-it-works"
-    className={cn(
-      "px-4 py-8 md:py-24 sm:px-6 lg:px-8",
-    )}
+    <m.div
+      className={cn(
+        "h-full lg:h-dvh w-full",
+        "px-7 py-8 md:py-16 md:pt-24",
+        "flex flex-col items-center justify-center",
+      )}
+      id="how-it-works"
     >
-      <div className={cn(
-        "mx-auto max-w-7xl",
-        "flex flex-col gap-16 items-center",
-      )}>
-        <p className="font-dm-sans font-black text-3xl">How it Works</p>
+      <div className="h-fit w-full text-center">
+        <p className="font-dm-sans font-black text-2xl md:text-3xl">How it Works</p>
+      </div>
 
-        <div className="flex gap-20 items-center justify-center">
-          <div className="h-154 w-154 rounded-full bg-brand-green-foreground relative">
-            <Image
-              src="/svg/ms-screenshots.svg"
-              alt="screenshot"
-              height={256}
-              width={256}
-              className="h-auto w-128 absolute right-1/2 translate-x-1/2 bottom-0"
-            />
-          </div>
+      <m.div
+        className={cn(
+          "mx-auto h-full max-w-full w-full",
+          "py-10 md:px-16",
+          "flex-1 flex flex-col gap-8 md:gap-16 items-center",
+        )}
+        onHoverStart={!isMobile ? (() => setHoverState("open")) : () => { }}
+        onHoverEnd={!isMobile ? (() => setHoverState("close")) : () => { }}
+      >
+        <m.div
+          animate={hoverState}
+          className="relative flex items-center justify-center h-full w-full min-w-full lg:min-w-300"
+        >
+          <m.div
+            variants={!isMobile ? leftItemVariant : undefined}
+            className={cn(
+              "h-154 w-154 rounded-full bg-brand-green-foreground",
+              "hidden lg:block absolute top-1/2 -translate-y-1/2",
+            )}
+          >
+            <div className="h-full w-full relative">
+              <Image
+                src="/svg/ms-screenshots.svg"
+                alt="screenshot"
+                height={256}
+                width={256}
+                className="h-auto w-128 absolute right-1/2 translate-x-1/2 bottom-0"
+              />
+            </div>
+          </m.div>
 
-          <div className="h-142 w-142 flex flex-col gap-24 px-5 justify-center rounded-4xl bg-brand-green-foreground">
+          <m.div
+            variants={!isMobile ? rightItemVariant : undefined}
+            className={cn(
+              "py-7 lg:py-0 px-5 rounded-2xl lg:rounded-4xl bg-brand-green-foreground",
+              "flex flex-col gap-12 lg:gap-24 justify-center",
+              "h-fit lg:h-156 w-full lg:w-156",
+              "lg:absolute lg:top-1/2 lg:-translate-y-1/2",
+            )}
+          >
             {steps.map(step => (
               <div
                 className={cn(
-                  "flex gap-4 items-center",
+                  "flex gap-2 lg:gap-4 items-center",
                 )}
                 key={step.id}
               >
-                <p className="font-bold text-white text-7xl font-calcio-demo">{step.id}</p>
+                <p className="font-bold text-white text-5xl lg:text-7xl font-calcio-demo">{step.id}</p>
                 <div className={cn(
                   "font-raleway flex flex-col",
-                  "px-8",
+                  "px-6 lg:px-8",
                   // "border-b last:border-none",
                 )}>
-                  <p className="text-brand-green font-bold text-lg">{step.title}</p>
-                  <p className="text-base font-light">{step.description}</p>
+                  <p className="text-brand-green font-bold text-base lg:text-lg">{step.title}</p>
+                  <p className="text-sm lg:text-base font-light">{step.description}</p>
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </div>
-    </div>
+          </m.div>
+        </m.div>
+      </m.div>
+    </m.div>
   );
 }
 
