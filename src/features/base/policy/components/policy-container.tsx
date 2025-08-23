@@ -5,10 +5,10 @@ import Link from "next/link";
 
 export function PolicyContainer() {
   return (
-    <div className="text-white w-full h-full min-h-fit py-20 px-28 flex flex-col gap-7">
-      <section className="flex flex-col gap-4 font-raleway">
-        <p className="font-bold text-3xl">Legal Center</p>
-        <div className="text-base font-light flex items-center">
+    <div className="text-white w-full h-full min-h-fit py-10 md:py-20 px-7 lg:px-28 flex flex-col gap-7">
+      <section className="flex flex-col gap-2.5 md:gap-4 font-raleway">
+        <p className="font-bold text-xl md:text-3xl">Legal Center</p>
+        <div className="text-sm md:text-base font-light flex flex-wrap items-center">
           <span>Privacy Policy</span>
           <DotIcon />
           <span>Terms of Service</span>
@@ -21,7 +21,7 @@ export function PolicyContainer() {
         </div>
       </section>
 
-      <section className="min-h-fit w-full flex flex-col gap-8">
+      <section className="min-h-fit w-full flex flex-col gap-5 md:gap-8">
         <div>
           <Button
             variant="brand-green"
@@ -30,11 +30,12 @@ export function PolicyContainer() {
           </Button>
         </div>
 
-        <div className="flex items-start gap-20 min-h-fit">
+        <div className="flex items-start gap-5 sm:gap-10 lg:gap-20 min-h-fit">
           <aside className={cn(
             "border-2 border-brand-green-dark rounded-xl overflow-y-auto",
-            "py-5 px-6 min-h-fit h-fit w-72 font-raleway",
-            "flex flex-col gap-4",
+            "py-5 px-6 min-h-fit h-fit w-72 min-w-56",
+            "text-sm md:text-base font-raleway",
+            "hidden md:flex flex-col gap-4",
             "sticky top-24",
           )}>
             <p className="font-bold uppercase">INTRODUCTION</p>
@@ -47,11 +48,11 @@ export function PolicyContainer() {
           </aside>
 
           <main className="flex-1 flex flex-col gap-2 font-dm-sans">
-            <p className="font-semibold text-lg">Privacy Policy</p>
+            <p className="font-semibold text-base md:text-lg">Privacy Policy</p>
 
-            <div className="flex flex-col w-full gap-3.5 text-sm">
+            <div className="flex flex-col w-full max-w-full text-wrap gap-3.5 text-xs md:text-sm">
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Introduction</p>
+                <p className="text-base md:text-lg font-semibold">Introduction</p>
                 <p className="">
                   Devon Technologies Ltd is a technology company incorporated to provide innovative technology solutions and artificially intelligent options to discovered challenges.
                   Clients and users can access our services through these channels including our website https://www.devontech.io/
@@ -60,14 +61,14 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5" id="scope-and-applicability">
-                <p className="text-lg font-semibold">SCOPE AND APPLICABILITY</p>
+                <p className="text-base md:text-lg font-semibold">SCOPE AND APPLICABILITY</p>
                 <p className="">
                   Scope & Applicability: This Privacy Policy applies to all individuals and entities whose personal data is processed by Devon Technologies, including but not limited to customers, users of our software and services, employees, contractors, vendors, and visitors to our physical and online platforms.
                 </p>
               </div>
 
               <div className="flex flex-col gap-2.5" id="commitment">
-                <p className="text-lg font-semibold">COMMITMENT</p>
+                <p className="text-base md:text-lg font-semibold">COMMITMENT</p>
                 <p className="">
                   This policy document is available on our website https://www.devontech.io/ with physical copies at our office.
                   By subscribing to our service or installing our Software, you consent to the processing of your personal data in accordance with this policy.
@@ -77,7 +78,7 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5" id="definitions">
-                <p className="text-lg font-semibold" id="lawful-bases-defined">2. Definitions </p>
+                <p className="text-base md:text-lg font-semibold" id="lawful-bases-defined">2. Definitions </p>
                 <p className="">
                   <strong>&ldquo;Consent&rdquo;</strong> of the Data Subject means any freely given, specific, informed, and unambiguous expression of the Data Subject&apos;s wishes, where they, through a statement or clear affirmative action, demonstrate consent to the processing of their personal data
                   <br />
@@ -107,15 +108,15 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5" id="information-collection-and-use">
-                <p className="text-lg font-semibold">3. Information Collection and Use </p>
+                <p className="text-base md:text-lg font-semibold">3. Information Collection and Use </p>
                 <p className="">
                   We want you to know that we collect personal information actively and passively. This means that when you use our Software, we sometimes require you to provide personally identifiable information when you want to take specific actions like registering for our services or onboarding on the platform we have created. In addition, when using our Sites and Services, our Sites and Services passively collect personally identifiable information as necessary to ensure the Sites and Services are operating effectively for our users
                 </p>
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Types of Data Collected</p>
-                <p className="text-lg font-semibold">Personal Data</p>
+                <p className="text-base md:text-lg font-semibold">Types of Data Collected</p>
+                <p className="text-base md:text-lg font-semibold">Personal Data</p>
 
                 <p className="">
                   We want you to know that we collect personal information actively and passively. This means that when you use our Software, we sometimes require you to provide personally identifiable information when you want to take specific actions like registering for our services or onboarding on the platform we have created. In addition, when using our Sites and Services, our Sites and Services passively collect personally identifiable information as necessary to ensure the Sites and Services are operating effectively for our users
@@ -125,14 +126,14 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Name and Contact Data:</p>
+                <p className="text-base md:text-lg font-semibold">Name and Contact Data:</p>
                 <p className="">
                   collect your first, middle and last name, email address, signature, date of birth, an identification document such as a copy of driver’s license, international passport, national identity card, and other similar contact data.
                 </p>
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Usage Data:</p>
+                <p className="text-base md:text-lg font-semibold">Usage Data:</p>
                 <p className="">
                   We may also collect information that your browser sends or computer on which the Software is installed whenever you access our services (&ldquo;Usage Data&rdquo;).
                   This Usage Data may include information such as your computer&apos;s Internet Protocol address (e.g., IP address), browser type, browser version, the time and date of your visit, the time spent on those pages, unique device identifiers and other diagnostic data.
@@ -140,13 +141,13 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Usage Data may also include the following:</p>
-                <p className="text-lg font-semibold">Geo-Location information:</p>
+                <p className="text-base md:text-lg font-semibold">Usage Data may also include the following:</p>
+                <p className="text-base md:text-lg font-semibold">Geo-Location information:</p>
                 <p className="">We may request access or permission to and track location-based information from your computer. If you wish to change our access or permissions, you may do so in your device&apos;s settings.</p>
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Tracking & Cookies Data:</p>
+                <p className="text-base md:text-lg font-semibold">Tracking & Cookies Data:</p>
                 <p className="">
                   We use cookies and similar tracking technologies to track the activity on our Service.
                   Cookies are files with small amount of data which may include an anonymous unique identifier. Cookies are sent to your browser from a website and stored on your device. Tracking technologies also used are beacons, tags, and scripts to collect and track information and to improve and analyze our Service.
@@ -155,7 +156,7 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Sensitive Personal Data</p>
+                <p className="text-base md:text-lg font-semibold">Sensitive Personal Data</p>
                 <p className="">
                   While using our services, we may ask you to provide us with certain sensitive personal data such as Sex (Male/Female), Nationality and Religion, state of origin, date of birth as required by our regulator.
                 </p>
@@ -185,7 +186,7 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Use of Analytics to Collect/Monitor/Analyze Data </p>
+                <p className="text-base md:text-lg font-semibold">Use of Analytics to Collect/Monitor/Analyze Data </p>
                 <p className="">
                   <p>We may use third-party Service Providers to monitor and analyze the use of our Service. We may use analytics services to help us understand how our services are used, improve functionality, and enhance user experience</p>
                   <p>Links to Other Sites</p>
@@ -197,23 +198,23 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">User control and Opt-out</p>
-                <p className="text-lg font-semibold">User Control and Opt-Out:</p>
+                <p className="text-base md:text-lg font-semibold">User control and Opt-out</p>
+                <p className="text-base md:text-lg font-semibold">User Control and Opt-Out:</p>
                 <p className="">
                   You have the right to opt out of non-essential analytics tracking at any time. This can be done through our cookie banner, in-app settings, or by adjusting your browser settings to reject tracking cookies. For Google Analytics, you can install the opt-out browser add-on here: https://tools.google.com/dlpage/gaoptout
                 </p>
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Data minimization</p>
-                <p className="text-lg font-semibold">Data Minimization and Anonymization:</p>
+                <p className="text-base md:text-lg font-semibold">Data minimization</p>
+                <p className="text-base md:text-lg font-semibold">Data Minimization and Anonymization:</p>
                 <p className="">
                   Where possible, analytics data is aggregated and anonymized so that it cannot reasonably be used to identify any specific individual. IP addresses may be truncated or masked before storage.
                 </p>
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Use of Data</p>
+                <p className="text-base md:text-lg font-semibold">Use of Data</p>
                 <p className="">
                   <p>We use the personal data we collect for the following purposes, in line with NDPR, NDPA, and, where applicable, GDPR requirements.</p>
                   <p>Service Provision</p>
@@ -229,14 +230,14 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Lawful Basis:</p>
+                <p className="text-base md:text-lg font-semibold">Lawful Basis:</p>
                 <p className=""> Contract performance, Legitimate Interest (maintaining service availability)</p>
-                <p className="text-lg font-semibold">User Control:</p>
+                <p className="text-base md:text-lg font-semibold">User Control:</p>
                 <p className="">Account closure or service termination will stop this processing, except where retention is required by law.</p>
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Service Improvement</p>
+                <p className="text-base md:text-lg font-semibold">Service Improvement</p>
                 <p className="">
                   • To monitor usage patterns and service performance.
                   <br />
@@ -248,10 +249,10 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Lawful Basis:</p>
+                <p className="text-base md:text-lg font-semibold">Lawful Basis:</p>
                 <p className="">Legitimate Interest</p>
 
-                <p className="text-lg font-semibold">User Control:</p>
+                <p className="text-base md:text-lg font-semibold">User Control:</p>
                 <p className="">You may opt out of non-essential analytics via our cookie banner or in-app settings.</p>
                 <p>Compliance and Legal Obligations</p>
                 <p>
@@ -261,10 +262,10 @@ export function PolicyContainer() {
                   <br />
                 </p>
 
-                <p className="text-lg font-semibold">Lawful Basis:</p>
+                <p className="text-base md:text-lg font-semibold">Lawful Basis:</p>
                 <p>Legal Obligation</p>
 
-                <p className="text-lg font-semibold">User Control:</p>
+                <p className="text-base md:text-lg font-semibold">User Control:</p>
                 <p>Processing cannot be refused where legally required.</p>
                 <p>Security and Fraud Prevention</p>
                 <p>
@@ -274,15 +275,15 @@ export function PolicyContainer() {
                   <br />
                 </p>
 
-                <p className="text-lg font-semibold">Lawful Basis:</p>
+                <p className="text-base md:text-lg font-semibold">Lawful Basis:</p>
                 <p>Legitimate Interest, Legal Obligation</p>
 
-                <p className="text-lg font-semibold">User Control:</p>
+                <p className="text-base md:text-lg font-semibold">User Control:</p>
                 <p>Limited — essential for the safety and integrity of our services.</p>
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Marketing and Communications</p>
+                <p className="text-base md:text-lg font-semibold">Marketing and Communications</p>
                 <p className="">
                   • To send you promotional content, product updates, and offers.
                   <br />
@@ -290,10 +291,10 @@ export function PolicyContainer() {
                   <br />
                 </p>
 
-                <p className="text-lg font-semibold">Lawful Basis:</p>
+                <p className="text-base md:text-lg font-semibold">Lawful Basis:</p>
                 <p>Consent (for electronic marketing), Legitimate Interest (for service-related communications)</p>
 
-                <p className="text-lg font-semibold">User Control:</p>
+                <p className="text-base md:text-lg font-semibold">User Control:</p>
                 <p>You may withdraw consent or opt out of marketing at any time via unsubscribe links, in-app settings, or by contacting us.</p>
 
                 <p>Basis for Lawful Processing</p>
@@ -310,32 +311,30 @@ export function PolicyContainer() {
                 </p>
               </div>
 
-
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Lawful Bases Defined</p>
+                <p className="text-base md:text-lg font-semibold">Lawful Bases Defined</p>
 
-                <p className="text-lg font-semibold">Consent:</p>
+                <p className="text-base md:text-lg font-semibold">Consent:</p>
                 <p>You have given clear permission for us to process your personal data for a specific purpose.</p>
 
-                <p className="text-lg font-semibold">Contract:</p>
+                <p className="text-base md:text-lg font-semibold">Contract:</p>
                 <p>Processing is necessary for a contract you have with us, or because you have asked us to take specific steps before entering into a contract.</p>
 
-                <p className="text-lg font-semibold">Legal Obligation:</p>
+                <p className="text-base md:text-lg font-semibold">Legal Obligation:</p>
                 <p>Processing is necessary to comply with a law (not including contractual obligations).</p>
 
-                <p className="text-lg font-semibold">Vital Interests:</p>
+                <p className="text-base md:text-lg font-semibold">Vital Interests:</p>
                 <p>Processing is necessary to protect someone’s life.</p>
 
-                <p className="text-lg font-semibold">Public Interest/Official Authority:</p>
+                <p className="text-base md:text-lg font-semibold">Public Interest/Official Authority:</p>
                 <p>Processing is necessary for us to perform a task in the public interest or for official functions.</p>
 
-                <p className="text-lg font-semibold">Legitimate Interests:</p>
+                <p className="text-base md:text-lg font-semibold">Legitimate Interests:</p>
                 <p>Processing is necessary for our legitimate interests or the legitimate interests of a third party, unless there is a good reason to protect your personal data that overrides those interests.</p>
               </div>
 
-
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">Lawful Basis Mapping Table</p>
+                <p className="text-base md:text-lg font-semibold">Lawful Basis Mapping Table</p>
               </div>
 
               {/* table */}
@@ -362,7 +361,7 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5" id="transfer-of-data">
-                <p className="text-lg font-semibold">Transfer of Data</p>
+                <p className="text-base md:text-lg font-semibold">Transfer of Data</p>
                 <p>
                   The world today is interconnected and so is the provision of the Services, in the event that Devon has contractual relations with third party for the purpose of providing the Data Subject with effective Service or maintenance services, Certain personal data will traverse these parties in the normal course of carrying out transactions.
                   <br />
@@ -405,7 +404,7 @@ export function PolicyContainer() {
 
 
               <div className="flex flex-col gap-2.5" id="disclosure-of-data">
-                <p className="text-lg font-semibold">Disclosure of Data</p>
+                <p className="text-base md:text-lg font-semibold">Disclosure of Data</p>
                 <p>
                   We only share and disclose your information in the following situations:
                   <br />
@@ -426,7 +425,7 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5" id="security-of-data">
-                <p className="text-lg font-semibold">Security of Data</p>
+                <p className="text-base md:text-lg font-semibold">Security of Data</p>
                 <p>
                   The security of your personal data is a top priority for Devon Technologies. We have implemented a combination of technical, organizational, and physical safeguards to ensure the confidentiality, integrity, and availability of personal data, in line with NDPR, NDPA, and internationally recognized best practices.
                   <br />
@@ -444,7 +443,7 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5">
-                <p className="text-lg font-semibold">General Principles for Processing of Personal Data</p>
+                <p className="text-base md:text-lg font-semibold">General Principles for Processing of Personal Data</p>
                 <p>
                   The Company is committed to maintaining the principles in the NDPR & NDPA regarding the processing of Personal Data.
                   <br />
@@ -520,21 +519,19 @@ export function PolicyContainer() {
                   <br />
                   i. Identifying remediation requirements and tracking resolution.
                   <br />
-                  <pre>
-                    a. Reporting all findings to the top management.
-                    <br />
-                    b. Coordinating with appropriate authorities as needed.
-                    <br />
-                    c. Coordinating internal and external communications.
-                    <br />
-                    d. Ensuring that impacted Data Subjects are properly notified, if necessary.
-                  </pre>
+                  a. Reporting all findings to the top management.
+                  <br />
+                  b. Coordinating with appropriate authorities as needed.
+                  <br />
+                  c. Coordinating internal and external communications.
+                  <br />
+                  d. Ensuring that impacted Data Subjects are properly notified, if necessary.
                   <br />
                 </p>
               </div>
 
               <div className="flex flex-col gap-2.5" id="your-privacy-rights">
-                <p className="text-lg font-semibold">Your Privacy Rights</p>
+                <p className="text-base md:text-lg font-semibold">Your Privacy Rights</p>
                 <p>
                   As data subjects you have certain rights under applicable data protection laws such as the NDPR & NDPA for Nigeria and the GDPR for European countries.
                   <br />
@@ -560,19 +557,19 @@ export function PolicyContainer() {
               </div>
 
               <div className="flex flex-col gap-2.5" id="training">
-                <p className="text-lg font-semibold">Training</p>
+                <p className="text-base md:text-lg font-semibold">Training</p>
                 <p>
                   The Company shall ensure that employees who collect, access and process Personal Data receive adequate data privacy and protection training in order to develop the necessary knowledge, skills and competence required to effectively manage the compliance framework under this Privacy Policy, the NDPR and the Nigeria Data Protection Act (2023) with regard to the protection of Personal Data. On an annual basis, the Company shall develop a capacity building plan for its employees on data privacy and protection in line with the NDPR and the Nigeria Data Protection Act (2023)
                 </p>
               </div>
 
               <div className="flex flex-col gap-2.5" id="changes-to-this-policy">
-                <p className="text-lg font-semibold">Changes to This Privacy Policy</p>
+                <p className="text-base md:text-lg font-semibold">Changes to This Privacy Policy</p>
                 <p>We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and making it available at our branches. You are advised to review this Privacy Policy periodically for any changes. Changes to this Privacy Policy are effective as of the date it is made public</p>
               </div>
 
               <div className="flex flex-col gap-2.5" id="contact-us">
-                <p className="text-lg font-semibold">Contact Us</p>
+                <p className="text-base md:text-lg font-semibold">Contact Us</p>
                 <p>If you have any further questions or comments about us or our policies, email us at info@devontech.io/ or by post to:</p>
                 <br />
                 <p className="border-t border-b py-4 w-[50%] italic">

@@ -8,17 +8,17 @@ export function JoinWaitlist() {
       id="waitlist"
       className={cn(
         "bg-brand-black text-white",
-        "px-4 py-10 md:py-32 sm:px-6 lg:px-8",
+        "px-7 py-8 md:py-32 lg:px-8 h-dvh",
         "flex items-center justify-center",
       )}
     >
-      <div className="flex flex-col gap-10 items-center justify-center w-max h-fit">
+      <div className="flex flex-col gap-6 md:gap-10 items-center justify-center w-max h-fit">
         <div className={cn(
-          "mx-auto max-w-85 text-center",
-          "flex flex-col gap-3 items-center",
+          "mx-auto max-w-full md:max-w-85 text-center",
+          "flex flex-col gap-2 md:gap-3 items-center",
         )}>
-          <p className="font-dm-sans font-black text-3xl">Join the Waitlist</p>
-          <p className="text-base">Be among the first to experience MeetSession when we launch</p>
+          <p className="font-dm-sans font-black text-2xl mf:text-3xl">Join the Waitlist</p>
+          <p className="text-sm md:text-base">Be among the first to experience MeetSession when we launch</p>
 
           <Link
             href="/waitlist"
@@ -30,19 +30,19 @@ export function JoinWaitlist() {
         </div>
 
         <div className={cn(
-          "border border-brand-blue flex flex-col gap-8 items-center justify-center",
-          "py-6 px-24 rounded-3xl w-fit",
+          "border border-brand-blue flex flex-col gap-4 md:gap-8 items-center justify-center",
+          "py-4 md:py-6 px-7 md:px-24 rounded-xl md:rounded-3xl w-fit",
         )}>
-          <p className="text-brand-blue-light w-full max-w-102 text-center">We&apos;re currently in private beta but you can secure your spot today. Click on the Button to secure your spot.</p>
+          <p className="text-sm md:text-base text-brand-blue-light w-full max-w-full md:max-w-102 text-center">We&apos;re currently in private beta but you can secure your spot today. Click on the Button to secure your spot.</p>
           <div className={cn(
             "w-full h-fit relative",
-            "flex items-start justify-around",
+            "flex items-start justify-evenly md:justify-around",
             "before:absolute before:border-b before:border-border/40 before:border-dashed before:w-full before:top-1/2 before:-translate-y-5",
           )}>
             {waitlistSteps.map(item => (
-              <div className="flex flex-col items-center justify-center gap-3 z-10" key={item.id}>
-                <div className="h-20 w-20 rounded-full bg-brand-black-light text-white text-5xl font-bold font-dm-sans flex items-center justify-center">{item.id}</div>
-                <p className="max-w-26 text-center text-sm">{item.item}</p>
+              <div className="flex flex-col items-center w-fit justify-center gap-1.5 md:gap-3 z-10" key={item.id}>
+                <div className="h-16 md:h-20 w-16 md:w-20 rounded-full bg-brand-black-light text-white text-3xl md:text-5xl font-bold font-dm-sans flex items-center justify-center">{item.id}</div>
+                <p className="w-20 max-w-full md:w-26 md:max-w-32 text-center text-xs md:text-sm">{item.item}</p>
               </div>
             ))}
           </div>

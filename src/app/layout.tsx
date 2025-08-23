@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { fontsConfig } from "@/fonts"
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "MeetSession",
@@ -18,6 +19,7 @@ export default function RootLayout({
         className={`${fontsConfig} font-quicksand antialiased min-h-fit h-dvh w-full`}
       >
         {children}
+        <Toaster richColors position="top-right" />
       </body>
     </html>
   );

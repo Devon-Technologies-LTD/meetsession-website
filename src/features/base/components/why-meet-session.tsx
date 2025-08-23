@@ -14,16 +14,16 @@ export function WhyMeetSession() {
       id="features"
       className={cn(
         "bg-brand-blue-extralight",
-        "px-4 py-8 md:py-24 sm:px-6 lg:px-8",
+        "px-7 py-8 md:py-24 lg:px-8",
       )}
     >
       <div className={cn(
-        "mx-auto max-w-7xl",
-        "flex flex-col gap-16 items-center",
+        "mx-auto max-w-full md:max-w-7xl",
+        "flex flex-col gap-8 md:gap-16 items-center",
       )}>
-        <p className="font-dm-sans font-black text-3xl">Why Meet Session?</p>
+        <p className="font-dm-sans font-black text-2xl md:text-3xl">Why Meet Session?</p>
 
-        <div className="flex flex-wrap gap-6 items-center justify-center">
+        <div className="flex flex-wrap gap-4 md:gap-6 items-center justify-center">
           {reasons.map(reason => (
             <WhyMeetSessionCard
               key={reason.id}
@@ -43,14 +43,14 @@ function WhyMeetSessionCard({ reason }: WhyMeetSessionCardProps) {
   return (
     <Card
       className={cn(
-        "border-none shadow-none rounded-4xl",
-        "h-72 w-96 px-1.5 py-8",
+        "border-none shadow-none rounded-2xl md:rounded-4xl",
+        "h-fit md:h-72 w-full md:w-96 md:px-1.5 py-8",
       )}
     >
       <CardContent>
         <div
           className={cn(
-            "h-16 w-18 rounded-lg bg-brand-green text-white",
+            "h-12 md:h-14 w-16 md:w-18 rounded-md md:rounded-lg bg-brand-green text-white",
             "flex items-center justify-center",
           )}
         >
@@ -67,10 +67,10 @@ function WhyMeetSessionCard({ reason }: WhyMeetSessionCardProps) {
 }
 
 const reasons: TWhyMeetSession[] = [
-  { id: 1, title: "Accurate Legal Transcription", description: "Capture every word with precision, even in noisy court rooms.", icon: <MsTranscriptIcon className="h-8 w-8" />, },
-  { id: 2, title: "Organized by Folders", description: "Easily sort and retrieve your recordings.", icon: <MsFolderIcon className="h-8 w-8" />, },
-  { id: 3, title: "Coss-Examination Mode", description: "Tailored settings for courtroom questioning.", icon: <MsExamIcon className="h-8 w-8" />, },
-  { id: 4, title: "Secure & Private", description: "Your data stays encrypted and confidential.", icon: <MsSecureIcon className="h-8 w-8" />, },
-  { id: 5, title: "On-The-Go Access", description: "Work from anywhere, without missing a beat.", icon: <MsAccessIcon className="h-8 w-8" />, },
-  { id: 6, title: "Microphone compatibility", description: "MeetSession is compatible with any pin microphone.", icon: <MicVocalIcon className="h-8 w-8" />, },
+  { id: 1, title: "Accurate Legal Transcription", description: "Capture every word with precision, even in noisy court rooms.", icon: <MsTranscriptIcon className="h-6 md:h-8 w-6 md:w-8" />, },
+  { id: 2, title: "Organized by Folders", description: "Easily sort and retrieve your recordings.", icon: <MsFolderIcon className="h-6 md:h-8 w-6 md:w-8" />, },
+  { id: 3, title: "Coss-Examination Mode", description: "Tailored settings for courtroom questioning.", icon: <MsExamIcon className="h-6 md:h-8 w-6 md:w-8" />, },
+  { id: 4, title: "Secure & Private", description: "Your data stays encrypted and confidential.", icon: <MsSecureIcon className="h-6 md:h-8 w-6 md:w-8" />, },
+  { id: 5, title: "On-The-Go Access", description: "Work from anywhere, without missing a beat.", icon: <MsAccessIcon className="h-6 md:h-8 w-6 md:w-8" />, },
+  { id: 6, title: "Microphone compatibility", description: "MeetSession is compatible with any pin microphone.", icon: <MicVocalIcon className="h-6 md:h-8 w-6 md:w-8" />, },
 ];

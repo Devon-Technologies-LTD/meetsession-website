@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { TNavItem } from "../lib/types";
 import { Logo } from "@/components/icons/logo";
-import { NavbarItems } from "./navbar-items";
+import { NavbarItems, NavbarItemsMobile } from "./navbar-items";
 import {
   // Button,
   buttonVariants,
@@ -14,7 +14,7 @@ export function Navbar() {
       className={cn(
         "w-full h-fit min-h-8 bg-white sticky top-0",
         "flex items-center justify-between",
-        "px-12 py-4 z-50",
+        "px-7 md:px-12 py-4 z-50",
       )}
     >
       <div className="w-fit">
@@ -25,14 +25,18 @@ export function Navbar() {
         ))}
       </div>
 
-      <main>
+      <main className="hidden md:block">
         <NavbarItems navItems={navItems} />
       </main>
 
-      <div className="buttons">
+      <div className="buttons hidden md:block">
         {navItems.filter(item => item.type === "buttons").map(item => (
           <div className="w-fit" key={item.id}>{item.render}</div>
         ))}
+      </div>
+
+      <div className="md:hidden">
+        <NavbarItemsMobile navItems={navItems} />
       </div>
     </header>
   );
@@ -42,8 +46,8 @@ const navItems: TNavItem[] = [
   {
     id: 1, label: "MeetSession", render: (
       <div className="flex items-center gap-3 w-fit">
-        <Logo className="w-10 h-10" />
-        <p className="font-bold text-lg capitalize">MeetSession</p>
+        <Logo className="w-8 md:w-10 h-8 md:h-10" />
+        <p className="font-bold text-base md:text-lg capitalize">MeetSession</p>
       </div>
     ), type: "logo", link: "/",
   },
