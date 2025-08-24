@@ -163,8 +163,8 @@ export function PolicyContainer() {
               </div>
 
               {/* table */}
-              <div className="bg-white p-5 rounded-2xl">
-                <table className="text-brand-black-dark">
+              <div className="w-full max-w-[calc(100vw-3rem)] md:max-w-full overflow-auto bg-white p-px md:p-5 rounded-2xl">
+                <table className="w-full max-w-full overflow-auto text-brand-black-dark">
                   <thead>
                     <tr>
                       {tableHeaders1.map(item => (
@@ -338,8 +338,8 @@ export function PolicyContainer() {
               </div>
 
               {/* table */}
-              <div className="bg-white p-5 rounded-2xl">
-                <table className="text-brand-black-dark">
+              <div className="w-full max-w-[calc(100vw-3rem)] md:max-w-full overflow-auto bg-white p-px md:p-5 rounded-2xl">
+                <table className="w-full max-w-full overflow-auto text-brand-black-dark">
                   <thead>
                     <tr>
                       {tableHeaders2.map(item => (
