@@ -13,11 +13,13 @@ export function HowItWorks() {
   const isMobile = useIsMobile("desktop");
 
   const rightItemVariant: Variants = {
-    open: { right: "0%", transition: { type: "spring", stiffness: 40, bounceStiffness: 100, } },
+    initial: { right: "50%", translateX: "10%", transition: { type: "spring", stiffness: 40, } },
+    open: { right: "0px", translateX: "0%", transition: { type: "spring", stiffness: 40, bounceStiffness: 100, } },
     close: { right: "50%", translateX: "50%", transition: { type: "spring", stiffness: 40, } },
   };
   const leftItemVariant: Variants = {
-    open: { left: "0%", transition: { type: "spring", stiffness: 40, bounceStiffness: 100, } },
+    initial: { left: "50%", translateX: "-10%", transition: { type: "spring", stiffness: 40, } },
+    open: { left: "0px", translateX: "0%", transition: { type: "spring", stiffness: 40, bounceStiffness: 100, } },
     close: { left: "50%", translateX: "-50%", transition: { type: "spring", stiffness: 40, } },
   };
 
@@ -44,6 +46,7 @@ export function HowItWorks() {
         onHoverEnd={!isMobile ? (() => setHoverState("close")) : () => { }}
       >
         <m.div
+          initial="initial"
           animate={hoverState}
           className="relative flex items-center justify-center h-full w-full min-w-full lg:min-w-300"
         >
