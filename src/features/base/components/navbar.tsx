@@ -7,8 +7,21 @@ import {
   buttonVariants,
 } from "@/components/ui/button";
 import Link from "next/link";
+import { Fragment } from "react";
 
 export function Navbar() {
+  function renderItem(item: TNavItem) {
+    return (
+      <Fragment key={item.id}>
+        {typeof item.render === "string" ? (
+          <Link href={item.link}>
+            {item.render}
+          </Link>
+        ) : (item.render)}
+      </Fragment>
+    );
+  }
+
   return (
     <header
       className={cn(
@@ -18,11 +31,7 @@ export function Navbar() {
       )}
     >
       <div className="w-fit">
-        {navItems.filter(item => item.type === "logo").map(item => (
-          <Link href={item.link} key={item.id}>
-            {item.render}
-          </Link>
-        ))}
+        {navItems.filter(item => item.type === "logo").map(item => (renderItem(item)))}
       </div>
 
       <main className="hidden md:block">
@@ -30,9 +39,7 @@ export function Navbar() {
       </main>
 
       <div className="buttons hidden md:block">
-        {navItems.filter(item => item.type === "buttons").map(item => (
-          <div className="w-fit" key={item.id}>{item.render}</div>
-        ))}
+        {navItems.filter(item => item.type === "buttons").map(item => (renderItem(item)))}
       </div>
 
       <div className="md:hidden">
@@ -45,10 +52,10 @@ export function Navbar() {
 const navItems: TNavItem[] = [
   {
     id: 1, label: "MeetSession", render: (
-      <div className="flex items-center gap-3 w-fit">
+      <Link href="/" className="flex items-center gap-3 w-fit">
         <Logo className="w-8 md:w-10 h-8 md:h-10" />
         <p className="font-bold text-base md:text-lg capitalize">MeetSession</p>
-      </div>
+      </Link>
     ), type: "logo", link: "/",
   },
   { id: 2, label: "Home", render: "Home", type: "links", link: "/", },
@@ -57,10 +64,10 @@ const navItems: TNavItem[] = [
   { id: 5, label: "Testimonials", render: "Testimonials", type: "links", link: "/#testimonials", },
   { id: 6, label: "Support", render: "Support", type: "links", link: "/#support", },
   {
-    id: 7, label: "Download", render: (
+    id: 7, label: "Join Waitlist", render: (
       <Link href="/waitlist" className={cn(buttonVariants({ variant: "default" }))}>Join Waitlist</Link>
     ), type: "buttons",
-    link: "/#download",
+    link: "/waitlist",
   },
 ];
 /*
