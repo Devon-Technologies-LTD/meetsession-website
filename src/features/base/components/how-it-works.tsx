@@ -13,14 +13,58 @@ export function HowItWorks() {
   const isMobile = useIsMobile("desktop");
 
   const rightItemVariant: Variants = {
-    initial: { right: "50%", translateX: "10%", transition: { type: "spring", stiffness: 40, } },
-    open: { right: "0px", translateX: "0%", transition: { type: "spring", stiffness: 40, bounceStiffness: 100, } },
-    close: { right: "50%", translateX: "50%", transition: { type: "spring", stiffness: 40, } },
+    initial: {
+      right: "50%",
+      translateX: isMobile ? "10%" : "0px",
+      transition: {
+        type: "spring",
+        stiffness: 40,
+      }
+    },
+    open: {
+      right: "0px",
+      translateX: "0%",
+      transition: {
+        type: "spring",
+        stiffness: 40,
+        bounceStiffness: 100,
+      }
+    },
+    close: {
+      right: "50%",
+      translateX: "50%",
+      transition: {
+        type: "spring",
+        stiffness: 40,
+      }
+    },
   };
   const leftItemVariant: Variants = {
-    initial: { left: "50%", translateX: "-10%", transition: { type: "spring", stiffness: 40, } },
-    open: { left: "0px", translateX: "0%", transition: { type: "spring", stiffness: 40, bounceStiffness: 100, } },
-    close: { left: "50%", translateX: "-50%", transition: { type: "spring", stiffness: 40, } },
+    initial: {
+      left: "50%",
+      translateX: "-10%",
+      transition: {
+        type: "spring",
+        stiffness: 40,
+      }
+    },
+    open: {
+      left: "0px",
+      translateX: "0%",
+      transition: {
+        type: "spring",
+        stiffness: 40,
+        bounceStiffness: 100,
+      }
+    },
+    close: {
+      left: "50%",
+      translateX: "-50%",
+      transition: {
+        type: "spring",
+        stiffness: 40,
+      }
+    },
   };
 
   return (
@@ -103,7 +147,19 @@ export function HowItWorks() {
 }
 
 const steps: THowItWorks[] = [
-  { id: 1, title: "Record", description: "Open the app and start recording your meeting or cross-examination with on tap" },
-  { id: 2, title: "Transcribe", description: "Get accurate transcripts in minutes using our advanced AI transcription engine" },
-  { id: 3, title: "Organize", description: "Save your sessions into folders for easy access and efficient case management" },
+  {
+    id: 1,
+    title: "Record",
+    description: "Open the app and start recording your meeting or cross-examination with on tap"
+  },
+  {
+    id: 2,
+    title: "Transcribe",
+    description: "Get accurate transcripts in minutes using our advanced AI transcription engine"
+  },
+  {
+    id: 3,
+    title: "Organize",
+    description: "Save your sessions into folders for easy access and efficient case management"
+  },
 ];

@@ -54,7 +54,7 @@ const navItems: TNavItem[] = [
     id: 1, label: "MeetSession", render: (
       <Link href="/" className="flex items-center gap-3 w-fit">
         <Logo className="w-8 md:w-10 h-8 md:h-10" />
-        <p className="font-bold text-base md:text-lg capitalize">MeetSession</p>
+        <p className="font-bold font-jersey text-lg md:text-xl capitalize">MeetSession</p>
       </Link>
     ), type: "logo", link: "/",
   },
