@@ -4,11 +4,16 @@
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { format } from "date-fns";
 
 import { waitlistSchema, TWaitlist } from "@/features/base/waitlist/lib/types"
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { joinWaitlistAction } from "../server";
@@ -24,8 +29,9 @@ export function WaitlistSection() {
   const form = useForm<TWaitlist>({
     resolver: zodResolver(waitlistSchema),
     defaultValues: {
-      name: "",
       email: "",
+      last_name: "",
+      first_name: "",
       source: source,
       phone_number: "",
       date_joined: currentDate,
@@ -35,15 +41,16 @@ export function WaitlistSection() {
   async function onSubmit(values: TWaitlist) {
     const formdata = new FormData();
     formdata.append("email", values.email);
-    formdata.append("phone_number", values.phone_number);
-    formdata.append("name", values.name);
     formdata.append("source", values.source);
+    formdata.append("last_name", values.last_name);
+    formdata.append("first_name", values.first_name);
     formdata.append("date_joined", values.date_joined);
+    formdata.append("phone_number", values.phone_number);
 
     const response = await joinWaitlistAction(formdata);
 
     if (response.success) {
-      toast.success(response.message);
+      toast.success("Successfully joined waitlist!");
       form.reset();
       router.push("/waitlist/success");
     } else {
@@ -62,18 +69,32 @@ export function WaitlistSection() {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="text-start max-w-2xl w-full flex flex-col gap-5">
         <Form {...form}>
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Input placeholder="Full name" {...field} className="py-6" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex items-center gap-4 w-full">
+            <FormField
+              control={form.control}
+              name="first_name"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input placeholder="First name" {...field} className="py-6" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="last_name"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input placeholder="Last name" {...field} className="py-6" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
             name="email"
