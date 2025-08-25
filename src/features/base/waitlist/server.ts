@@ -14,18 +14,24 @@ const apiClient = createApiClient({
 export async function joinWaitlistAction(formdata: FormData) {
   const dirty = Object.fromEntries(formdata);
   const result = waitlistSchema.safeParse(dirty);
-
   if (!result.success) {
+    const errs = z.flattenError(result.error).fieldErrors;
+    console.log(errs)
     return {
       success: false,
       message: result.error.message,
-      errors: z.flattenError(result.error).fieldErrors,
+      errors: errs,
       data: null,
       initialData: dirty,
     };
   }
-
-  const res = await apiClient.unauthenticated<{ message: string; data: Record<string, string> }>("/waitlist", { method: "POST", data: result.data });
+  const res = await apiClient.unauthenticated<{ message: string; data: Record<string, string>; }>(
+    "/waitlist",
+    {
+      method: "POST",
+      data: result.data,
+    }
+  );
   if (!res.ok) {
     return {
       success: res.ok,

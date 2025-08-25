@@ -24,8 +24,10 @@ export function WaitlistSection() {
   const form = useForm<TWaitlist>({
     resolver: zodResolver(waitlistSchema),
     defaultValues: {
+      name: "",
       email: "",
       source: source,
+      phone_number: "",
       date_joined: currentDate,
     },
   });
@@ -33,6 +35,8 @@ export function WaitlistSection() {
   async function onSubmit(values: TWaitlist) {
     const formdata = new FormData();
     formdata.append("email", values.email);
+    formdata.append("phone_number", values.phone_number);
+    formdata.append("name", values.name);
     formdata.append("source", values.source);
     formdata.append("date_joined", values.date_joined);
 
@@ -58,7 +62,7 @@ export function WaitlistSection() {
 
       <form onSubmit={form.handleSubmit(onSubmit)} className="text-start max-w-2xl w-full flex flex-col gap-5">
         <Form {...form}>
-          {/*<FormField
+          <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
@@ -69,7 +73,7 @@ export function WaitlistSection() {
                 <FormMessage />
               </FormItem>
             )}
-          />*/}
+          />
           <FormField
             control={form.control}
             name="email"
@@ -77,6 +81,18 @@ export function WaitlistSection() {
               <FormItem className="w-full">
                 <FormControl>
                   <Input placeholder="Email address" {...field} className="py-6" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="phone_number"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormControl>
+                  <Input placeholder="Phone number" {...field} className="py-6" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
