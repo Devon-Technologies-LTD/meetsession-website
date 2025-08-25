@@ -1,7 +1,7 @@
 "use client";
 
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -48,15 +48,15 @@ export function Carousel({ items }: CarouselProps) {
   const len = items.length;
   const at = (i: number) => items[((i % len) + len) % len];
 
-  const prev = () => setIndex((i) => (i - 1 + len) % len);
-  const next = () => setIndex((i) => (i + 1) % len);
+  const prev = useCallback(() => setIndex((i) => (i - 1 + len) % len), [len]);
+  const next = useCallback(() => setIndex((i) => (i + 1) % len), [len]);
 
   // Auto-rotate every 5s, pause on hover/focus
   useEffect(() => {
     if (paused || len <= 1) return;
     const id = setInterval(next, 5000);
     return () => clearInterval(id);
-  }, [paused, len]);
+  }, [paused, len, next]);
 
   const showArrows = len > 1;
 
