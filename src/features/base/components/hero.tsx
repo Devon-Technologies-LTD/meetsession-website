@@ -19,7 +19,7 @@ export function Hero() {
         "z-20",
       )}>
         <div className="text-4xl md:text-5xl font-bold font-dm-sans">
-          <p>Your Legal Transcription,</p>
+          <p>Your Legal Transcript,</p>
           <p>Organized and Ready </p>
           <p className="text-brand-green-dark">Anytime, Anywhere.</p>
         </div>
