@@ -42,10 +42,11 @@ export function Hero() {
       </div>
 
       <div className={cn(
-        "blur-2xl lg:blur-none",
-        "absolute right-1/2 translate-x-1/2 bottom-1/2 translate-y-1/2 lg:translate-y-0 lg:right-0 lg:-translate-x-0 lg:bottom-0",
+        "blur-none lg:blur-none w-full md:w-fit",
+        "absolute right-1/2 translate-x-1/2 bottom-3 translate-y-0 lg:translate-y-0 lg:right-0 lg:-translate-x-0 lg:bottom-0",
         "after:absolute after:h-128 after:w-128 after:bottom-52 after:right-32 after:rounded-full",
         "after:teal-radial-fade",
+        "before:absolute before:h-full before:w-full before:bg-brand-black/80 before:md:bg-transparent",
       )}>
         <Image
           src="/svg/hero-img.svg"
