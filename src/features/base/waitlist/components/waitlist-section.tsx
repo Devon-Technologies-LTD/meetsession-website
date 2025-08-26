@@ -32,6 +32,7 @@ export function WaitlistSection() {
       email: "",
       last_name: "",
       first_name: "",
+      other_name: "",
       source: source,
       phone_number: "",
       date_joined: currentDate,
@@ -40,12 +41,9 @@ export function WaitlistSection() {
 
   async function onSubmit(values: TWaitlist) {
     const formdata = new FormData();
-    formdata.append("email", values.email);
-    formdata.append("source", values.source);
-    formdata.append("last_name", values.last_name);
-    formdata.append("first_name", values.first_name);
-    formdata.append("date_joined", values.date_joined);
-    formdata.append("phone_number", values.phone_number);
+    Object.keys(values).forEach(value => {
+      formdata.append(value, values[value as keyof typeof values] ?? "");
+    });
 
     const response = await joinWaitlistAction(formdata);
 
@@ -76,7 +74,7 @@ export function WaitlistSection() {
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormControl>
-                    <Input placeholder="First name" {...field} className="py-6" />
+                    <Input placeholder="First name (required)" {...field} className="py-6 text-sm md:text-base" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -88,7 +86,33 @@ export function WaitlistSection() {
               render={({ field }) => (
                 <FormItem className="w-full">
                   <FormControl>
-                    <Input placeholder="Last name" {...field} className="py-6" />
+                    <Input placeholder="Last name (required)" {...field} className="py-6 text-sm md:text-base" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex items-center gap-4 w-full">
+            <FormField
+              control={form.control}
+              name="other_name"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input placeholder="Other name (optional)" {...field} className="py-6 text-sm md:text-base" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone_number"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormControl>
+                    <Input placeholder="Phone number (required)" {...field} className="py-6 text-sm md:text-base" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -101,19 +125,7 @@ export function WaitlistSection() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <Input placeholder="Email address" {...field} className="py-6" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="phone_number"
-            render={({ field }) => (
-              <FormItem className="w-full">
-                <FormControl>
-                  <Input placeholder="Phone number" {...field} className="py-6" />
+                  <Input placeholder="Email address (required)" {...field} className="py-6 text-sm md:text-base" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
