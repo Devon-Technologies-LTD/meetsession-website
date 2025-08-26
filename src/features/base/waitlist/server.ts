@@ -16,7 +16,6 @@ export async function joinWaitlistAction(formdata: FormData) {
   const result = waitlistSchema.safeParse(dirty);
   if (!result.success) {
     const errs = z.flattenError(result.error).fieldErrors;
-    console.log(errs)
     return {
       success: false,
       message: result.error.message,
