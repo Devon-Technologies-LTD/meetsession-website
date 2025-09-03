@@ -74,8 +74,8 @@ export function Hero() {
       </div>
       <div
         className={cn(
-          "after:absolute after:h-182 after:w-182 after:top-10 after:right-0 after:rounded-full",
-          "after:bg-brand-green-dark after:blur-3xl after:opacity-50 after:z-0",
+          "md:after:absolute md:after:h-182 md:after:w-182 md:after:top-10 md:after:right-0 md:after:rounded-full",
+          "md:after:bg-brand-green-dark md:after:blur-3xl md:after:opacity-50 after:z-0",
           "rounded-full",
         )}
       ></div>

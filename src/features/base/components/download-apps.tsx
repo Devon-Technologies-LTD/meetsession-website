@@ -3,11 +3,6 @@ import { PlayStoreLogo } from "@/components/icons/play-store-logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const appOptions = [
-  { id: 1, icon: AppleStoreLogo, title: "Apple App Store" },
-  { id: 2, icon: PlayStoreLogo, title: "Google Play Store" },
-];
-
 export function DownloadApps() {
   return (
     <div
@@ -29,20 +24,20 @@ export function DownloadApps() {
           className={cn(
             "w-252 h-252 rounded-full",
             "absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2",
-            "border-64 border-brand-green-light",
+            "border-64 border-white/10",
           )}
         />
         <div
           className={cn(
             "w-220 h-220 rounded-full",
             "absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2",
-            "border-64 border-brand-green",
+            "border-64 border-brand-green-dark",
           )}
         />
         <div
           className={cn(
             "w-full md:w-190 h-full md:h-190 rounded-full",
-            "px-7",
+            "px-7 md:bg-brand-black/10",
             "absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2",
             "flex flex-col items-center justify-center gap-10 md:gap-20",
           )}
@@ -75,3 +70,8 @@ export function DownloadApps() {
     </div>
   );
 }
+
+const appOptions = [
+  { id: 1, icon: AppleStoreLogo, title: "Apple App Store" },
+  { id: 2, icon: PlayStoreLogo, title: "Google Play Store" },
+];

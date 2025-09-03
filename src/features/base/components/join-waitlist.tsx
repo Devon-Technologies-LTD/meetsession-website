@@ -13,7 +13,7 @@ export function JoinWaitlist() {
         "relative overflow-hidden",
       )}
     >
-      <div className="flex flex-col gap-6 md:gap-10 items-center justify-center w-max h-fit">
+      <div className="flex flex-col gap-6 md:gap-10 items-center justify-center w-max h-fit z-10">
         <div
           className={cn(
             "mx-auto max-w-full md:max-w-85 text-center",
@@ -44,7 +44,7 @@ export function JoinWaitlist() {
             "py-4 md:py-6 px-7 md:px-24 rounded-xl md:rounded-3xl w-fit",
           )}
         >
-          <p className="text-sm md:text-base text-brand-blue-light w-full max-w-full md:max-w-102 text-center">
+          <p className="text-sm md:text-base text-brand-blue-extralight md:text-brand-blue-light w-full max-w-full md:max-w-102 text-center">
             We&apos;re currently in private beta but you can secure your spot
             today. Click on the Button to secure your spot.
           </p>
@@ -73,18 +73,17 @@ export function JoinWaitlist() {
       </div>
 
       {/* filters */}
-      <>
-        <div
-          className={cn(
-            "before:top-1/2 before:-translate-y-1/2 before:absolute before:-left-80",
-            "before:w-182 before:h-182 before:bg-brand-blue",
-            "before:rounded-full before:blur-3xl before:opacity-70",
-            "after:top-1/2 after:-translate-y-1/2 after:absolute after:-right-80",
-            "after:w-182 after:h-182 after:bg-brand-blue",
-            "after:rounded-full after:blur-3xl after:opacity-70",
-          )}
-        ></div>
-      </>
+      <div
+        className={cn(
+          "z-0",
+          "md:before:top-1/2 md:before:-translate-y-1/2 md:before:absolute md:before:-left-80",
+          "md:before:w-182 md:before:h-182 md:before:bg-brand-blue",
+          "md:before:rounded-full md:before:blur-3xl md:before:opacity-70",
+          "after:-bottom-1/2 after:md:top-1/2 after:md:-translate-y-1/2 after:absolute after:right-1/2 after:translate-x-1/2 after:md:-right-80 after:md:translate-x-0",
+          "after:w-120 after:md:w-182 after:h-120 after:md:h-182 after:bg-brand-blue",
+          "after:rounded-full after:blur-3xl after:opacity-70",
+        )}
+      ></div>
     </div>
   );
 }
