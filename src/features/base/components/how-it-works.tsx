@@ -1,6 +1,5 @@
 "use client";
 
-
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { THowItWorks } from "../lib/types";
@@ -19,7 +18,7 @@ export function HowItWorks() {
       transition: {
         type: "spring",
         stiffness: 40,
-      }
+      },
     },
     open: {
       right: "0px",
@@ -28,7 +27,7 @@ export function HowItWorks() {
         type: "spring",
         stiffness: 40,
         bounceStiffness: 100,
-      }
+      },
     },
     close: {
       right: "50%",
@@ -36,7 +35,7 @@ export function HowItWorks() {
       transition: {
         type: "spring",
         stiffness: 40,
-      }
+      },
     },
   };
   const leftItemVariant: Variants = {
@@ -46,7 +45,7 @@ export function HowItWorks() {
       transition: {
         type: "spring",
         stiffness: 40,
-      }
+      },
     },
     open: {
       left: "0px",
@@ -55,7 +54,7 @@ export function HowItWorks() {
         type: "spring",
         stiffness: 40,
         bounceStiffness: 100,
-      }
+      },
     },
     close: {
       left: "50%",
@@ -63,7 +62,7 @@ export function HowItWorks() {
       transition: {
         type: "spring",
         stiffness: 40,
-      }
+      },
     },
   };
 
@@ -73,11 +72,23 @@ export function HowItWorks() {
         "h-full lg:h-dvh w-full",
         "px-7 py-8 md:py-16 md:pt-24",
         "flex flex-col items-center justify-center",
+        "relative",
       )}
       id="how-it-works"
     >
+      <div
+        className={cn(
+          "bg-[size:38px_38px] opacity-25",
+          "absolute bottom-0 left-0 right-0 top-0",
+          "[mask-image:radial-gradient(ellipse_80%_30%_at_50%_60%,#000_20%,transparent_110%)]",
+          "bg-[linear-gradient(to_right,var(--brand-green-color-default)_1px,transparent_1px),linear-gradient(to_bottom,var(--brand-green-color-default)_1px,transparent_1px)]",
+        )}
+      ></div>
+
       <div className="h-fit w-full text-center">
-        <p className="font-dm-sans font-black text-2xl md:text-3xl">How it Works</p>
+        <p className="font-dm-sans font-black text-2xl md:text-3xl">
+          How it Works
+        </p>
       </div>
 
       <m.div
@@ -86,8 +97,12 @@ export function HowItWorks() {
           "py-10 md:px-16",
           "flex-1 flex flex-col gap-8 md:gap-16 items-center",
         )}
-        onHoverStart={!isMobile ? (() => setHoverState("open")) : () => { }}
-        onHoverEnd={!isMobile ? (() => setHoverState("close")) : () => { }}
+        onHoverStart={!isMobile ? () => setHoverState("open") : () => {}}
+        onHoverEnd={!isMobile ? () => setHoverState("close") : () => {}}
+        // style={{
+        //   filter: "url(#grainy)",
+        //   WebkitFilter: "url(#grainy)",
+        // }}
       >
         <m.div
           initial="initial"
@@ -121,21 +136,27 @@ export function HowItWorks() {
               "lg:absolute lg:top-1/2 lg:-translate-y-1/2",
             )}
           >
-            {steps.map(step => (
+            {steps.map((step) => (
               <div
-                className={cn(
-                  "flex gap-2 lg:gap-4 items-center",
-                )}
+                className={cn("flex gap-2 lg:gap-4 items-center")}
                 key={step.id}
               >
-                <p className="font-bold text-white text-5xl lg:text-7xl font-calcio-demo">{step.id}</p>
-                <div className={cn(
-                  "font-raleway flex flex-col",
-                  "px-6 lg:px-8",
-                  // "border-b last:border-none",
-                )}>
-                  <p className="text-brand-green font-bold text-base lg:text-lg">{step.title}</p>
-                  <p className="text-sm lg:text-base font-light">{step.description}</p>
+                <p className="font-bold text-white text-5xl lg:text-7xl font-calcio-demo">
+                  {step.id}
+                </p>
+                <div
+                  className={cn(
+                    "font-raleway flex flex-col",
+                    "px-6 lg:px-8",
+                    // "border-b last:border-none",
+                  )}
+                >
+                  <p className="text-brand-green font-bold text-base lg:text-lg">
+                    {step.title}
+                  </p>
+                  <p className="text-sm lg:text-base font-light">
+                    {step.description}
+                  </p>
                 </div>
               </div>
             ))}
@@ -150,16 +171,19 @@ const steps: THowItWorks[] = [
   {
     id: 1,
     title: "Record",
-    description: "Open the app and start recording your meeting or cross-examination with on tap"
+    description:
+      "Open the app and start recording your meeting or cross-examination with on tap",
   },
   {
     id: 2,
     title: "Transcribe",
-    description: "Get accurate transcripts in minutes using our advanced AI transcription engine"
+    description:
+      "Get accurate transcripts in minutes using our advanced AI transcription engine",
   },
   {
     id: 3,
     title: "Organize",
-    description: "Save your sessions into folders for easy access and efficient case management"
+    description:
+      "Save your sessions into folders for easy access and efficient case management",
   },
 ];

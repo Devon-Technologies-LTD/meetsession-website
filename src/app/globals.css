@@ -54,6 +54,7 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   /* custom */
+  --color-brand-black-foreground: var(--brand-brack-color-foreground);
   --color-brand-black-extralight: var(--brand-black-color-extralight);
   --color-brand-black-light: var(--brand-black-color-light);
   --color-brand-black: var(--brand-black-color-default);
@@ -65,10 +66,13 @@
   --color-brand-green: var(--brand-green-color-default);
   --color-brand-green-dark: var(--brand-green-color-dark);
 
+  --color-brand-blue-foreground: var(--brand-blue-color-foreground);
   --color-brand-blue-extralight: var(--brand-blue-color-extralight);
   --color-brand-blue-light: var(--brand-blue-color-light);
   --color-brand-blue: var(--brand-blue-color-default);
   --color-brand-blue-dark: var(--brand-blue-color-dark);
+
+  --image-noise: var(--bg-noise);
 }
 
 :root {
@@ -114,16 +118,21 @@
   --brand-green-color-dark: rgb(34, 157, 113);
 
   /* colours blue */
+  --brand-blue-color-foreground: rgba(119, 156, 172, 1);
   --brand-blue-color-extralight: rgb(240, 250, 255);
   --brand-blue-color-light: rgb(61, 121, 147);
   --brand-blue-color-default: rgb(20, 108, 148);
   --brand-blue-color-dark: rgb(17, 56, 74);
 
   /* colours black */
+  --brand-brack-color-foreground: rgba(25, 45, 54, 1);
   --brand-black-color-extralight: rgb(54, 54, 54);
   --brand-black-color-light: rgb(48, 48, 48);
   --brand-black-color-default: rgb(0, 22, 31);
   --brand-black-color-dark: rgb(0, 0, 0);
+
+
+  --bg-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 }
 
 .dark {
@@ -169,18 +178,6 @@
     background-size: auto, 150px 150px;
   }
 
-  .teal-radial-fade {
-    background: radial-gradient(circle at center,
-        rgba(34, 157, 113, 1) 0%,
-        rgba(34, 157, 113, 0.9) 15%,
-        rgba(34, 157, 113, 0.75) 30%,
-        rgba(34, 157, 113, 0.6) 45%,
-        rgba(34, 157, 113, 0.45) 60%,
-        rgba(34, 157, 113, 0.3) 75%,
-        rgba(34, 157, 113, 0.15) 90%,
-        rgba(34, 157, 113, 0) 100%);
-  }
-
   .textured-teal-fade {
     background:
       /* Noise texture overlay */
@@ -195,21 +192,94 @@
         rgba(34, 157, 113, 0) 100%);
   }
 
-  .stepped-teal-fade {
-    background:
-      radial-gradient(circle at center,
-        rgba(34, 157, 113, 1) 0%,
-        rgba(34, 157, 113, 1) 10%,
-        rgba(34, 157, 113, 0.8) 10%,
-        rgba(34, 157, 113, 0.8) 20%,
-        rgba(34, 157, 113, 0.6) 20%,
-        rgba(34, 157, 113, 0.6) 40%,
-        rgba(34, 157, 113, 0.4) 40%,
-        rgba(34, 157, 113, 0.4) 60%,
-        rgba(34, 157, 113, 0.2) 60%,
-        rgba(34, 157, 113, 0.2) 80%,
-        rgba(34, 157, 113, 0) 80%,
-        rgba(34, 157, 113, 0) 100%);
+  /*
+  .noise-filter {
+    --noise-intensity: 0.2;
+    --noise-opacity: 0.5;
+    position: relative;
+    isolation: isolate;
+    filter: url('#noiseFilter');
+    opacity: var(--noise-opacity);
+  }
+
+  .noise-filter::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: inherit;
+    z-index: -1;
+    opacity: var(--noise-opacity);
+    filter: url('#noiseFilter');
+  }
+
+  .noise-filter {
+    opacity: var(--noise-opacity, 0.4);
+    position: relative;
+  }
+
+  .noise-filter::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    filter: url(#noiseFilter);
+    opacity: var(--noise-opacity, 0.35);
+    mix-blend-mode: overlay;
+    border-radius: inherit;
+
+    z-index: 0;
+  }
+  */
+
+  /* styles/globals.css or your main CSS file */
+  .noise-filter {
+    --noise-intensity: 0.2;
+    /* Default intensity */
+    --noise-opacity: 0.5;
+    /* Default opacity */
+    filter: url('#noiseFilter');
+    /* position: relative; */
+  }
+
+  .noise-filter::before {
+    content: '';
+    /* position: absolute; */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: inherit;
+    filter: url('#noiseFilter');
+    z-index: 1;
+    opacity: var(--noise-opacity);
+  }
+
+  .noise-filter>* {
+    position: relative;
+    /* ensures text/content stay above */
+    z-index: 1;
+  }
+
+  /* Optional: Predefined intensity levels */
+  .noise-light {
+    --noise-intensity: 0.1;
+    --noise-opacity: 0.3;
+  }
+
+  .noise-medium {
+    --noise-intensity: 0.2;
+    --noise-opacity: 0.5;
+  }
+
+  .noise-heavy {
+    --noise-intensity: 0.3;
+    --noise-opacity: 0.7;
   }
 }
 
@@ -220,5 +290,17 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  .with-noise {
+    filter: "url(#grainyNoise)",
+  }
+
+  .grained {
+    background: url("data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTIwMCAxMjAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogICAgICAgIDxkZWZzPgogICAgICAgICAgPGZpbHRlciBpZD0iZ3JhaW55Ij4KICAgICAgICAgICAgPGZlVHVyYnVsZW5jZQogICAgICAgICAgICAgIHR5cGU9InR1cmJ1bGVuY2UiCiAgICAgICAgICAgICAgYmFzZUZyZXF1ZW5jeT0iMC44IgogICAgICAgICAgICAgIG51bU9jdGF2ZXM9IjMiCiAgICAgICAgICAgIC8+CiAgICAgICAgICA8L2ZpbHRlcj4KICAgICAgICAgIDxyYWRpYWxHcmFkaWVudCBpZD0iZmFkZU1hc2siIGN4PSI1MCUiIGN5PSI1MCUiIHI9IjUwJSI+CiAgICAgICAgICAgIDxzdG9wIG9mZnNldD0iMjUlIiBzdG9wQ29sb3I9IndoaXRlIiAvPgogICAgICAgICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3BDb2xvcj0iYmxhY2siIC8+CiAgICAgICAgICA8L3JhZGlhbEdyYWRpZW50PgogICAgICAgICAgPG1hc2sgaWQ9ImNpcmNsZU1hc2siPgogICAgICAgICAgICA8Y2lyY2xlIGN4PSI2MDAiIGN5PSI2MDAiIHI9IjU2NSIgZmlsbD0idXJsKCNmYWRlTWFzaykiIC8+CiAgICAgICAgICA8L21hc2s+CiAgICAgICAgPC9kZWZzPgogICAgICAgIDxyZWN0CiAgICAgICAgICB3aWR0aD0iMTIwMCIKICAgICAgICAgIGhlaWdodD0iMTIwMCIKICAgICAgICAgIGZpbHRlcj0idXJsKCNncmFpbnkpIgogICAgICAgICAgbWFzaz0idXJsKCNjaXJjbGVNYXNrKSIKICAgICAgICAvPgogICAgICA8L3N2Zz4=");
+  }
+
+  .grains {
+    background-image: url("data:image/svg+xml;base64,PHN2Zz4KICAgICAgICA8ZmlsdGVyIGlkPSJncmFpbnkiPgogICAgICAgICAgPGZlVHVyYnVsZW5jZSB0eXBlPSJ0dXJidWxlbmNlIiBiYXNlRnJlcXVlbmN5PSI2IiAvPgogICAgICAgIDwvZmlsdGVyPgogICAgICAgIDxwYXRoCiAgICAgICAgICB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgICAgICAgICBkPSJNNTY1IDAuNUM4NzYuNzYzIDAuNSAxMTI5LjUgMjU0LjM1MiAxMTI5LjUgNTY3LjVDMTEyOS41IDg4MC42NDggODc2Ljc2MyAxMTM0LjUgNTY1IDExMzQuNUMyNTMuMjM3IDExMzQuNSAwLjUgODgwLjY0OCAwLjUgNTY3LjVDMC41IDI1NC4zNTIgMjUzLjIzNyAwLjUgNTY1IDAuNVoiCiAgICAgICAgICBmaWxsPSIjZDlkOWQ5IgogICAgICAgICAgZmlsdGVyPSJ1cmwoI2dyYWlueSkiCiAgICAgICAgLz4KICAgICAgPC9zdmc+");
   }
 }

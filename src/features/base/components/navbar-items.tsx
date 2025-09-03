@@ -12,43 +12,45 @@ type NavbarItemsProps = {
   navItems: TNavItem[];
 };
 export function NavbarItems({ navItems }: NavbarItemsProps) {
-  const [selectedId, setSelectedId] = useState<number | undefined>(navItems[0].id);
+  const [selectedId, setSelectedId] = useState<number | undefined>(
+    navItems.filter((item) => item.type === "links")[0].id,
+  );
 
   return (
-    <ul className={cn(
-      "w-full h-full",
-      "flex items-center gap-1",
-    )}>
-      {navItems.filter(item => item.type === "links").map(item => {
-        return (
-          <li
-            key={item.id}
-            className="cursor-pointer relative rounded-xl text-white text-sm font-medium px-4 py-2"
-            onClick={() => setSelectedId(item.id)}
-          >
-            <Link href={item.link}>
-              {item.id === selectedId && (
-                <m.div
-                  layoutId="active-item"
-                  style={{ borderRadius: "8px", }}
-                  className={cn(
-                    "rounded-xl",
-                    "absolute inset-0",
-                    "bg-brand-green-dark",
-                  )}
-                  transition={{ duration: 0.3 }}
-                ></m.div>
-              )}
-              <span
-                className={cn(
-                  "relative z-10 mix-blend-exclusion",
-                  { "text-white mix-blend-color-dodge": item.id === selectedId }
+    <ul className={cn("w-full h-full", "flex items-center gap-1")}>
+      {navItems
+        .filter((item) => item.type === "links")
+        .map((item) => {
+          return (
+            <li
+              key={item.id}
+              className="cursor-pointer relative rounded-xl text-white text-sm font-medium px-4 py-2"
+              onClick={() => setSelectedId(item.id)}
+            >
+              <Link href={item.link}>
+                {item.id === selectedId && (
+                  <m.div
+                    layoutId="active-item"
+                    style={{ borderRadius: "8px" }}
+                    className={cn(
+                      "rounded-xl",
+                      "absolute inset-0",
+                      "bg-brand-green-dark",
+                    )}
+                    transition={{ duration: 0.3 }}
+                  ></m.div>
                 )}
-              >{item.render}</span>
-            </Link>
-          </li>
-        )
-      })}
+                <span
+                  className={cn("relative z-10 mix-blend-exclusion", {
+                    "text-white mix-blend-color-dodge": item.id === selectedId,
+                  })}
+                >
+                  {item.render}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
     </ul>
   );
 }
@@ -57,14 +59,14 @@ export function NavbarItemsMobile({ navItems }: NavbarItemsProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const overlayVariant: Variants = {
-    open: { opacity: 1, transition: { duration: 0.1 }, },
-    close: { opacity: 0, transition: { duration: 0.2 }, },
-    exit: { opacity: 0, transition: { duration: 0.2 }, },
+    open: { opacity: 1, transition: { duration: 0.1 } },
+    close: { opacity: 0, transition: { duration: 0.2 } },
+    exit: { opacity: 0, transition: { duration: 0.2 } },
   };
   const navbarVariant: Variants = {
-    open: { x: "0%", transition: { duration: 0.3, type: "tween" }, },
-    close: { x: "100%", transition: { duration: 0.2, type: "tween" }, },
-    exit: { x: "100%", transition: { duration: 0.2, type: "tween" }, },
+    open: { x: "0%", transition: { duration: 0.3, type: "tween" } },
+    close: { x: "100%", transition: { duration: 0.2, type: "tween" } },
+    exit: { x: "100%", transition: { duration: 0.2, type: "tween" } },
   };
 
   return (
@@ -73,7 +75,7 @@ export function NavbarItemsMobile({ navItems }: NavbarItemsProps) {
         className="toggle"
         variant="outline"
         size="icon"
-        onClick={() => setIsOpen(prev => !prev)}
+        onClick={() => setIsOpen((prev) => !prev)}
       >
         <MenuIcon />
       </Button>
@@ -110,33 +112,35 @@ export function NavbarItemsMobile({ navItems }: NavbarItemsProps) {
                 exit="exit"
                 layoutId="nav"
               >
-                {navItems.filter(item => item.type === "links" || item.type === "buttons").map(item => {
-                  return (
-                    <li
-                      key={item.id}
-                      className={cn(
-                        "px-4 py-2",
-                        "text-black text-sm font-medium",
-                        "cursor-pointer relative rounded-xl",
-                      )}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Link href={item.link}>
-                        <span
-                          className={cn(
-                            "relative z-10",
-                          )}
-                        >{item.render}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
+                {navItems
+                  .filter(
+                    (item) => item.type === "links" || item.type === "buttons",
+                  )
+                  .map((item) => {
+                    return (
+                      <li
+                        key={item.id}
+                        className={cn(
+                          "px-4 py-2",
+                          "text-black text-sm font-medium",
+                          "cursor-pointer relative rounded-xl",
+                        )}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Link href={item.link}>
+                          <span className={cn("relative z-10")}>
+                            {item.render}
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
 
                 <Button
                   className="absolute top-4 right-4"
                   variant="outline"
                   size="icon"
-                  onClick={() => setIsOpen(prev => !prev)}
+                  onClick={() => setIsOpen((prev) => !prev)}
                 >
                   <XIcon />
                 </Button>
@@ -148,4 +152,3 @@ export function NavbarItemsMobile({ navItems }: NavbarItemsProps) {
     </>
   );
 }
-
