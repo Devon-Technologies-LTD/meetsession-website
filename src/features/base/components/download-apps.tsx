@@ -1,32 +1,75 @@
 import { AppleStoreLogo } from "@/components/icons/apple-store-logo";
 import { PlayStoreLogo } from "@/components/icons/play-store-logo";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+const appOptions = [
+  { id: 1, icon: AppleStoreLogo, title: "Apple App Store" },
+  { id: 2, icon: PlayStoreLogo, title: "Google Play Store" },
+];
 
 export function DownloadApps() {
   return (
-    <div className="w-full h-full p-0 md:px-20 md:py-24 bg-brand-black-dark text-white text-center">
-      <div className="md:rounded-4xl bg-brand-green w-full h-full px-7 md:px-24 py-24 md:py-24 flex flex-col items-center gap-20">
-        <div className="flex flex-col gap-2 md:gap-3">
-          <p className="font-black font-dm-sans text-2xl md:text-5xl">Start Transcribing Smart Today</p>
-          <p className="text-sm md:text-base font-light">Get MeetSession on your phone and start recording with ease.</p>
-        </div>
+    <div
+      className={cn(
+        "w-full h-full",
+        "p-0 md:px-20 md:py-40",
+        "bg-brand-black-dark text-white text-center",
+      )}
+    >
+      <div
+        className={cn(
+          "md:rounded-[72px] px-7 md:px-24 py-32 md:py-24",
+          "bg-brand-green-dark w-full h-116",
+          "relative overflow-hidden",
+        )}
+      >
+        {/* circles */}
+        <div
+          className={cn(
+            "w-252 h-252 rounded-full",
+            "absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2",
+            "border-64 border-brand-green-light",
+          )}
+        />
+        <div
+          className={cn(
+            "w-220 h-220 rounded-full",
+            "absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2",
+            "border-64 border-brand-green",
+          )}
+        />
+        <div
+          className={cn(
+            "w-full md:w-190 h-full md:h-190 rounded-full",
+            "px-7",
+            "absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2",
+            "flex flex-col items-center justify-center gap-10 md:gap-20",
+          )}
+        >
+          <div className="flex flex-col gap-2 md:gap-3">
+            <p className="font-black font-dm-sans text-2xl md:text-3xl">
+              Start Transcribing Smart Today
+            </p>
+            <p className="text-sm md:text-base font-light">
+              Get MeetSession on your phone and start recording with ease.
+            </p>
+          </div>
 
-        <div className="flex items-center gap-3 md:gap-5">
-          <Button
-            variant="secondary"
-            className="text-sm font-medium h-12 px-8"
-          >
-            <AppleStoreLogo />
-            <span className="text-sm font-medium">Apple App Store</span>
-          </Button>
-
-          <Button
-            variant="secondary"
-            className="text-sm font-medium h-12 px-8"
-          >
-            <PlayStoreLogo />
-            <span className="text-sm font-medium">Google Play Store</span>
-          </Button>
+          <div className="flex flex-col md:flex-row items-center gap-3 md:gap-5 w-full md:w-fit">
+            {appOptions.map((option) => {
+              return (
+                <Button
+                  key={option.id}
+                  variant="secondary"
+                  className="text-sm font-medium h-12 px-8 w-full md:w-fit"
+                >
+                  <option.icon />
+                  <span className="text-sm font-medium">{option.title}</span>
+                </Button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
