@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
+import { NoiseElement } from "@/components/noise-element";
 
 export function JoinWaitlist() {
   return (
@@ -38,52 +39,69 @@ export function JoinWaitlist() {
           </Link>
         </div>
 
-        <div
-          className={cn(
-            "border border-brand-blue flex flex-col gap-4 md:gap-8 items-center justify-center",
-            "py-4 md:py-6 px-7 md:px-24 rounded-xl md:rounded-3xl w-fit",
-          )}
-        >
-          <p className="text-sm md:text-base text-brand-blue-extralight md:text-brand-blue-light w-full max-w-full md:max-w-102 text-center">
-            We&apos;re currently in private beta but you can secure your spot
-            today. Click on the Button to secure your spot.
-          </p>
+        <div className="h-fit w-fit rounded-xl md:rounded-3xl p-px bg-gradient-to-b from-brand-blue to-brand-green">
           <div
             className={cn(
-              "w-full h-fit relative",
-              "flex items-start justify-evenly md:justify-around",
-              "before:absolute before:border-b before:border-border/40 before:border-dashed before:w-full before:top-1/2 before:-translate-y-5",
+              "bg-brand-black border border-brand-blue",
+              "py-4 md:py-6 px-7 md:px-24 rounded-xl md:rounded-3xl w-fit",
+              "flex flex-col gap-4 md:gap-8 items-center justify-center",
             )}
           >
-            {waitlistSteps.map((item) => (
-              <div
-                className="flex flex-col items-center w-fit justify-center gap-1.5 md:gap-3 z-10"
-                key={item.id}
-              >
-                <div className="h-16 md:h-20 w-16 md:w-20 rounded-full bg-brand-black-light text-white text-3xl md:text-5xl font-bold font-dm-sans flex items-center justify-center">
-                  {item.id}
+            <p className="text-sm md:text-base text-brand-blue-foreground md:text-brand-blue-light w-full max-w-full md:max-w-128 text-center">
+              We&apos;re currently in private beta but you can secure your spot
+              today. Click on the Button to secure your spot.
+            </p>
+            <div
+              className={cn(
+                "w-full h-fit relative",
+                "flex items-start justify-evenly md:justify-around",
+                "before:absolute before:border-b before:border-border/40 before:border-dashed before:w-full before:top-1/2 before:-translate-y-10",
+              )}
+            >
+              {waitlistSteps.map((item) => (
+                <div
+                  className="flex flex-col items-center w-fit justify-center gap-1.5 md:gap-3 z-10"
+                  key={item.id}
+                >
+                  <div className="h-16 md:h-20 w-16 md:w-20 rounded-full bg-brand-black-foreground text-white text-3xl md:text-4xl font-bold font-dm-sans flex items-center justify-center">
+                    {item.id}
+                  </div>
+                  <p className="w-20 max-w-full md:w-26 md:max-w-32 text-center text-sm md:text-base">
+                    {item.item}
+                  </p>
                 </div>
-                <p className="w-20 max-w-full md:w-26 md:max-w-32 text-center text-xs md:text-sm">
-                  {item.item}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* filters */}
-      <div
-        className={cn(
-          "z-0",
-          "md:before:top-1/2 md:before:-translate-y-1/2 md:before:absolute md:before:-left-80",
-          "md:before:w-182 md:before:h-182 md:before:bg-brand-blue",
-          "md:before:rounded-full md:before:blur-3xl md:before:opacity-70",
-          "after:-bottom-1/2 after:md:top-1/2 after:md:-translate-y-1/2 after:absolute after:right-1/2 after:translate-x-1/2 after:md:-right-80 after:md:translate-x-0",
-          "after:w-120 after:md:w-182 after:h-120 after:md:h-182 after:bg-brand-blue",
-          "after:rounded-full after:blur-3xl after:opacity-70",
-        )}
-      ></div>
+      <NoiseElement
+        className="hidden md:block absolute -left-96 top-1/2 translate-y-1/2"
+        intensity={40}
+        opacity={0.2}
+      >
+        <div
+          className={cn(
+            "h-full w-full relative",
+            "before:w-182 before:h-182",
+            "before:bg-brand-blue before:opacity-70 before:rounded-full before:blur-3xl",
+            "before:absolute before:top-1/2 before:-translate-y-1/2 before:-left-12",
+          )}
+        ></div>
+      </NoiseElement>
+      <NoiseElement className="absolute -right-96 bottom-0 md:bottom-1/2 -translate-y-1/2">
+        <div
+          className={cn(
+            "h-full w-full relative",
+            "before:bg-brand-blue before:opacity-70 before:rounded-full before:blur-3xl",
+            "before:w-120 md:before:w-182 before:h-120 md:before:h-182",
+            "before:absolute before:-bottom-64 md:before:bottom-1/2 before:right-1/2 md:before:-right-12",
+            "before:-translate-x-1/2 md:before:translate-x-0 before:-translate-y-0 md:before:translate-y-1/2",
+          )}
+        ></div>
+      </NoiseElement>
     </div>
   );
 }

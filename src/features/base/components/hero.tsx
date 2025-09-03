@@ -1,5 +1,6 @@
 import { AppleStoreLogo } from "@/components/icons/apple-store-logo";
 import { PlayStoreLogo } from "@/components/icons/play-store-logo";
+import { NoiseElement } from "@/components/noise-element";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -15,6 +16,37 @@ export function Hero() {
         "bg-brand-black",
       )}
     >
+      <>
+        {/* top */}
+        <div
+          className={cn(
+            "bg-[size:24px_24px] opacity-25",
+            "absolute bottom-0 left-0 right-0 top-0 z-0",
+            "[mask-image:radial-gradient(ellipse_80%_10%_at_50%_5%,#000_40%,transparent_110%)]",
+            "bg-[linear-gradient(to_right,var(--brand-green-color-default)_1px,transparent_1px),linear-gradient(to_right,var(--brand-green-color-default)_1px,transparent_1px)]",
+          )}
+        ></div>
+        {/* right */}
+        <div
+          className={cn(
+            "bg-[size:24px_24px] opacity-25",
+            "absolute bottom-0 left-0 right-0 top-0 z-0",
+            "[mask-image:radial-gradient(ellipse_10%_80%_at_90%_50%,#000_40%,transparent_110%)]",
+            "bg-[linear-gradient(to_bottom,var(--brand-green-color-default)_1px,transparent_1px),linear-gradient(to_bottom,var(--brand-green-color-default)_1px,transparent_1px)]",
+          )}
+        ></div>
+        {/* bottom */}
+        <div
+          className={cn(
+            "bg-[size:24px_24px] opacity-25",
+            "absolute bottom-0 left-0 right-0 top-0 z-0",
+            "[mask-image:radial-gradient(ellipse_80%_10%_at_50%_90%,#000_40%,transparent_110%)]",
+            "bg-[linear-gradient(to_right,var(--brand-green-color-default)_1px,transparent_1px),linear-gradient(to_right,var(--brand-green-color-default)_1px,transparent_1px)]",
+          )}
+        ></div>
+      </>
+
+      {/* main content */}
       <div
         className={cn(
           "flex flex-col items-start justify-center gap-1.5 md:gap-3.5",
@@ -59,9 +91,10 @@ export function Hero() {
 
       <div
         className={cn(
-          "blur-none lg:blur-none w-full md:w-fit",
-          "absolute right-1/2 translate-x-1/2 bottom-3 translate-y-0 lg:translate-y-0 lg:right-0 lg:-translate-x-0 lg:bottom-0",
-          "before:absolute before:h-full before:w-full before:bg-brand-black/80 before:md:bg-transparent z-10",
+          "w-full lg:w-fit z-10",
+          "absolute right-1/2 translate-x-1/2 bottom-3 translate-y-0 lg:translate-y-0 lg:right-16 lg:-translate-x-0 lg:bottom-0",
+          "before:absolute before:h-full before:w-full before:bg-brand-black/80 lg:before:bg-transparent",
+          "",
         )}
       >
         <Image
@@ -72,13 +105,23 @@ export function Hero() {
           className="h-auto w-128"
         />
       </div>
-      <div
+      <NoiseElement
         className={cn(
-          "md:after:absolute md:after:h-182 md:after:w-182 md:after:top-10 md:after:right-0 md:after:rounded-full",
-          "md:after:bg-brand-green-dark md:after:blur-3xl md:after:opacity-50 after:z-0",
-          "rounded-full",
+          "hidden lg:block absolute top-1/2 -translate-y-1/2 right-0",
         )}
-      ></div>
+        as="section"
+        opacity={60}
+      >
+        <div
+          className={cn(
+            "border border-red-400",
+            "absolute h-182 w-182 top-10 right-0 rounded-full",
+            "bg-brand-green-dark blur-3xl opacity-50 z-0",
+            "rounded-full",
+            // "noise-filter",
+          )}
+        ></div>
+      </NoiseElement>
     </div>
   );
 }
