@@ -2,7 +2,7 @@ import { WaitlistSection } from "@/features/base/waitlist/components/waitlist-se
 
 export default function Page() {
   return (
-    <div className="min-h-fit h-full w-full">
+    <div className="z-10 min-h-fit h-full w-full">
       <WaitlistSection />
     </div>
   );
