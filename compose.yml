@@ -1,0 +1,16 @@
+services:
+  ms-frontend:
+    image: ms-frontend-image
+    container_name: ms-frontend-container
+    build:
+      context: .
+      dockerfile: ./docker/development/Dockerfile
+    ports:
+      - "3001:3000"
+    # env_file:
+    #   - .env
+    restart: on-failure:3
+    volumes:
+      - .:/app
+      - /app/node_modules
+

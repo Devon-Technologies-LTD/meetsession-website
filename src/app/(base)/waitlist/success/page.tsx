@@ -7,13 +7,13 @@ export default function Page() {
     <div
       className={cn(
         "min-h-fit h-full w-full bg-brand-black text-white",
-        "px-7",
+        "px-7 z-10",
         "flex items-center justify-center",
       )}
     >
       <div
         className={cn(
-          "w-full md:w-fit h-fit text-center",
+          "w-full md:w-fit h-fit text-center z-10",
           "flex flex-col gap-3 md:gap-5 items-center",
         )}
       >
