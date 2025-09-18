@@ -21,7 +21,7 @@ export function WhyMeetSession() {
       className={cn(
         "px-7 py-8 md:py-24 lg:px-8",
         "bg-brand-blue-extralight",
-        "h-full w-full",
+        "h-full md:min-h-dvh w-full",
         "relative",
       )}
     >
@@ -57,12 +57,13 @@ export function WhyMeetSession() {
 type WhyMeetSessionCardProps = {
   reason: TWhyMeetSession;
 };
+
 function WhyMeetSessionCard({ reason }: WhyMeetSessionCardProps) {
   return (
     <Card
       className={cn(
-        "border-none shadow-none rounded-2xl md:rounded-4xl",
-        "h-fit md:h-72 w-full md:w-96 md:px-1.5 py-8",
+        "border-none shadow-2xl rounded-2xl md:rounded-4xl",
+        "h-fit md:h-64 w-full md:w-96 md:px-1.5 py-8",
       )}
     >
       <CardContent>
@@ -78,7 +79,9 @@ function WhyMeetSessionCard({ reason }: WhyMeetSessionCardProps) {
 
       <CardHeader>
         <CardTitle>{reason.title}</CardTitle>
-        <CardDescription>{reason.description}</CardDescription>
+        <CardDescription className="text-sm md:text-base text-neutral-800">
+          {reason.description}
+        </CardDescription>
       </CardHeader>
     </Card>
   );

@@ -1,10 +1,9 @@
 import { AppleStoreLogo } from "@/components/icons/apple-store-logo";
 import { PlayStoreLogo } from "@/components/icons/play-store-logo";
 import { NoiseElement } from "@/components/noise-element";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import Link from "next/link";
 
 export function Hero() {
   return (
@@ -60,32 +59,27 @@ export function Hero() {
           <p className="text-brand-green-dark">Anytime, Anywhere.</p>
         </div>
 
-        <p className="text-sm font-normal md:font-light max-w-full md:max-w-96">
+        <p className="text-sm md:text-base font-normal md:font-light max-w-full md:max-w-96">
           Meet session helps lawyers and organizations record meetings or
           cross-examinations and stores them neatly in folders for instant
           access.
         </p>
 
         <div className="flex flex-col gap-2 w-full">
-          <div className="flex items-center gap-2">
-            <Button size="icon" variant="brand-blue">
+          <div className="flex flex-col md:flex-row items-center gap-2">
+            <Button variant="brand-blue" className="py-6 !px-8 w-full md:w-fit">
               <AppleStoreLogo className="w-7 h-7" />
+              <span>Apple App Store</span>
             </Button>
 
-            <Button size="icon" variant="brand-green">
+            <Button
+              variant="brand-green"
+              className="py-6 !px-8 w-full md:w-fit"
+            >
               <PlayStoreLogo className="w-9 h-9" />
+              <span>Google Play store</span>
             </Button>
           </div>
-
-          <Link
-            href="/waitlist"
-            className={cn(
-              buttonVariants({ variant: "brand-blue", size: "lg" }),
-              "h-12 w-full md:w-fit",
-            )}
-          >
-            Join Waitlist
-          </Link>
         </div>
       </div>
 

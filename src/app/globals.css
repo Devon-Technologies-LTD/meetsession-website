@@ -71,6 +71,7 @@
   --color-brand-blue-light: var(--brand-blue-color-light);
   --color-brand-blue: var(--brand-blue-color-default);
   --color-brand-blue-dark: var(--brand-blue-color-dark);
+  --color-brand-blue-midnight: var(--brand-midnight-blue-color);
 
   --image-noise: var(--bg-noise);
 }
@@ -123,6 +124,8 @@
   --brand-blue-color-light: rgb(61, 121, 147);
   --brand-blue-color-default: rgb(20, 108, 148);
   --brand-blue-color-dark: rgb(17, 56, 74);
+
+  --brand-midnight-blue-color: rgba(0, 31, 45, 1);
 
   /* colours black */
   --brand-brack-color-foreground: rgba(25, 45, 54, 1);

@@ -80,7 +80,7 @@ export function NavbarItemsMobile({ navItems }: NavbarItemsProps) {
         <MenuIcon />
       </Button>
 
-      <AnimatePresence mode="sync">
+      <AnimatePresence mode="wait">
         {isOpen && (
           <>
             <m.div
