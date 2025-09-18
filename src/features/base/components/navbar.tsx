@@ -100,19 +100,17 @@ const navItems: TNavItem[] = [
   },
   {
     id: 7,
-    label: "Join Waitlist",
+    label: "Download App",
     render: (
-      <Link
-        href="/waitlist"
-        className={cn(buttonVariants({ variant: "default" }))}
-      >
-        Join Waitlist
+      <Link href="" className={cn(buttonVariants({ variant: "default" }))}>
+        Download App
       </Link>
     ),
     type: "buttons",
-    link: "/waitlist",
+    link: "",
   },
 ];
+
 /*
       <Button
         variant="default"
