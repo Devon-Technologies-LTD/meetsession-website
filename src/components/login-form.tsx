@@ -18,7 +18,11 @@ import { loginAction } from "@/server/actions";
 import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
 
-export function LoginForm() {
+type LoginFormProps = {
+  onSuccessAction?: (response?: Record<string, unknown>) => void;
+  onFailedAction?: (error?: Record<string, string>) => void;
+};
+export function LoginForm({ onSuccessAction: onSuccess }: LoginFormProps) {
   // const router = useRouter();
 
   const form = useForm<TLogin>({
@@ -40,6 +44,7 @@ export function LoginForm() {
     if (response.success) {
       toast.success("Successfully");
       form.reset();
+      onSuccess?.(response.data?.data);
       // router.push("/");
     } else {
       toast.error(

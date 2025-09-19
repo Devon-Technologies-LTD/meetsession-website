@@ -76,6 +76,9 @@ export function DeleteAccount({ email }: DeleteAccountProps) {
     setOpen(false);
     formRef.current?.requestSubmit();
   }
+  function onSuccessfullLogin() {
+    setOpenAuth(false);
+  }
 
   return (
     <div className="w-full h-full bg-brand-black-dark text-white flex flex-col items-center justify-center">
@@ -180,7 +183,11 @@ export function DeleteAccount({ email }: DeleteAccountProps) {
           </form>
         </div>
       </div>
-      <LoginDialog />
+      <LoginDialog
+        open={openAuth}
+        setOpen={setOpenAuth}
+        onSuccess={onSuccessfullLogin}
+      />
     </div>
   );
 }
@@ -240,14 +247,23 @@ function DeleteAccountDialog({
 function LoginDialog({
   open,
   setOpen,
+  onSuccess: onConfirmLogin,
 }: {
   open?: boolean;
   setOpen?: (open: boolean) => void;
+  onSuccess?: () => void;
 }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
-        // render login form // <LoginForm />
+        <DialogHeader>
+          <DialogTitle>Login to confirm account deletion</DialogTitle>
+          <DialogDescription>
+            To proceed with the account deletion process, please log in to your
+            account.
+          </DialogDescription>
+        </DialogHeader>
+        <LoginForm onSuccessAction={onConfirmLogin} />
       </DialogContent>
     </Dialog>
   );
