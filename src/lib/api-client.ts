@@ -1,6 +1,7 @@
-// lib/apiClient.ts
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
 import { cookies } from "next/headers";
+import { decodeToken, decryptToken as tokenDecryptor } from "./utils";
+import { ALGORITHM, SECRET_KEY } from "./constants";
 
 // ---------------- Types ----------------
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -8,21 +9,24 @@ type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 type ApiClientOptions = {
   baseURL: string;
   getAccessToken?: () => Promise<string | null> | string | null;
-  refreshToken?: () => Promise<{ accessToken: string; refreshToken?: string } | null>;
+  refreshToken?: () => Promise<{
+    accessToken: string;
+    refreshToken?: string;
+  } | null>;
   logout?: () => Promise<void> | void;
   enableRefresh?: boolean;
   setCookie?: (name: string, value: string) => Promise<void> | void;
   cookieNames?: { access?: string; refresh?: string };
   timeout?: number; // request timeout in ms (default: 10000)
   logger?: { log: (msg: string) => void; error: (msg: string) => void };
-}
+};
 
 type RequestOptions<TData = unknown> = {
   method?: HttpMethod;
   data?: TData;
   headers?: Record<string, string>;
   signal?: AbortSignal; // for abort support
-}
+};
 
 export type ApiResponse<T> =
   | { ok: true; data: T }
@@ -34,16 +38,18 @@ interface RetryableConfig extends AxiosRequestConfig {
 }
 
 // ---------------- Utils ----------------
+/*
 function decodeJwt(token: string): { exp?: number } {
   try {
     const payload = JSON.parse(
-      Buffer.from(token.split(".")[1], "base64").toString()
+      Buffer.from(token.split(".")[1], "base64").toString(),
     );
     return payload;
   } catch {
     return {};
   }
 }
+*/
 
 // ---------------- Client ----------------
 class ApiClient {
@@ -84,7 +90,11 @@ class ApiClient {
         async (error: AxiosError) => {
           const originalConfig = error.config as RetryableConfig;
 
-          if (error.response?.status === 401 && this.refreshToken && !originalConfig._retry) {
+          if (
+            error.response?.status === 401 &&
+            this.refreshToken &&
+            !originalConfig._retry
+          ) {
             originalConfig._retry = true;
             this.logger?.log("401 received, attempting token refresh...");
 
@@ -102,7 +112,7 @@ class ApiClient {
           }
 
           return Promise.reject(error);
-        }
+        },
       );
     }
   }
@@ -110,19 +120,28 @@ class ApiClient {
   // -------- Token Management --------
   private async resolveToken(): Promise<string | null> {
     let token: string | null = null;
+    let retrieved: string | null = null;
 
     if (this.getAccessToken) {
-      token = await this.getAccessToken();
+      retrieved = await this.getAccessToken();
     } else {
       const cookieStore = await cookies();
-      token = cookieStore.get(this.cookieNames.access)?.value ?? null;
+      retrieved = cookieStore.get(this.cookieNames.access)?.value ?? null;
     }
+    const key = new TextEncoder().encode(SECRET_KEY);
+    const decrypted = await tokenDecryptor({
+      algorithm: ALGORITHM,
+      encrypted: retrieved,
+      key,
+    });
+    token = decrypted?.token ?? null;
 
     if (!token) return null;
 
     // Pre-check JWT expiry
 
-    const { exp } = decodeJwt(token);
+    const decoded = decodeToken(token);
+    const { exp } = decoded;
     if (exp && Date.now() >= exp * 1000) {
       this.logger?.log("Token expired before request");
 
@@ -198,7 +217,7 @@ class ApiClient {
   // -------- Request Methods --------
   async unauthenticated<TResponse = unknown, TData = unknown>(
     path: string,
-    options: RequestOptions<TData> = {}
+    options: RequestOptions<TData> = {},
   ): Promise<ApiResponse<TResponse>> {
     try {
       const { method = "GET", data, headers, signal } = options;
@@ -222,7 +241,7 @@ class ApiClient {
 
   async authenticated<TResponse = unknown, TData = unknown>(
     path: string,
-    options: RequestOptions<TData> = {}
+    options: RequestOptions<TData> = {},
   ): Promise<ApiResponse<TResponse>> {
     try {
       const { method = "GET", data, headers, signal } = options;
@@ -260,7 +279,10 @@ class ApiClient {
     if (err instanceof Error) return err.message;
     return "Unknown error";
   }
-  private validateDataForWriteRequest<TData = undefined>(method: HttpMethod, data: TData) {
+  private validateDataForWriteRequest<TData = undefined>(
+    method: HttpMethod,
+    data: TData,
+  ) {
     if (["POST", "PUT", "PATCH"].includes(method) && !data) {
       throw new Error(`Data is required for ${method} requests`);
     }
@@ -271,4 +293,3 @@ class ApiClient {
 export function createApiClient(options: ApiClientOptions) {
   return new ApiClient(options);
 }
-
