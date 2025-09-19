@@ -246,7 +246,9 @@ function LoginDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      // render login form // <LoginForm />
+      <DialogContent>
+        // render login form // <LoginForm />
+      </DialogContent>
     </Dialog>
   );
 }
