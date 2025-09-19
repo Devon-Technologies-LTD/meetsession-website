@@ -29,14 +29,26 @@ import { useRef, useState } from "react";
 import { deleteAccountAction } from "../server/actions";
 import { toast } from "sonner";
 import { LoginForm } from "@/components/login-form";
+import { useRouter } from "next/navigation";
 
 type DeleteAccountProps = {
   email?: string;
+  token?: string;
 };
 
-export function DeleteAccount({ email }: DeleteAccountProps) {
+export function DeleteAccount({ email, token }: DeleteAccountProps) {
   const [open, setOpen] = useState(false);
   const [openAuth, setOpenAuth] = useState(false);
+  const router = useRouter();
+
+  function setToken(token: string) {
+    fetch(`/api/v1/auth/set-tokens?accessToken=${token}`)
+      .then((res) => res.json())
+      .catch((err) => console.log("set token err: ", err));
+  }
+  if (token) {
+    setToken(token);
+  }
 
   const form = useForm<TDeleteAccount>({
     resolver: zodResolver(deleteAccountSchema),
@@ -51,7 +63,7 @@ export function DeleteAccount({ email }: DeleteAccountProps) {
   async function onSubmit(values: TDeleteAccount) {
     const formdata = new FormData();
     formdata.append("email", values.email);
-    values.reason ? formdata.append("reason", values?.reason) : null;
+    formdata.append("reason", values?.reason);
 
     const res = await deleteAccountAction(formdata);
     if (!res.success) {
@@ -63,12 +75,14 @@ export function DeleteAccount({ email }: DeleteAccountProps) {
       });
       if (
         typeof res.errors === "string" &&
-        res.errors.toLowerCase().includes("token")
+        (res.errors.toLowerCase().includes("token") ||
+          res.errors.toLowerCase().includes("login"))
       ) {
         setOpenAuth(true); // open login dialog
       }
     } else {
       toast.success(res.message);
+      router.push("/");
     }
   }
 
@@ -77,6 +91,13 @@ export function DeleteAccount({ email }: DeleteAccountProps) {
     formRef.current?.requestSubmit();
   }
   function onSuccessfullLogin() {
+    // console.log("login data: ", data);
+    // const query = new URLSearchParams(searchParams.toString());
+    // query.set(
+    //   "token",
+    //   (data as { token: string; user_details: Record<string, string> }).token,
+    // );
+    // router.replace(`${pathname}?${query.toString()}`);
     setOpenAuth(false);
   }
 
@@ -124,12 +145,12 @@ export function DeleteAccount({ email }: DeleteAccountProps) {
                 name="reason"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Reason for Deletion (Optional)</FormLabel>
+                    <FormLabel>Reason for Deletion</FormLabel>
                     <FormControl>
                       <textarea
-                        {...field}
                         className="py-2 px-4 rounded-md border border-border text-sm"
                         placeholder="Reason for deleting account"
+                        {...field}
                         rows={5}
                       ></textarea>
                     </FormControl>
@@ -198,6 +219,7 @@ type DeleteAccountDialogProps = {
   onSuccess?: () => void;
   onClose?: () => void;
 };
+
 function DeleteAccountDialog({
   open,
   onOpenChange,
@@ -251,14 +273,16 @@ function LoginDialog({
 }: {
   open?: boolean;
   setOpen?: (open: boolean) => void;
-  onSuccess?: () => void;
+  onSuccess?: (data?: unknown) => void;
 }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Login to confirm account deletion</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-4xl font-bold font-dm-sans text-center">
+            Login To Proceed
+          </DialogTitle>
+          <DialogDescription className="text-neutral-700 text-center font-dm-sans">
             To proceed with the account deletion process, please log in to your
             account.
           </DialogDescription>

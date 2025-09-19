@@ -28,6 +28,7 @@ export async function deleteAccountAction(formdata: FormData) {
     status?: boolean;
   }>("/profile", {
     method: "DELETE",
+    data: result.data,
   });
   if (!res.ok) {
     return {

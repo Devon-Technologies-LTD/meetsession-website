@@ -1,6 +1,9 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { TSeparateOptions } from "./types";
+import { jwtDecode } from "jwt-decode";
+import * as jose from "jose";
+import { TTokens, TUser } from "./schemas";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -38,4 +41,29 @@ export function separateCamelCase(
   }
 
   return result;
+}
+
+export function decodeToken(token: string) {
+  const decoded = jwtDecode(token);
+  return decoded;
+}
+
+export async function decryptToken({
+  algorithm,
+  encrypted,
+  key,
+}: {
+  algorithm?: string;
+  encrypted: string | null;
+  key: Uint8Array<ArrayBuffer>;
+}) {
+  if (!encrypted) return null;
+  try {
+    const { payload } = await jose.jwtVerify(encrypted, key, {
+      algorithms: [algorithm || "HS256"],
+    });
+    return payload as { user_details: TUser; token: TTokens };
+  } catch {
+    return null;
+  }
 }

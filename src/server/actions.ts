@@ -4,10 +4,17 @@ import z from "zod";
 import { loginSchema, TTokens, TUser } from "@/lib/schemas";
 import { createApiClient } from "@/lib/api-client";
 import { BASE_URL } from "@/lib/constants";
-import { auth } from "@/lib/auth";
+import { createAuthService } from "@/lib/auth-service";
+import { SECRET_KEY, ALGORITHM } from "@/lib/constants";
+import { setServerCookie } from "./set-cookie";
 
 const apiClient = createApiClient({
   baseURL: BASE_URL,
+});
+const auth = createAuthService({
+  secret: SECRET_KEY,
+  algorithm: ALGORITHM,
+  setCookie: setServerCookie,
 });
 
 export async function loginAction(formdata: FormData) {

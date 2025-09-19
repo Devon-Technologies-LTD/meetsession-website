@@ -1,5 +1,7 @@
 import { cookies } from "next/headers";
 import * as jose from "jose";
+import { TTokens, TUser } from "./schemas";
+import { decodeToken, decryptToken as tokenDecryptor } from "./utils";
 
 type AuthTokens = {
   accessToken: string;
@@ -8,8 +10,13 @@ type AuthTokens = {
 
 interface AuthServiceOptions {
   secret: string; // used for token encryption
+  algorithm?: string;
   cookieNames?: { access?: string; refresh?: string };
-  setCookie?: (name: string, value: string) => Promise<void> | void;
+  setCookie?: (
+    name: string,
+    value: string,
+    options?: Record<string, string | number | Date>,
+  ) => Promise<void> | void;
   logger?: { log: (msg: string) => void; error: (msg: string) => void };
 }
 
@@ -34,65 +41,73 @@ export function createAuthService(options: AuthServiceOptions) {
 
   // -------- Encryption Helpers --------
   async function encryptToken(token: string): Promise<string> {
-    const jwe = await new jose.EncryptJWT({ token })
-      .setProtectedHeader({ alg: "dir", enc: "A256GCM" })
-      .setIssuedAt()
-      .setExpirationTime("1h") // encryption envelope lifetime (not JWT exp)
-      .encrypt(key);
-    return jwe;
+    return new jose.SignJWT({ token })
+      .setProtectedHeader({ alg: options?.algorithm || "HS256" })
+      .sign(key);
   }
 
-  async function decryptToken(encrypted: string): Promise<string | null> {
-    try {
-      const { payload } = await jose.jwtDecrypt(encrypted, key);
-      return payload.token as string;
-    } catch {
-      return null;
-    }
+  async function decryptToken(
+    encrypted: string,
+  ): Promise<{ user_details: TUser; token: TTokens } | null> {
+    return tokenDecryptor({ algorithm: options?.algorithm, encrypted, key });
   }
 
   // -------- Core Methods --------
   async function storeTokens(tokens: AuthTokens) {
     if (!tokens.accessToken) throw new Error("Missing access token");
 
-    const cookieStore = await cookies();
+    if (!options.setCookie) {
+      throw new Error(
+        "setCookie callback not provided. You must call storeTokens from a Server Action or Route Handler with setCookie configured.",
+      );
+    }
+
+    const duration = 24 * 60 * 60 * 1000;
+
+    const decryptedToken = decodeToken(tokens.accessToken);
+    const expires = decryptedToken.exp
+      ? decryptedToken.exp * 1000
+      : new Date(Date.now() + duration);
+
     const encryptedAccess = await encryptToken(tokens.accessToken);
-    cookieStore.set(cookieNames.access, encryptedAccess, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-      path: "/",
-    });
+    await options.setCookie(cookieNames.access, encryptedAccess, { expires });
 
     if (tokens.refreshToken) {
+      const decryptedToken = decodeToken(tokens.refreshToken);
+      const expires = decryptedToken.exp
+        ? decryptedToken.exp * 1000
+        : new Date(Date.now() + duration);
       const encryptedRefresh = await encryptToken(tokens.refreshToken);
-      cookieStore.set(cookieNames.refresh, encryptedRefresh, {
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-        path: "/",
+      await options.setCookie(cookieNames.refresh, encryptedRefresh, {
+        expires,
       });
     }
   }
 
-  async function getAccessToken(): Promise<string | null> {
+  async function getAccessToken(): Promise<TTokens | null | undefined> {
     const cookieStore = await cookies();
     const encrypted = cookieStore.get(cookieNames.access)?.value;
     if (!encrypted) return null;
-    return await decryptToken(encrypted);
+    const tok = await decryptToken(encrypted);
+    return tok?.token;
   }
 
-  async function getRefreshToken(): Promise<string | null> {
+  async function getRefreshToken(): Promise<string | null | undefined> {
     const cookieStore = await cookies();
     const encrypted = cookieStore.get(cookieNames.refresh)?.value;
     if (!encrypted) return null;
-    return await decryptToken(encrypted);
+    const tok = await decryptToken(encrypted);
+    return tok?.token;
   }
 
   async function clearTokens() {
-    const cookieStore = await cookies();
-    cookieStore.delete(cookieNames.access);
-    cookieStore.delete(cookieNames.refresh);
+    if (!options.setCookie) {
+      throw new Error(
+        "setCookie callback not provided. You must call clearTokens from a Server Action or Route Handler with setCookie configured.",
+      );
+    }
+    await options.setCookie(cookieNames.access, "");
+    await options.setCookie(cookieNames.refresh, "");
   }
 
   async function isAccessTokenValid(): Promise<boolean> {
@@ -116,5 +131,7 @@ export function createAuthService(options: AuthServiceOptions) {
     clearTokens,
     isAccessTokenValid,
     isRefreshTokenValid,
+    encryptToken,
+    decryptToken,
   };
 }

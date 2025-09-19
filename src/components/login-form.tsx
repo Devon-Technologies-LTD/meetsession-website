@@ -1,10 +1,9 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-// import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { loginSchema, TLogin } from "@/lib/schemas";
+import { loginSchema, TLogin, TTokens, TUser } from "@/lib/schemas";
 import {
   Form,
   FormControl,
@@ -17,9 +16,15 @@ import { Button } from "@/components/ui/button";
 import { loginAction } from "@/server/actions";
 import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
+// import { useRouter } from "next/navigation";
 
 type LoginFormProps = {
-  onSuccessAction?: (response?: Record<string, unknown>) => void;
+  onSuccessAction?: (
+    response?: {
+      token: TTokens;
+      user_details: TUser;
+    } | null,
+  ) => void;
   onFailedAction?: (error?: Record<string, string>) => void;
 };
 export function LoginForm({ onSuccessAction: onSuccess }: LoginFormProps) {
@@ -44,7 +49,7 @@ export function LoginForm({ onSuccessAction: onSuccess }: LoginFormProps) {
     if (response.success) {
       toast.success("Successfully");
       form.reset();
-      onSuccess?.(response.data?.data);
+      onSuccess?.(response?.data);
       // router.push("/");
     } else {
       toast.error(
@@ -56,13 +61,7 @@ export function LoginForm({ onSuccessAction: onSuccess }: LoginFormProps) {
   }
 
   return (
-    <div className="z-10 flex flex-col py-24 px-6 justify-center items-center gap-6 w-full h-full bg-brand-black text-center text-white">
-      <div className="z-10 flex flex-col items-center gap-4">
-        <p className="z-10 text-3xl md:text-5xl font-bold font-dm-sans">
-          Login form
-        </p>
-      </div>
-
+    <div className="z-10 flex flex-col p-6 justify-center items-center gap-6 w-full h-full text-center">
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="z-10 text-start max-w-2xl w-full [&_button]:placeholder:text-white flex flex-col gap-5"
