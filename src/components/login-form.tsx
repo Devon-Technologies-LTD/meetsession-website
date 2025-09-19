@@ -38,7 +38,7 @@ export function LoginForm() {
     const response = await loginAction(formdata);
 
     if (response.success) {
-      toast.success("Successfully joined waitlist!");
+      toast.success("Successfully");
       form.reset();
       // router.push("/");
     } else {
@@ -54,11 +54,7 @@ export function LoginForm() {
     <div className="z-10 flex flex-col py-24 px-6 justify-center items-center gap-6 w-full h-full bg-brand-black text-center text-white">
       <div className="z-10 flex flex-col items-center gap-4">
         <p className="z-10 text-3xl md:text-5xl font-bold font-dm-sans">
-          Join MeetSession Waitlist
-        </p>
-        <p className="z-10 text-sm md:text-base max-w-sm">
-          Be among the first to experience seamless legal transcription. Sign up
-          now to reserve your spot on our exclusive waitlist.
+          Login form
         </p>
       </div>
 
@@ -74,7 +70,7 @@ export function LoginForm() {
               <FormItem className="w-full">
                 <FormControl>
                   <Input
-                    placeholder="First name (required)"
+                    placeholder="Email (required)"
                     {...field}
                     className="py-6 text-sm md:text-base placeholder:text-gray-300"
                   />
@@ -91,7 +87,7 @@ export function LoginForm() {
                 <FormControl>
                   <Input
                     type="password"
-                    placeholder="Last name (required)"
+                    placeholder="Password (required)"
                     {...field}
                     className="py-6 text-sm md:text-base placeholder:text-gray-300"
                   />
