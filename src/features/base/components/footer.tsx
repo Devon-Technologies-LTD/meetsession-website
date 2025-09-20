@@ -66,9 +66,20 @@ export function Footer() {
       <div className="h-full flex flex-col gap-4 font-montserrat">
         <p className="font-semibold text-base">Company</p>
         <ul className="flex flex-col gap-2">
-          <li>About Us</li>
+          <li>
+            <Link href="https://www.devontech.io" target="_blank">
+              About Us
+            </Link>
+          </li>
           <li>FAQs</li>
-          <li>Book a demo</li>
+          <li>
+            <Link
+              href="https://calendly.com/devontech/demo-of-devon-technologeis-products"
+              target="_blank"
+            >
+              Book a demo
+            </Link>
+          </li>
         </ul>
       </div>
 
