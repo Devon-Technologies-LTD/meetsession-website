@@ -27,7 +27,7 @@ export default function CountAnimation({
   const [current, setCurrent] = React.useState(0);
 
   React.useEffect(() => {
-    const animation = animate(count, number, { duration: 2 });
+    const animation = animate(count, number, { duration: 6 });
     return animation.stop;
   }, [count, number]);
 
