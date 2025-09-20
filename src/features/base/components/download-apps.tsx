@@ -1,7 +1,8 @@
 import { AppleStoreLogo } from "@/components/icons/apple-store-logo";
 import { PlayStoreLogo } from "@/components/icons/play-store-logo";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export function DownloadApps() {
   return (
@@ -54,14 +55,17 @@ export function DownloadApps() {
           <div className="flex flex-col md:flex-row items-center gap-3 md:gap-5 w-full md:w-fit">
             {appOptions.map((option) => {
               return (
-                <Button
+                <Link
                   key={option.id}
-                  variant="secondary"
-                  className="text-sm font-medium h-12 px-8 w-full md:w-fit"
+                  href={option.link ?? "#"}
+                  className={cn(
+                    buttonVariants({ variant: "secondary" }),
+                    "text-sm font-medium h-12 px-8 w-full md:w-fit",
+                  )}
                 >
                   <option.icon />
                   <span className="text-sm font-medium">{option.title}</span>
-                </Button>
+                </Link>
               );
             })}
           </div>
@@ -72,6 +76,11 @@ export function DownloadApps() {
 }
 
 const appOptions = [
-  { id: 1, icon: AppleStoreLogo, title: "Apple App Store" },
-  { id: 2, icon: PlayStoreLogo, title: "Google Play Store" },
+  {
+    id: 1,
+    icon: AppleStoreLogo,
+    title: "Apple App Store",
+    link: "https://apps.apple.com/ng/app/meetsession/id6751320453",
+  },
+  { id: 2, icon: PlayStoreLogo, title: "Google Play Store", link: null },
 ];

@@ -1,9 +1,10 @@
 import { AppleStoreLogo } from "@/components/icons/apple-store-logo";
 import { PlayStoreLogo } from "@/components/icons/play-store-logo";
 import { NoiseElement } from "@/components/noise-element";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import Link from "next/link";
 
 export function Hero() {
   return (
@@ -67,10 +68,17 @@ export function Hero() {
 
         <div className="flex flex-col gap-2 w-full">
           <div className="flex flex-col md:flex-row items-center gap-2">
-            <Button variant="brand-blue" className="py-6 !px-8 w-full md:w-fit">
+            <Link
+              href={"https://apps.apple.com/ng/app/meetsession/id6751320453"}
+              target="_blank"
+              className={cn(
+                buttonVariants({ variant: "brand-blue" }),
+                "py-6 !px-8 w-full md:w-fit",
+              )}
+            >
               <AppleStoreLogo className="w-7 h-7" />
               <span>Apple App Store</span>
-            </Button>
+            </Link>
 
             <Button
               variant="brand-green"

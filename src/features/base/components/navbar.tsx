@@ -84,6 +84,7 @@ const navItems: TNavItem[] = [
     type: "links",
     link: "/#how-it-works",
   },
+  /*
   {
     id: 5,
     label: "Testimonials",
@@ -91,6 +92,7 @@ const navItems: TNavItem[] = [
     type: "links",
     link: "/#testimonials",
   },
+  */
   {
     id: 6,
     label: "Support",

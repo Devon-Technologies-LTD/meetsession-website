@@ -13,6 +13,7 @@ import { MsAccessIcon } from "@/components/icons/why-ms-access-icon";
 import { MsSecureIcon } from "@/components/icons/why-ms-secure-icon";
 import { MsTranscriptIcon } from "@/components/icons/why-ms-transcript-icon";
 import { MicVocalIcon } from "lucide-react";
+import { MsSpeakersIcon } from "@/components/icons/why-ms-speakers-icon";
 
 export function WhyMeetSession() {
   return (
@@ -41,7 +42,7 @@ export function WhyMeetSession() {
         )}
       >
         <p className="font-dm-sans font-black text-2xl md:text-3xl z-20">
-          Why Meet Session?
+          Why MeetSession?
         </p>
 
         <div className="flex flex-wrap gap-4 md:gap-6 items-center justify-center z-20">
@@ -124,5 +125,12 @@ const reasons: TWhyMeetSession[] = [
     title: "Microphone compatibility",
     description: "MeetSession is compatible with any pin microphone.",
     icon: <MicVocalIcon className="h-6 md:h-8 w-6 md:w-8" />,
+  },
+  {
+    id: 7,
+    title: "Speaker differentiation",
+    description:
+      "Automatically identify and separate voices, ensuring transcripts are clear and attributed to the right speaker.",
+    icon: <MsSpeakersIcon className="h-6 md:h-8 w-6 md:w-8" />,
   },
 ];

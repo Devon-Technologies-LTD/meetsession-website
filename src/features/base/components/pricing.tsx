@@ -13,9 +13,11 @@ import { generateTierColor } from "../lib/utils";
 import { CheckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FreePlanIcon } from "@/components/icons/free-plan-icon";
+/*
 import { BasicPlanIcon } from "@/components/icons/basic-plan-icon";
 import { EssentialPlanIcon } from "@/components/icons/essential-plan-icon";
 import { ProPlanIcon } from "@/components/icons/pro-plan-icon";
+*/
 
 export function Pricing() {
   return (
@@ -170,8 +172,8 @@ const priceList: TTier[] = [
     description:
       "Perfect for individuals just getting started with recording and transcription",
     features: [
-      "2hrs recording & Transcription",
-      "Basic Meeting Organization",
+      "8hrs+ recording & Transcription",
+      "Meeting Organization",
       "Speaker Differentiation",
     ],
     link: "",
@@ -179,6 +181,7 @@ const priceList: TTier[] = [
     icon: <FreePlanIcon />,
     themeColor: "black",
   },
+  /*
   {
     id: 2,
     title: "Basic Plan",
@@ -187,8 +190,8 @@ const priceList: TTier[] = [
       "Ideal for regular users who need reliable transcription and organizational tools",
     link: "",
     features: [
-      "50hr recording and transcript",
-      "Organize meetings",
+      "30hr+ recording and transcription",
+      "Meeting organization",
       "Speaker differentiation",
     ],
     icon: <BasicPlanIcon />,
@@ -202,8 +205,8 @@ const priceList: TTier[] = [
       "Great for professionals managing multiple meetings with advanced features.",
     link: "",
     features: [
-      "100hr recording and transcript",
-      "Organize meetings",
+      "50hr+ recording and transcript",
+      "Meeting organization",
       "Speaker differentiation",
     ],
     icon: <EssentialPlanIcon />,
@@ -218,11 +221,12 @@ const priceList: TTier[] = [
       "Best for teams and power users who need maximum storage and productivity",
     link: "",
     features: [
-      "Unlimited recording and transcript",
-      "Organize meetings",
+      "60hr+ recording and transcript",
+      "Meeting organization",
       "Speaker differentiation",
     ],
     icon: <ProPlanIcon />,
     themeColor: "midnight-blue",
   },
+  */
 ];
