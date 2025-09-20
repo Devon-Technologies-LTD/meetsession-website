@@ -1,10 +1,10 @@
 import Image from "next/image";
-import { cn, separateCamelCase } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 import { getMetrics } from "../server";
 
 import { NoiseElement } from "@/components/noise-element";
-import CountAnimation from "@/components/count-animation";
+import { MetricsDisplay } from "./metrics-display";
 
 export function MeasureImpact() {
   return (
@@ -121,28 +121,11 @@ async function Metrics() {
   return (
     <div className="w-full md:w-fit h-fit gap-3.5 sm:gap-4 md:gap-5 lg:gap-6 flex flex-wrap items-center md:items-start justify-center">
       {arr.map((itr) => (
-        <div
+        <MetricsDisplay
           key={itr.id}
-          className="p-px rounded-xl bg-linear-to-b from-brand-blue to-brand-green"
-        >
-          <div className="w-full h-full rounded-xl bg-brand-black">
-            <div
-              className={cn(
-                "min-w-32 md:min-w-44 w-fit min-h-20 h-fit rounded-xl bg-linear-to-r from-white/10 to-transparent",
-                "p-2 sm:p-3 md:p-5 lg:p-6 flex flex-col gap-1 sm:gap-2 md:gap-3 items-center justify-center",
-              )}
-            >
-              <CountAnimation
-                number={itr.value}
-                suffix="+"
-                className="text-4xl font-dm-sans font-black text-white text-center"
-              />
-              <p className="text-xs md:text-sm lg:text-base">
-                {separateCamelCase(itr.description)}
-              </p>
-            </div>
-          </div>
-        </div>
+          value={itr.value}
+          description={itr.description}
+        />
       ))}
     </div>
   );
