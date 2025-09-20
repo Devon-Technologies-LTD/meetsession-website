@@ -102,8 +102,8 @@ export function DeleteAccount({ email, token }: DeleteAccountProps) {
   }
 
   return (
-    <div className="w-full h-full bg-brand-black-dark text-white flex flex-col items-center justify-center">
-      <div className="flex flex-col items-start gap-8 w-fit">
+    <div className="w-full h-full min-h-fit px-7 py-14 md:px-10 md:py-20 bg-brand-black-dark text-white flex flex-col items-center justify-center">
+      <div className="flex flex-col items-start gap-4 md:gap-8 w-fit h-fit">
         <div className="flex flex-col items-start justify-start">
           <p className="text-3xl font-bold font-dm-sans">Delete Your Account</p>
           <p className="text-sm md:text-base">
@@ -111,14 +111,14 @@ export function DeleteAccount({ email, token }: DeleteAccountProps) {
           </p>
         </div>
 
-        <div className="flex flex-col gap-5 rounded-xl bg-white max-w-5xl w-full p-10 text-brand-black">
+        <div className="flex flex-col gap-5 rounded-xl bg-white max-w-5xl w-full p-5 md:p-10 text-brand-black">
           <p className="text-2xl font-bold font-dm-sans">
             Confirm Account Deletion
           </p>
 
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4 w-full h-fit"
+            className="flex flex-col gap-4 w-full h-full"
             ref={formRef}
           >
             <Form {...form}>

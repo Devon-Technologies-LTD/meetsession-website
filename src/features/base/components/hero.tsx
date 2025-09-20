@@ -1,10 +1,11 @@
 import { AppleStoreLogo } from "@/components/icons/apple-store-logo";
 import { PlayStoreLogo } from "@/components/icons/play-store-logo";
 import { NoiseElement } from "@/components/noise-element";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import Link from "next/link";
+import { TAppOption } from "../lib/types";
+import { DownloadAppButton } from "./download-app-button";
 
 export function Hero() {
   return (
@@ -68,25 +69,16 @@ export function Hero() {
 
         <div className="flex flex-col gap-2 w-full">
           <div className="flex flex-col md:flex-row items-center gap-2">
-            <Link
-              href={"https://apps.apple.com/ng/app/meetsession/id6751320453"}
-              target="_blank"
-              className={cn(
-                buttonVariants({ variant: "brand-blue" }),
-                "py-6 !px-8 w-full md:w-fit",
-              )}
-            >
-              <AppleStoreLogo className="w-7 h-7" />
-              <span>Apple App Store</span>
-            </Link>
-
-            <Button
-              variant="brand-green"
-              className="py-6 !px-8 w-full md:w-fit"
-            >
-              <PlayStoreLogo className="w-9 h-9" />
-              <span>Google Play store</span>
-            </Button>
+            {downloadAppOptions.map((option) => (
+              <DownloadAppButton
+                key={option.id}
+                option={option}
+                className={cn(
+                  themeColor[option.id as keyof typeof themeColor],
+                  "py-6 !px-8 w-full md:w-fit",
+                )}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -127,3 +119,23 @@ export function Hero() {
     </div>
   );
 }
+
+const downloadAppOptions: TAppOption[] = [
+  {
+    id: 1,
+    icon: <AppleStoreLogo className="w-7 h-7" />,
+    title: "Apple App Store",
+    link: "https://apps.apple.com/ng/app/meetsession/id6751320453",
+  },
+  {
+    id: 2,
+    icon: <PlayStoreLogo className="w-9 h-9" />,
+    title: "Google Play Store",
+    link: null /*"https://play.google.com/store/apps/details?id=com.meetsession"*/,
+  },
+];
+
+const themeColor = {
+  1: buttonVariants({ variant: "brand-blue" }),
+  2: buttonVariants({ variant: "brand-green" }),
+};

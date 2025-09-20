@@ -2,10 +2,7 @@ import { cn } from "@/lib/utils";
 import { TNavItem } from "../lib/types";
 import { Logo } from "@/components/icons/logo";
 import { NavbarItems, NavbarItemsMobile } from "./navbar-items";
-import {
-  // Button,
-  buttonVariants,
-} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Fragment } from "react";
 
@@ -103,11 +100,7 @@ const navItems: TNavItem[] = [
   {
     id: 7,
     label: "Download App",
-    render: (
-      <Link href="" className={cn(buttonVariants({ variant: "default" }))}>
-        Download App
-      </Link>
-    ),
+    render: <Button variant="default">Download App</Button>,
     type: "buttons",
     link: "",
   },
