@@ -1,17 +1,22 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { TNavItem } from "../lib/types";
-import { Logo } from "@/components/icons/logo";
 import { NavbarItems, NavbarItemsMobile } from "./navbar-items";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Fragment } from "react";
+import { useNavItems } from "../hooks/use-nav-items";
 
 export function Navbar() {
+  const { navItems } = useNavItems();
+
   function renderItem(item: TNavItem) {
     return (
       <Fragment key={item.id}>
         {typeof item.render === "string" ? (
-          <Link href={item.link}>{item.render}</Link>
+          <Link target={item.external ? "_blank" : undefined} href={item.link}>
+            {item.render ? item.render : item.label}
+          </Link>
         ) : (
           item.render
         )}
@@ -50,67 +55,3 @@ export function Navbar() {
     </header>
   );
 }
-
-const navItems: TNavItem[] = [
-  {
-    id: 1,
-    label: "MeetSession",
-    render: (
-      <Link href="/" className="flex items-center gap-3 w-fit">
-        <Logo className="w-8 md:w-10 h-8 md:h-10" />
-        <p className="font-bold font-jersey text-lg md:text-xl capitalize">
-          MeetSession
-        </p>
-      </Link>
-    ),
-    type: "logo",
-    link: "/",
-  },
-  { id: 2, label: "Home", render: "Home", type: "links", link: "/" },
-  {
-    id: 3,
-    label: "Features",
-    render: "Features",
-    type: "links",
-    link: "/#features",
-  },
-  {
-    id: 4,
-    label: "howItWorks",
-    render: "How it Works",
-    type: "links",
-    link: "/#how-it-works",
-  },
-  /*
-  {
-    id: 5,
-    label: "Testimonials",
-    render: "Testimonials",
-    type: "links",
-    link: "/#testimonials",
-  },
-  */
-  {
-    id: 6,
-    label: "Support",
-    render: "Support",
-    type: "links",
-    link: "/#support",
-  },
-  {
-    id: 7,
-    label: "Download App",
-    render: <Button variant="default">Download App</Button>,
-    type: "buttons",
-    link: "",
-  },
-];
-
-/*
-      <Button
-        variant="default"
-        className="font-semibold"
-      >
-        Download App
-      </Button>
-      */
