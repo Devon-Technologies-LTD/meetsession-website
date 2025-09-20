@@ -8,7 +8,7 @@ export default async function Page(props: PageProps) {
   const { email, token } = searchParams;
 
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full min-h-dvh">
       <DeleteAccount email={email} token={token} />
     </div>
   );
