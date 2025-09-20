@@ -17,7 +17,9 @@ export function useNavItems() {
       setAppLink("https://apps.apple.com/ng/app/meetsession/id6751320453");
     } else {
       // google play store link
-      setAppLink("");
+      setAppLink(
+        "https://play.google.com/store/apps/details?id=com.meet_session.io",
+      );
     }
   }, [os]);
 

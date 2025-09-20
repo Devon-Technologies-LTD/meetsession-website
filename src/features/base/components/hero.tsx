@@ -131,7 +131,7 @@ const downloadAppOptions: TAppOption[] = [
     id: 2,
     icon: <PlayStoreLogo className="w-9 h-9" />,
     title: "Google Play Store",
-    link: null /*"https://play.google.com/store/apps/details?id=com.meetsession"*/,
+    link: "https://play.google.com/store/apps/details?id=com.meet_session.io",
   },
 ];
 

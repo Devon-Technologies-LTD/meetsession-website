@@ -70,5 +70,10 @@ const appOptions: TAppOption[] = [
     title: "Apple App Store",
     link: "https://apps.apple.com/ng/app/meetsession/id6751320453",
   },
-  { id: 2, icon: <PlayStoreLogo />, title: "Google Play Store", link: null },
+  {
+    id: 2,
+    icon: <PlayStoreLogo />,
+    title: "Google Play Store",
+    link: "https://play.google.com/store/apps/details?id=com.meet_session.io",
+  },
 ];
