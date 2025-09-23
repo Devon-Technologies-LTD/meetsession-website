@@ -234,7 +234,7 @@ jobs:
                       - linux/arm64
                   image: $IMAGE_NAME:$IMAGE_TAG
                   ports:
-                    - "3000:3000"
+                    - "3123:3000"
                   restart: unless-stopped
                   env_file:
                     - .env
