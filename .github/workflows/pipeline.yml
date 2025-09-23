@@ -190,8 +190,8 @@ jobs:
         - name: Build and push Docker image
           run: |
             IMAGE_NAME=$(echo "ghcr.io/${{ github.actor }}/meetsession/frontend" | tr '[:upper:]' '[:lower:]')
-            IMAGE_TAG=staging-${{ github.sha }}
-            IMAGE_ENV=staging
+            IMAGE_TAG=prod-${{ github.sha }}
+            IMAGE_ENV=production
 
             echo "Building image $IMAGE_NAME:$IMAGE_TAG"
             docker build -t $IMAGE_NAME:$IMAGE_TAG -f docker/$IMAGE_ENV/Dockerfile .
