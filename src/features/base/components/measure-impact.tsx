@@ -1,10 +1,8 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 
-import { getMetrics } from "../server";
-
 import { NoiseElement } from "@/components/noise-element";
-import { MetricsDisplay } from "./metrics-display";
+import { Metrics } from "./metrics";
 
 export function MeasureImpact() {
   return (
@@ -106,27 +104,5 @@ export function MeasureImpact() {
         ></div>
       </NoiseElement>
     </section>
-  );
-}
-
-async function Metrics() {
-  const metrics = await getMetrics();
-  if (!metrics.success || !metrics.data) {
-    return <p className="text-white text-sm italic">No analytics founds</p>;
-  }
-  const arr: { id: number; value: number; description: string }[] = [];
-  Object.entries(metrics.data).forEach(([key, val], i) => {
-    arr.push({ value: val, description: key, id: i + 1 });
-  });
-  return (
-    <div className="w-full md:w-fit h-fit gap-3.5 sm:gap-4 md:gap-5 lg:gap-6 flex flex-wrap items-center md:items-start justify-center">
-      {arr.map((itr) => (
-        <MetricsDisplay
-          key={itr.id}
-          value={itr.value}
-          description={itr.description}
-        />
-      ))}
-    </div>
   );
 }
