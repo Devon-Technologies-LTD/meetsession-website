@@ -29,8 +29,8 @@ type RequestOptions<TData = unknown> = {
 };
 
 export type ApiResponse<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string };
+  | { ok: true; data: T; status?: number }
+  | { ok: false; error: string; status?: number };
 
 // Internal
 interface RetryableConfig extends AxiosRequestConfig {
@@ -232,10 +232,10 @@ class ApiClient {
         signal,
       });
 
-      return { ok: true, data: response.data };
+      return { ok: true, data: response.data, status: response.status };
     } catch (err) {
       const errorMsg = this.extractError(err);
-      return { ok: false, error: errorMsg };
+      return { ok: false, error: errorMsg.message, status: errorMsg.status };
     }
   }
 
@@ -267,18 +267,22 @@ class ApiClient {
       return { ok: true, data: response.data };
     } catch (err) {
       const errorMsg = this.extractError(err);
-      return { ok: false, error: errorMsg };
+      return { ok: false, error: errorMsg.message, status: errorMsg.status };
     }
   }
 
   // -------- Helpers --------
-  private extractError(err: unknown): string {
+  private extractError(err: unknown): { message: string; status?: number } {
     if (axios.isAxiosError(err)) {
-      return err.response?.data?.message || err.message || "API Error";
+      return {
+        message: err.response?.data?.message || err.message || "API Error",
+        status: err.response?.status,
+      };
     }
-    if (err instanceof Error) return err.message;
-    return "Unknown error";
+    if (err instanceof Error) return { message: err.message, status: 400 };
+    return { message: "Unknown error", status: 500 };
   }
+
   private validateDataForWriteRequest<TData = undefined>(
     method: HttpMethod,
     data: TData,
