@@ -1,0 +1,10 @@
+services:
+  frontend-prod:
+    image: ghcr.io/devonsre/meetsession/frontend:staging-latest
+    build:
+      context: .
+      dockerfile: docker/staging/Dockerfile
+    # image: frontend-prod
+    ports:
+      - "3000:3000"
+    restart: on-failure:3

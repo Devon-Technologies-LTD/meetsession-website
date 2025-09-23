@@ -1,0 +1,31 @@
+name: Cleanup Old GHCR Images
+
+on:
+  schedule:
+    - cron: "0 3 * * 0"   # Runs every Sunday at 3AM UTC
+  workflow_dispatch:       # Allow manual runs from GitHub UI
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete old staging/preprod images
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: "frontend"
+          package-type: "container"
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: false
+          # keep all prod-* tags, so staging-* and preprod-* can be deleted
+          ignore-versions: "^prod-.*"
+          token: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Delete untagged images (dangling)
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: "frontend"
+          package-type: "container"
+          min-versions-to-keep: 0
+          delete-only-untagged-versions: true
+          token: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}

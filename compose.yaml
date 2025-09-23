@@ -1,0 +1,14 @@
+services:
+  frontend-dev:
+    image: ghcr.io/devonsre/meetsession/frontend:dev-latest
+    build:
+      context: .
+      dockerfile: docker/development/Dockerfile
+    ports:
+      - "3000:3000"
+    restart: on-failure:3
+    volumes:
+      - .:/app
+      - /app/node_modules # Exclude node_modules from the volume mount (managed inside the container) 
+    env_file:
+      - .env

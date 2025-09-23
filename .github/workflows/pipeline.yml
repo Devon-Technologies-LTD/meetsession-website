@@ -1,0 +1,246 @@
+name: JudicAI Frontend V2 API Pipeline
+
+on:
+    push:
+        branches: 
+            - "preprod"   # Preproduction
+            - "stage"         # Staging
+            
+    pull_request:
+        types: 
+            - closed
+        branches: 
+            - "production"      # Production
+
+jobs:
+    staging-deploy:
+      name: Deploy changes to staging server
+      runs-on: ubuntu-latest
+      if: ${{ github.ref == 'refs/heads/stage' }}
+
+      steps:
+        # 1. Checkout repository
+        - name: Check out repository
+          uses: actions/checkout@v4
+
+        # 2. Set up Node.js (for lint + type-check + tests)
+        - name: Set up Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: 22
+
+        # # 3. Install pnpm
+        # - name: Install pnpm
+        #   run: npm install -g pnpm
+        #
+        # # 4. Install dependencies
+        # - name: Install dependencies
+        #   run: pnpm install --frozen-lockfile
+        #
+        # # 5. Run lint and type-check (fast fail before Docker build)
+        # - name: Run lint and type-check
+        #   run: |
+        #     pnpm build
+
+        # 6. Log in to GitHub Container Registry
+        - name: Log in to GitHub Container Registry
+          uses: docker/login-action@v3
+          with:
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+
+        # 7. Build and push Docker image
+        - name: Build and push Docker image
+          run: |
+            IMAGE_NAME=$(echo "ghcr.io/${{ github.repository }}/frontend" | tr '[:upper:]' '[:lower:]')
+            IMAGE_TAG=staging-${{ github.sha }}
+            IMAGE_ENV=staging
+
+            echo "Building image $IMAGE_NAME:$IMAGE_TAG"
+            docker build -t $IMAGE_NAME:$IMAGE_TAG -f docker/$IMAGE_ENV/Dockerfile .
+            docker push $IMAGE_NAME:$IMAGE_TAG
+
+            echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+            echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+            # echo "IMAGE_ENV=$IMAGE_ENV" >> $GITHUB_ENV
+
+        # 8. Deploy on VPS
+        - name: Deploy via SSH and Docker Compose
+          uses: appleboy/ssh-action@v1.2.0
+          with:
+            host: ${{ secrets.DC_STAGING_1_HOST }}
+            username: ${{ secrets.DC_STAGING_1_USER }}
+            password: ${{ secrets.DC_STAGING_1_PASS }}
+            port: ${{ secrets.PORT }}
+            script: |
+              set -e
+              APP_DIR="/opt/products/fe-staging/LSP/judicai-v2"
+              IMAGE_NAME=${{ env.IMAGE_NAME }}
+              IMAGE_TAG=${{ env.IMAGE_TAG }}
+              GHCR_PAT=${{ env.GHCR_PAT }}
+
+              mkdir -p $APP_DIR
+              cd $APP_DIR
+
+              # Create/update compose.yml if needed
+              if [ -f compose.yml ]; then
+                echo "Updating compose file..."
+              else
+                echo "Creating compose file..."
+              fi
+              cat > compose.yml <<EOF
+              services:
+                web:
+                  build:
+                    platforms:
+                      - linux/amd64
+                      - linux/arm64
+                  image: $IMAGE_NAME:$IMAGE_TAG
+                  ports:
+                    - "3000:3000"
+                  restart: unless-stopped
+                  env_file:
+                    - .env
+              EOF
+
+              # Pull new image and start container
+              echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+              docker compose pull
+              docker compose -f compose.yml up -d
+
+
+    preproduction-deploy:
+        name: Deploy changes to preproduction server
+        runs-on: ubuntu-latest
+
+        if: ${{ github.ref == 'refs/heads/preproduction' }}
+        steps:
+          - name: Check out repository
+            uses: actions/checkout@v3
+
+          - name: Set up Node.js
+            uses: actions/setup-node@v3
+            with:
+              node-version: 22
+
+          - name: Install pnpm
+            run: npm i -g pnpm
+
+          - name: Install dependencies and build project
+            run: |
+              pnpm install
+              pnpm build
+              mkdir -p build
+              mkdir -p build/.next/static
+              mkdir -p build/public
+              cp -r public/* ./build/public
+              cp -r .next/standalone/* ./build/
+              cp -r .next/standalone/.next/* ./build/.next
+              cp -r .next/static/* ./build/.next/static
+
+          - name: Upload to VPS
+            uses: appleboy/scp-action@v0.1.7
+            with:
+              host: ${{secrets.DC_STAGING_1_HOST}}
+              username: ${{secrets.DC_STAGING_1_USER}}
+              password: ${{secrets.DC_STAGING_1_PASS}}
+              source: ./build/
+              target: /opt/products/fe-preproduction/LSP/fe-build/
+
+          - name: Run build
+            uses: appleboy/ssh-action@v1.2.0
+            with:
+              host: ${{secrets.DC_STAGING_1_HOST}}
+              username: ${{secrets.DC_STAGING_1_USER}}
+              password: ${{secrets.DC_STAGING_1_PASS}}
+              port: ${{ secrets.PORT }}
+              script: |
+                cd /opt/products/fe-preproduction/LSP/fe-build/build/
+                pwd
+                pm2 restart fe-lsp-preprod
+                pm2 save
+
+
+    production-deploy:
+      name: Deploy changes to staging server
+      runs-on: ubuntu-latest
+      if: ${{ github.ref == 'refs/heads/production' }}
+
+      steps:
+        # 1. Checkout repository
+        - name: Check out repository
+          uses: actions/checkout@v4
+
+        # 2. Set up Node.js (for lint + type-check + tests)
+        - name: Set up Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: 24
+
+        # 3. Log in to GitHub Container Registry
+        - name: Log in to GitHub Container Registry
+          uses: docker/login-action@v3
+          with:
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GHCR_PAT != '' && secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+
+        # 4. Build and push Docker image
+        - name: Build and push Docker image
+          run: |
+            IMAGE_NAME=$(echo "ghcr.io/${{ github.actor }}/meetsession/frontend" | tr '[:upper:]' '[:lower:]')
+            IMAGE_TAG=staging-${{ github.sha }}
+            IMAGE_ENV=staging
+
+            echo "Building image $IMAGE_NAME:$IMAGE_TAG"
+            docker build -t $IMAGE_NAME:$IMAGE_TAG -f docker/$IMAGE_ENV/Dockerfile .
+            docker push $IMAGE_NAME:$IMAGE_TAG
+
+            echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+            echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+            # echo "IMAGE_ENV=$IMAGE_ENV" >> $GITHUB_ENV
+
+        # 5. Deploy on VPS
+        - name: Deploy via SSH and Docker Compose
+          uses: appleboy/ssh-action@v1.2.0
+          with:
+            host: ${{ secrets.MS_PROD_HOST }}
+            username: ${{ secrets.MS_PROD_USER }}
+            password: ${{ secrets.MS_PROD_PASS }}
+            port: ${{ secrets.PORT }}
+            script: |
+              set -e
+              APP_DIR="/opt/products/meetsession/fe-production"
+              IMAGE_NAME=${{ env.IMAGE_NAME }}
+              IMAGE_TAG=${{ env.IMAGE_TAG }}
+              GHCR_PAT=${{ env.GHCR_PAT }}
+
+              mkdir -p $APP_DIR
+              cd $APP_DIR
+
+              # Create/update compose.yml if needed
+              if [ -f compose.yml ]; then
+                echo "Updating compose file..."
+              else
+                echo "Creating compose file..."
+              fi
+              cat > compose.yml <<EOF
+              services:
+                web:
+                  build:
+                    platforms:
+                      - linux/amd64
+                      - linux/arm64
+                  image: $IMAGE_NAME:$IMAGE_TAG
+                  ports:
+                    - "3000:3000"
+                  restart: unless-stopped
+                  env_file:
+                    - .env
+              EOF
+
+              # Pull new image and start container
+              echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+              docker compose pull
+              docker compose -f compose.yml up -d
