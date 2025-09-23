@@ -6,5 +6,5 @@ services:
       dockerfile: docker/production/Dockerfile
     # image: frontend-prod
     ports:
-      - "3002:3000"
+      - "3123:3000"
     restart: on-failure:3
