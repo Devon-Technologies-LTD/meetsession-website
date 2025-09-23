@@ -1,0 +1,10 @@
+services:
+  frontend-preprod:
+    image: ghcr.io/devonsre/meetsession/frontend:preprod-latest
+    build:
+      context: .
+      dockerfile: docker/preprod/Dockerfile
+    # image: frontend-prod
+    ports:
+      - "3001:3000"
+    restart: on-failure:3
