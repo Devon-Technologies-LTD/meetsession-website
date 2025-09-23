@@ -1,4 +1,4 @@
-name: JudicAI Frontend V2 API Pipeline
+name: MeetSession Frontend Pipeline
 
 on:
     push:
