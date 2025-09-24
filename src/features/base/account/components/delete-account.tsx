@@ -28,7 +28,7 @@ import {
 import { useRef, useState } from "react";
 import { deleteAccountAction } from "../server/actions";
 import { toast } from "sonner";
-import { LoginForm } from "@/components/login-form";
+import { SigninForm } from "@/components/signin";
 import { useRouter } from "next/navigation";
 
 type DeleteAccountProps = {
@@ -287,7 +287,7 @@ function LoginDialog({
             account.
           </DialogDescription>
         </DialogHeader>
-        <LoginForm onSuccessAction={onConfirmLogin} />
+        <SigninForm onSuccessAction={onConfirmLogin} />
       </DialogContent>
     </Dialog>
   );
