@@ -11,7 +11,7 @@ type AuthTokens = {
 interface AuthServiceOptions {
   secret: string; // used for token encryption
   algorithm?: string;
-  cookieNames?: { access?: string; refresh?: string };
+  cookieNames?: { access?: string; refresh?: string; user?: string };
   setCookie?: (
     name: string,
     value: string,
@@ -35,6 +35,7 @@ export function createAuthService(options: AuthServiceOptions) {
   const cookieNames = {
     access: options.cookieNames?.access ?? "access_token",
     refresh: options.cookieNames?.refresh ?? "refresh_token",
+    user: options.cookieNames?.user ?? "user_details",
   };
 
   const key = new TextEncoder().encode(options.secret);
@@ -53,8 +54,8 @@ export function createAuthService(options: AuthServiceOptions) {
   }
 
   // -------- Core Methods --------
-  async function storeTokens(tokens: AuthTokens) {
-    if (!tokens.accessToken) throw new Error("Missing access token");
+  async function storeTokens(data: { user?: TUser; tokens: AuthTokens }) {
+    if (!data.tokens.accessToken) throw new Error("Missing access token");
 
     if (!options.setCookie) {
       throw new Error(
@@ -64,20 +65,29 @@ export function createAuthService(options: AuthServiceOptions) {
 
     const duration = 24 * 60 * 60 * 1000;
 
-    const decryptedToken = decodeToken(tokens.accessToken);
+    const decryptedToken = decodeToken(data.tokens.accessToken);
     const expires = decryptedToken.exp
       ? decryptedToken.exp * 1000
       : new Date(Date.now() + duration);
 
-    const encryptedAccess = await encryptToken(tokens.accessToken);
+    const encryptedAccess = await encryptToken(data.tokens.accessToken);
     await options.setCookie(cookieNames.access, encryptedAccess, { expires });
 
-    if (tokens.refreshToken) {
-      const decryptedToken = decodeToken(tokens.refreshToken);
+    if (data.user) {
+      const encryptedUserDetails = await encryptToken(
+        JSON.stringify(data.user),
+      );
+      await options.setCookie(cookieNames.user, encryptedUserDetails, {
+        expires,
+      });
+    }
+
+    if (data.tokens.refreshToken) {
+      const decryptedToken = decodeToken(data.tokens.refreshToken);
       const expires = decryptedToken.exp
         ? decryptedToken.exp * 1000
         : new Date(Date.now() + duration);
-      const encryptedRefresh = await encryptToken(tokens.refreshToken);
+      const encryptedRefresh = await encryptToken(data.tokens.refreshToken);
       await options.setCookie(cookieNames.refresh, encryptedRefresh, {
         expires,
       });
@@ -108,6 +118,16 @@ export function createAuthService(options: AuthServiceOptions) {
     }
     await options.setCookie(cookieNames.access, "");
     await options.setCookie(cookieNames.refresh, "");
+    await options.setCookie(cookieNames.user, "");
+  }
+
+  async function getUserDetails(): Promise<TUser | null | undefined> {
+    const cookieStore = await cookies();
+    const encrypted = cookieStore.get(cookieNames.user)?.value;
+    if (!encrypted) return null;
+    const user = (await decryptToken(encrypted)) as unknown as string | null;
+    if (!user) return null;
+    return JSON.parse(user);
   }
 
   async function isAccessTokenValid(): Promise<boolean> {
@@ -126,6 +146,7 @@ export function createAuthService(options: AuthServiceOptions) {
 
   return {
     storeTokens,
+    getUserDetails,
     getAccessToken,
     getRefreshToken,
     clearTokens,
