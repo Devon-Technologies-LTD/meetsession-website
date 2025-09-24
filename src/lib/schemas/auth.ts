@@ -1,12 +1,24 @@
 import z from "zod";
 
+// login
 export const loginSchema = z.object({
   email: z.email(),
   password: z.string(),
 });
-
 export type TLogin = z.infer<typeof loginSchema>;
 
+// tokens
+export const tokensSchema = z.string();
+export type TTokens = z.infer<typeof tokensSchema>;
+
+// signup
+export const signupSchema = z.object({
+  email: z.email(),
+  password: z.string(),
+});
+export type TSignup = z.infer<typeof loginSchema>;
+
+// user
 export const userSchema = z.object({
   id: z.string(),
   status: z.string(),
@@ -19,6 +31,3 @@ export const userSchema = z.object({
   app_version: z.string().optional(),
 });
 export type TUser = z.infer<typeof userSchema>;
-
-export const tokensSchema = z.string();
-export type TTokens = z.infer<typeof tokensSchema>;
