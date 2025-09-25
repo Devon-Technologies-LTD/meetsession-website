@@ -49,3 +49,9 @@ export const verifyEmailSchema = z.object({
   otp: z.string().min(6, { error: "OTP must be 6 digits" }),
 });
 export type TVerifyEmail = z.infer<typeof verifyEmailSchema>;
+
+// resend otp
+export const resendOTPSchema = z.object({
+  email: z.email({ error: "Email address is required" }),
+});
+export type TResendOTP = z.infer<typeof resendOTPSchema>;

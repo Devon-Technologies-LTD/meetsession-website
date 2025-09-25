@@ -107,7 +107,7 @@ export function SigninForm({ onSuccessAction: onSuccess }: LoginFormProps) {
         </Form>
 
         <Button
-          variant="brand-blue"
+          variant="brand-green"
           type="submit"
           size="pill"
           className="text-white font-medium py-6 cursor-pointer relative overflow-hidden"
@@ -129,7 +129,6 @@ export function Signin() {
   const router = useRouter();
   // success handler
   function onSuccess() {
-    console.log("Login successful");
     router.push(`/dashboard`);
   }
 
