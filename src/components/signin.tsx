@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { loginSchema, TLogin, TTokens, TUser } from "@/lib/schemas";
+import { loginSchema, TLogin } from "@/lib/schemas";
 import {
   Form,
   FormControl,
@@ -16,20 +16,17 @@ import { Button } from "@/components/ui/button";
 import { loginAction } from "@/server/actions";
 import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
-// import { useRouter } from "next/navigation";
+import { TLoginResponse } from "@/lib/types";
+import { useRouter } from "next/navigation";
+import { Label } from "./ui/label";
+import { PasswordField } from "./ui/password-field";
 
 type LoginFormProps = {
-  onSuccessAction?: (
-    response?: {
-      token: TTokens;
-      user_details: TUser;
-    } | null,
-  ) => void;
+  onSuccessAction?: (response?: TLoginResponse | null) => void;
   onFailedAction?: (error?: Record<string, string>) => void;
 };
-export function LoginForm({ onSuccessAction: onSuccess }: LoginFormProps) {
-  // const router = useRouter();
 
+export function SigninForm({ onSuccessAction: onSuccess }: LoginFormProps) {
   const form = useForm<TLogin>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -61,10 +58,10 @@ export function LoginForm({ onSuccessAction: onSuccess }: LoginFormProps) {
   }
 
   return (
-    <div className="z-10 flex flex-col p-6 justify-center items-center gap-6 w-full h-full text-center">
+    <div className="z-10 flex flex-col justify-center items-center gap-6 w-full h-full text-center">
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="z-10 text-start max-w-2xl w-full [&_button]:placeholder:text-white flex flex-col gap-5"
+        className="z-10 text-start max-w-2xl font-dm-sans w-full [&_button]:placeholder:text-white flex flex-col gap-5"
       >
         <Form {...form}>
           <FormField
@@ -72,11 +69,15 @@ export function LoginForm({ onSuccessAction: onSuccess }: LoginFormProps) {
             name="email"
             render={({ field }) => (
               <FormItem className="w-full">
+                <Label className="font-bold" htmlFor={field.name}>
+                  Email Address
+                </Label>
                 <FormControl>
                   <Input
-                    placeholder="Email (required)"
+                    id={field.name}
+                    placeholder="example@email.com"
+                    className="pill py-6 text-sm md:text-base placeholder:text-gray-300 focus-visible:ring-0"
                     {...field}
-                    className="py-6 text-sm md:text-base placeholder:text-gray-300"
                   />
                 </FormControl>
                 <FormMessage />
@@ -88,12 +89,15 @@ export function LoginForm({ onSuccessAction: onSuccess }: LoginFormProps) {
             name="password"
             render={({ field }) => (
               <FormItem className="w-full">
+                <Label className="font-bold" htmlFor={field.name}>
+                  Password
+                </Label>
                 <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Password (required)"
+                  <PasswordField
+                    id={field.name}
+                    placeholder="*****************"
+                    className="pill py-6 text-sm md:text-base placeholder:text-gray-300"
                     {...field}
-                    className="py-6 text-sm md:text-base placeholder:text-gray-300"
                   />
                 </FormControl>
                 <FormMessage />
@@ -105,7 +109,7 @@ export function LoginForm({ onSuccessAction: onSuccess }: LoginFormProps) {
         <Button
           variant="brand-green"
           type="submit"
-          size="lg"
+          size="pill"
           className="text-white font-medium py-6 cursor-pointer relative overflow-hidden"
           disabled={form.formState.isSubmitting || !form.formState.isValid}
         >
@@ -117,6 +121,27 @@ export function LoginForm({ onSuccessAction: onSuccess }: LoginFormProps) {
           Login
         </Button>
       </form>
+    </div>
+  );
+}
+
+export function Signin() {
+  const router = useRouter();
+  // success handler
+  function onSuccess() {
+    router.push(`/dashboard`);
+  }
+
+  // error handler
+  function onError(
+    data?: Record<string, string | string[] | undefined> | string,
+  ) {
+    console.log(data);
+  }
+
+  return (
+    <div className="w-full h-full">
+      <SigninForm onSuccessAction={onSuccess} onFailedAction={onError} />
     </div>
   );
 }

@@ -73,6 +73,8 @@
   --color-brand-blue-dark: var(--brand-blue-color-dark);
   --color-brand-blue-midnight: var(--brand-midnight-blue-color);
 
+  --color-brand-sky: var(--brand-sky-color);
+
   --image-noise: var(--bg-noise);
 }
 
@@ -124,6 +126,7 @@
   --brand-blue-color-light: rgb(61, 121, 147);
   --brand-blue-color-default: rgb(20, 108, 148);
   --brand-blue-color-dark: rgb(17, 56, 74);
+  --brand-sky-color: rgba(25, 183, 255, 1);
 
   --brand-midnight-blue-color: rgba(0, 31, 45, 1);
 
@@ -284,6 +287,14 @@
     --noise-intensity: 0.3;
     --noise-opacity: 0.7;
   }
+}
+
+@layer components {}
+
+.pill {
+  min-height: 2.5rem;
+  border-radius: 20px;
+  padding: 1.5rem;
 }
 
 @layer base {
