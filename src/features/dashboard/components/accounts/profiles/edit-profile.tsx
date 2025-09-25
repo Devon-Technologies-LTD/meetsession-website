@@ -190,7 +190,6 @@ export function EditProfileForm({
 }
 
 export function EditProfileImage({ imageUrl }: { imageUrl?: string }) {
-  const [file, setFile] = useState<File | undefined>(undefined);
   const [filePreview, setFilePreview] = useState<string | undefined>(imageUrl);
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -213,15 +212,13 @@ export function EditProfileImage({ imageUrl }: { imageUrl?: string }) {
 
   const setPreviewFile = useCallback(
     (file?: File) => {
-      setFile(file);
-
       let url: string;
       if (file) {
         url = URL.createObjectURL(file);
         setFilePreview(url);
       }
     },
-    [file, setFilePreview],
+    [setFilePreview],
   );
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -278,7 +275,6 @@ export function EditProfileImage({ imageUrl }: { imageUrl?: string }) {
                 className="hover:cursor-pointer bg-white shadow-lg p-6 rounded-full"
                 disabled={loading}
                 onClick={() => {
-                  setFile(undefined);
                   setFilePreview(undefined);
                 }}
               >

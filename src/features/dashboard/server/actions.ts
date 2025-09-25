@@ -29,7 +29,6 @@ export async function retrieveProfileAction() {
   });
 
   if (!res.ok) {
-    revalidatePath("/dashboard/accounts/edit");
     return {
       success: res.ok,
       data: null,
@@ -73,6 +72,7 @@ export async function updateProfileAction(formdata: FormData) {
     method: "PATCH",
   });
 
+  revalidatePath("/dashboard/accounts/edit");
   if (!res.ok) {
     return {
       success: res.ok,
@@ -96,8 +96,6 @@ export async function updateProfileAction(formdata: FormData) {
 
 export async function uploadProfileImage(_prev: unknown, formdata: FormData) {
   const data = Object.fromEntries(formdata);
-
-  console.log("clicked", data);
 
   return {
     success: false,

@@ -16,7 +16,7 @@ export function LogoutButton() {
         router.push("/signin");
       }
     }
-  }, [state]);
+  }, [state, router]);
 
   return (
     <form
