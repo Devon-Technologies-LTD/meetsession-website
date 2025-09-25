@@ -64,7 +64,7 @@ function VerifyEmailForm({
       );
     }
   }
-  const [_state, action, loading] = useActionState(onResendOtp, undefined);
+  const [, action, loading] = useActionState(onResendOtp, undefined);
 
   useEffect(() => {
     start();
