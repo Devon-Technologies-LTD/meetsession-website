@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
+  // TODO: handle route management for auth paths
   const { pathname } = request.nextUrl;
   console.log("middleware: ", pathname);
   // Middleware logic goes here

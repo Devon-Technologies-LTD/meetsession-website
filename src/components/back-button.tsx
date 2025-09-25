@@ -25,3 +25,26 @@ export function BackButton({
     </Button>
   );
 }
+
+export function BackAction({
+  href,
+  name,
+  className,
+  ...props
+}: React.ComponentProps<"div"> & { href?: string; name?: string }) {
+  const router = useRouter();
+
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 font-dm-sans text-xl font-bold tracking-tight",
+        className,
+      )}
+      {...props}
+      onClick={() => (href ? router.push(href) : router.back())}
+    >
+      <ChevronLeftIcon />
+      <span>{name ? name : "Back"}</span>
+    </div>
+  );
+}
