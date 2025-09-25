@@ -129,7 +129,7 @@ export function Signin() {
   const router = useRouter();
   // success handler
   function onSuccess() {
-    router.push(`/dashboard`);
+    router.push(`/dashboard/accounts`);
   }
 
   // error handler
