@@ -64,7 +64,7 @@ export const useCountdown = (initialSeconds?: number): UseCountdownReturn => {
   const reset = useCallback(() => {
     setIsRunning(false);
     setTimeLeft(COUNTDOWN_DURATION);
-  }, [initialSeconds, COUNTDOWN_DURATION]);
+  }, [COUNTDOWN_DURATION]);
 
   // Format time as MM:SS
   const formattedTime = useCallback(() => {
