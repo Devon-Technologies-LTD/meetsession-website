@@ -10,7 +10,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
   const isSignup = pathname.startsWith("/signup");
 
   function generateFrom() {
-    return isSignup ? "from-brand-sky/70" : "from-brand-green-light/70";
+    return isSignup ? "from-brand-sky/50" : "from-brand-green-light/50";
   }
 
   return (
