@@ -71,22 +71,24 @@ export async function Management() {
           Subscription & Billing
         </p>
         <Tile className="bg-amber-100/80">
-          <Tile.TileItem
-            prefixIcon={<ManageAccountIcon className="h-6 w-6" />}
-            suffixIcon={<CaretRightIcon className="w-3 h-3" />}
-          >
-            <div className="w-full h-fit flex items-center justify-between gap-2">
-              <div>
-                <p className="text-sm font-semibold">Manage Account</p>
-                <p className="text-xs text-neutral-500">
-                  Manage your subscription
-                </p>
+          <Link href="/dashboard/accounts/plans">
+            <Tile.TileItem
+              prefixIcon={<ManageAccountIcon className="h-6 w-6" />}
+              suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+            >
+              <div className="w-full h-fit flex items-center justify-between gap-2">
+                <div>
+                  <p className="text-sm font-semibold">Manage Account</p>
+                  <p className="text-xs text-neutral-500">
+                    Manage your subscription
+                  </p>
+                </div>
+                <span className="whitespace-nowrap bg-yellow-600 text-white px-2 py-1 rounded-full text-[9px] font-semibold">
+                  Pro Tier
+                </span>
               </div>
-              <span className="whitespace-nowrap bg-yellow-600 text-white px-2 py-1 rounded-full text-[9px] font-semibold">
-                Pro Tier
-              </span>
-            </div>
-          </Tile.TileItem>
+            </Tile.TileItem>
+          </Link>
         </Tile>
       </div>
 
