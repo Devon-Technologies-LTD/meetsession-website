@@ -228,7 +228,8 @@ jobs:
             port: ${{ secrets.PORT }}
             script: |
               set -e
-              APP_DIR="/mnt/production_volume/products/MeetSession-frontend"
+              # APP_DIR="/mnt/production_volume/products/MeetSession-frontend"
+              APP_DIR="/opt/products/meetsession/fe-production"
               IMAGE_NAME=${{ env.IMAGE_NAME }}
               IMAGE_TAG=${{ env.IMAGE_TAG }}
               GHCR_PAT=${{ env.GHCR_PAT }}
@@ -242,7 +243,7 @@ jobs:
               else
                 echo "Creating compose file..."
               fi
-              cat > compose.yml <<EOF
+              echo '${{ secrets.MS_PROD_PASS }}' sudo -S cat > compose.yml <<EOF
               services:
                 web:
                   build:
