@@ -30,6 +30,17 @@ const auth = createAuthService({
 });
 
 // user signin
+export async function signoutAction() {
+  await auth.clearTokens();
+  return {
+    success: true,
+    errors: null,
+    message: "Failed request",
+    data: null,
+  };
+}
+
+// user signin
 export async function loginAction(formdata: FormData) {
   const dirty = Object.fromEntries(formdata);
   const result = loginSchema.safeParse(dirty);
