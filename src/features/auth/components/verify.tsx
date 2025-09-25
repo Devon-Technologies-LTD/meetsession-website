@@ -64,11 +64,11 @@ function VerifyEmailForm({
       );
     }
   }
-  const [_, action, loading] = useActionState(onResendOtp, undefined);
+  const [_state, action, loading] = useActionState(onResendOtp, undefined);
 
   useEffect(() => {
     start();
-  }, []);
+  }, [start]);
 
   async function onSubmit(values: TVerifyEmail) {
     const formdata = new FormData();
@@ -198,7 +198,7 @@ function VerifyEmailForm({
                       <Loader2Icon className="animate-spin w-5 h-5" />
                     </span>
                   )}
-                  Didn't receive OTP? Send again.
+                  Didn&apos;t receive OTP? Send again.
                 </Button>
               </form>
             </div>

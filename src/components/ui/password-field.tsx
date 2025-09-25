@@ -3,6 +3,7 @@
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { Input } from "./input";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export function PasswordField({
   id,
@@ -16,7 +17,10 @@ export function PasswordField({
       <Input
         id={id}
         type={isPassword ? "password" : "text"}
-        className="pill py-6 text-sm md:text-base placeholder:text-gray-300 focus-visible:ring-0"
+        className={cn(
+          "pill py-6 text-sm md:text-base placeholder:text-gray-300 focus-visible:ring-0",
+          className,
+        )}
         {...props}
       />
 
