@@ -242,7 +242,7 @@ jobs:
               else
                 echo "Creating compose file..."
               fi
-              cat > compose.yml <<EOF
+              echo '${{ secrets.MS_PROD_PASS }}' sudo -S cat > compose.yml <<EOF
               services:
                 web:
                   build:
