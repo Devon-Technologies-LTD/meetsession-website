@@ -1,11 +1,30 @@
 import { BackAction } from "@/components/back-button";
 import { FeatureCards } from "@/features/dashboard/components/accounts/plans/feature-cards";
+import { retrievePlansAction } from "@/features/dashboard/lib/server/actions";
 
-export default function Page() {
+export default async function Page() {
+  const plans = await retrievePlansAction({ withFeature: true });
+
   return (
-    <div className="px-2 w-full h-full flex flex-col gap-6">
+    <div className="font-dm-sans px-2 pb-10 w-full h-full flex flex-col gap-8">
       <BackAction name="Back to Account" />
-      <FeatureCards />
+      <div className="w-full h-fit">
+        <p className="text-sm font-medium">
+          Try Out a New Plan. You can always switch back anytime you like
+        </p>
+      </div>
+
+      <div className="flex flex-col w-full gap-10">
+        {plans.success ? (
+          <FeatureCards plans={plans.data.data} />
+        ) : (
+          <p>Error retrieving plans: {plans.errors.toString()}</p>
+        )}
+
+        <p className="max-w-48 md:max-w-full mx-auto text-center text-xs text-neutral-500">
+          &copy; 2025 MeetSession by Devon Technologies Ltd.
+        </p>
+      </div>
     </div>
   );
 }

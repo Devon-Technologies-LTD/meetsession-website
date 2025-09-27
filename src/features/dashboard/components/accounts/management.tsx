@@ -41,105 +41,113 @@ export async function Management() {
         </div>
       </Tile>
 
-      <div className="w-full h-fit flex flex-col gap-4">
-        <p className="text-sm text-neutral-400 font-medium">
-          Profile & Personal
-        </p>
-        <Tile className="bg-neutral-100">
-          <Link href="/dashboard/accounts/edit">
+      <div className="flex flex-col md:flex-row gap-5 items-start w-full h-full min-h-full">
+        <div className="w-full h-fit flex flex-col gap-4">
+          <p className="text-sm text-neutral-400 font-medium">
+            Profile & Personal
+          </p>
+          <Tile className="bg-neutral-100">
+            <Link href="/dashboard/accounts/edit">
+              <Tile.TileItem
+                prefixIcon={<CircleUserRoundIcon className="h-6 w-6" />}
+                suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+              >
+                <p className="text-sm font-semibold">Edit profile</p>
+                <p className="text-xs text-neutral-500">Name, Email, Picture</p>
+              </Tile.TileItem>
+            </Link>
+
             <Tile.TileItem
-              prefixIcon={<CircleUserRoundIcon className="h-6 w-6" />}
+              prefixIcon={<LockKeyholeIcon className="h-6 w-6" />}
               suffixIcon={<CaretRightIcon className="w-3 h-3" />}
             >
-              <p className="text-sm font-semibold">Edit profile</p>
-              <p className="text-xs text-neutral-500">Name, Email, Picture</p>
+              <p className="text-sm font-semibold">Change Password</p>
+              <p className="text-xs text-neutral-500">Update your password</p>
             </Tile.TileItem>
-          </Link>
+          </Tile>
+        </div>
 
-          <Tile.TileItem
-            prefixIcon={<LockKeyholeIcon className="h-6 w-6" />}
-            suffixIcon={<CaretRightIcon className="w-3 h-3" />}
-          >
-            <p className="text-sm font-semibold">Change Password</p>
-            <p className="text-xs text-neutral-500">Update your password</p>
-          </Tile.TileItem>
-        </Tile>
-      </div>
-
-      <div className="w-full h-fit flex flex-col gap-4">
-        <p className="text-sm text-neutral-400 font-medium">
-          Subscription & Billing
-        </p>
-        <Tile className="bg-amber-100/80">
-          <Link href="/dashboard/accounts/plans">
-            <Tile.TileItem
-              prefixIcon={<ManageAccountIcon className="h-6 w-6" />}
-              suffixIcon={<CaretRightIcon className="w-3 h-3" />}
-            >
-              <div className="w-full h-fit flex items-center justify-between gap-2">
-                <div>
-                  <p className="text-sm font-semibold">Manage Account</p>
-                  <p className="text-xs text-neutral-500">
-                    Manage your subscription
-                  </p>
-                </div>
-                <span className="whitespace-nowrap bg-yellow-600 text-white px-2 py-1 rounded-full text-[9px] font-semibold">
-                  Pro Tier
-                </span>
-              </div>
-            </Tile.TileItem>
-          </Link>
-        </Tile>
-      </div>
-
-      <div className="w-full h-fit flex flex-col gap-4">
-        <p className="text-sm text-neutral-400 font-medium">App Preferences</p>
-        <Tile className="bg-neutral-100">
-          <Tile.TileItem
-            prefixIcon={<BellRingIcon className="h-6 w-6" />}
-            suffixIcon={<CaretRightIcon className="w-3 h-3" />}
-          >
-            <div className="w-full h-fit flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold">Notifications</p>
-                <p className="text-xs text-neutral-500">
-                  Pushed notifications enabled
-                </p>
-              </div>
-              <ToggleRightIcon className="h-auto w-5 text-brand-green-light" />
-            </div>
-          </Tile.TileItem>
-        </Tile>
-      </div>
-
-      <div className="w-full h-fit flex flex-col gap-4">
-        <p className="text-sm text-neutral-400 font-medium">
-          Support & Information
-        </p>
-        <Tile className="bg-neutral-100">
-          <Tile.TileItem
-            prefixIcon={<HeadsetIcon className="h-6 w-6" />}
-            suffixIcon={<CaretRightIcon className="w-3 h-3" />}
-          >
-            <p className="text-sm font-semibold">Help & Support</p>
-            <p className="text-xs text-neutral-500">
-              Contact us with questions
+        <div className="flex flex-col gap-5 items-start w-full h-full min-h-full">
+          <div className="w-full h-fit flex flex-col gap-4">
+            <p className="text-sm text-neutral-400 font-medium">
+              Subscription & Billing
             </p>
-          </Tile.TileItem>
-          <Tile.TileItem
-            prefixIcon={<CircleAlertIcon className="h-6 w-6" />}
-            suffixIcon={<CaretRightIcon className="w-3 h-3" />}
-          >
-            <p className="text-sm font-semibold">About MeetSession</p>
-            <p className="text-xs text-neutral-500">Know more about our app</p>
-          </Tile.TileItem>
-          <Tile.TileItem>
-            <div className="p-3.5 rounded-lg bg-neutral-900 text-white flex items-center justify-between">
-              <p className="text-sm font-semibold">Contact Support</p>
-              <CaretRightIcon className="h-3 w-3" />
-            </div>
-          </Tile.TileItem>
-        </Tile>
+            <Tile className="bg-amber-100/80">
+              <Link href="/dashboard/accounts/plans">
+                <Tile.TileItem
+                  prefixIcon={<ManageAccountIcon className="h-6 w-6" />}
+                  suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+                >
+                  <div className="w-full h-fit flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold">Manage Account</p>
+                      <p className="text-xs text-neutral-500">
+                        Manage your subscription
+                      </p>
+                    </div>
+                    <span className="whitespace-nowrap bg-yellow-600 text-white px-2 py-1 rounded-full text-[9px] font-semibold">
+                      Pro Tier
+                    </span>
+                  </div>
+                </Tile.TileItem>
+              </Link>
+            </Tile>
+          </div>
+
+          <div className="w-full h-fit flex flex-col gap-4">
+            <p className="text-sm text-neutral-400 font-medium">
+              App Preferences
+            </p>
+            <Tile className="bg-neutral-100">
+              <Tile.TileItem
+                prefixIcon={<BellRingIcon className="h-6 w-6" />}
+                suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+              >
+                <div className="w-full h-fit flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-semibold">Notifications</p>
+                    <p className="text-xs text-neutral-500">
+                      Pushed notifications enabled
+                    </p>
+                  </div>
+                  <ToggleRightIcon className="h-auto w-5 text-brand-green-light" />
+                </div>
+              </Tile.TileItem>
+            </Tile>
+          </div>
+
+          <div className="w-full h-fit flex flex-col gap-4">
+            <p className="text-sm text-neutral-400 font-medium">
+              Support & Information
+            </p>
+            <Tile className="bg-neutral-100">
+              <Tile.TileItem
+                prefixIcon={<HeadsetIcon className="h-6 w-6" />}
+                suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+              >
+                <p className="text-sm font-semibold">Help & Support</p>
+                <p className="text-xs text-neutral-500">
+                  Contact us with questions
+                </p>
+              </Tile.TileItem>
+              <Tile.TileItem
+                prefixIcon={<CircleAlertIcon className="h-6 w-6" />}
+                suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+              >
+                <p className="text-sm font-semibold">About MeetSession</p>
+                <p className="text-xs text-neutral-500">
+                  Know more about our app
+                </p>
+              </Tile.TileItem>
+              <Tile.TileItem>
+                <div className="p-3.5 rounded-lg bg-neutral-900 text-white flex items-center justify-between">
+                  <p className="text-sm font-semibold">Contact Support</p>
+                  <CaretRightIcon className="h-3 w-3" />
+                </div>
+              </Tile.TileItem>
+            </Tile>
+          </div>
+        </div>
       </div>
 
       <p className="text-muted-foreground text-xs text-center w-full">
