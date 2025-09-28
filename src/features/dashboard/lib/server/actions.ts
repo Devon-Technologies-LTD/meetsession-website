@@ -3,18 +3,14 @@
 import { createApiClient } from "@/lib/api-client";
 import { BASE_URL } from "@/lib/constants";
 import { TSubscriptionPlan } from "@/lib/types";
+import { TQueryParams } from "@/lib/types";
 
 const apiClient = createApiClient({
   baseURL: BASE_URL,
 });
 
-type retrievePlansParams = {
+type retrievePlansParams = TQueryParams & {
   withFeature?: boolean;
-  search?: string;
-  page?: number;
-  limit?: number;
-  sort?: string;
-  order?: string;
 };
 
 export async function retrievePlansAction(params?: retrievePlansParams) {
