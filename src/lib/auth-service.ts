@@ -125,9 +125,9 @@ export function createAuthService(options: AuthServiceOptions) {
     const cookieStore = await cookies();
     const encrypted = cookieStore.get(cookieNames.user)?.value;
     if (!encrypted) return null;
-    const user = (await decryptToken(encrypted)) as unknown as string | null;
+    const user = await decryptToken(encrypted);
     if (!user) return null;
-    return JSON.parse(user);
+    return JSON.parse(user.token);
   }
 
   async function isAccessTokenValid(): Promise<boolean> {
