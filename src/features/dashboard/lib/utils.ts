@@ -1,15 +1,11 @@
-import {
-  // TFeature,
-  TPlanFeature,
-  TSubscriptionPlanFeature,
-} from "@/lib/types";
+import { TFeature, TSubscriptionPlanFeature } from "@/lib/types";
 
 export function retrieveFeatures({
   // features,
   featureOptions,
 }: {
   features?: TSubscriptionPlanFeature[];
-  featureOptions: TPlanFeature[];
+  featureOptions: TFeature[];
 }) {
   const activeFeatures = featureOptions.map((feat) => {
     return {

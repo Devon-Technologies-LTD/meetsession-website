@@ -1,27 +1,7 @@
-import { JSX } from "react";
-import { SVGProps } from "react";
+// import { JSX } from "react";
+// import { SVGProps } from "react";
 
 export type TFeature = { id: number; response: string };
-export type TPlanTheme = "black" | "blue" | "green" | "midnight-blue";
-export type TPlan = {
-  id: number;
-  title: string;
-  description?: string;
-  price: number;
-  features: TFeature[];
-  link: string;
-  isDefault?: boolean;
-  isRecommended?: boolean;
-  themeColor?: TPlanTheme;
-  icon?: (
-    props: SVGProps<SVGSVGElement>,
-  ) => Element | React.ReactNode | JSX.Element;
-};
-export type TPlanFeature = {
-  id: number;
-  detail: string;
-  subDetail?: string;
-};
 
 export type TSubscriptionPlanFeature = {
   key: string;
