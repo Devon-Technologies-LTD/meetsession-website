@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, RefObject, useContext, useRef, useState } from "react";
+import {
+  createContext,
+  RefObject,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+} from "react";
 
 import { TStatus } from "@/features/dashboard/lib/types";
 import { TSubscriptionPlan } from "@/lib/types";
@@ -45,15 +52,21 @@ export function PlanManagementProvider({
     useState<TPaymentDetails | null>(null);
   const paymentStatus = useRef<TStatus>("idle");
 
-  function updateSelectedPlan(plan: TSubscriptionPlan) {
-    setSelectedPlan(plan);
-  }
-  function updatePaymentStatus(status: TStatus) {
+  const updateSelectedPlan = useCallback(
+    (plan: TSubscriptionPlan) => {
+      setSelectedPlan(plan);
+    },
+    [setSelectedPlan],
+  );
+  const updatePaymentStatus = useCallback((status: TStatus) => {
     paymentStatus.current = status;
-  }
-  function updateTransactionDetails(details: TPaymentDetails) {
-    setTransactionDetails(details);
-  }
+  }, []);
+  const updateTransactionDetails = useCallback(
+    (details: TPaymentDetails) => {
+      setTransactionDetails(details);
+    },
+    [setTransactionDetails],
+  );
 
   return (
     <PlanManagementContext.Provider

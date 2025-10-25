@@ -100,7 +100,16 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       updatePaymentStatus("payment_initiated");
       initialize({ planId: plan?.id ?? "" });
     }
-  }, [isFreePlan, plan?.id, hasPaid.current, initialize /*updateStatus*/]);
+  }, [
+    isFreePlan,
+    plan?.id,
+    initialize,
+    plans,
+    router,
+    updatePaymentStatus,
+    updateSelectedPlan,
+    updateTransactionDetails /*updateStatus*/,
+  ]);
 
   // verify effect
   useEffect(() => {
@@ -175,6 +184,11 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   }, [
     initializeState,
     popupPayment,
+    initialize,
+    plan?.id,
+    router,
+    updatePaymentStatus,
+    updateTransactionDetails,
     /*
     onPaymentSuccess,
     onPaymentFailed,
