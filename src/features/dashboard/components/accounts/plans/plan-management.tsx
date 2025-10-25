@@ -1,6 +1,15 @@
 "use client";
 
-import { createContext, RefObject, useContext, useState } from "react";
+import { SuccessIcon } from "@/components/icons/success-icon";
+import { FailIcon } from "@/components/icons/fail-icon";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { AnimatePresence, motion as m } from "motion/react";
 
 import { cn } from "@/lib/utils";
@@ -10,8 +19,7 @@ import {
   CircleChevronDownIcon,
   CircleChevronUpIcon,
   CircleCheckIcon,
-  CheckCircle2Icon,
-  CircleXIcon,
+  Loader2Icon,
 } from "lucide-react";
 import {
   Card,
@@ -24,38 +32,40 @@ import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { TSubscriptionPlan } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import {
+  TPaymentDetails,
+  TPlanManagementContext,
+  TStatus,
+} from "@/features/dashboard/lib/types";
 
-type TPaymentDetails = {
-  transactionId: string;
-  date: string | Date;
-  transactionType: string;
-  planName?: string;
-  amount?: number;
-  status: "successful" | "failed";
-  nextAction?: () => void;
+import { usePaystackPayment } from "@/hooks/use-paystack-payment";
+import { toast } from "sonner";
+import { useUserSubscription } from "@/context/use-user-subscription";
+
+export const paymentThemeEls = (status: TStatus) => {
+  switch (status) {
+    case "not_paying":
+    case "payment_success":
+      return {
+        icon: (
+          <SuccessIcon className="text-brand-green h-24 md:h-28 w-24 md:w-28" />
+        ),
+        textColor: "text-brand-green",
+        bgColor: "bg-brand-green text-white",
+        actionText: "Back to Home",
+      };
+    case "payment_failed":
+    default:
+      return {
+        icon: <FailIcon className="text-red-500 h-24 md:h-28 w-24 md:w-28" />,
+        textColor: "text-red-500",
+        bgColor: "bg-red-500 text-white",
+        actionText: "Try Again",
+      };
+  }
 };
-type TStatus =
-  | "idle"
-  | "not_paying"
-  | "payment_initiated"
-  | "payment_pending"
-  | "payment_success"
-  | "payment_failed";
 
-type PlanManagementContextType = {
-  plans?: TSubscriptionPlan[];
-  status: TStatus;
-  statusRef?: RefObject<TStatus>;
-  selectedId: string;
-  selectedPlan?: TSubscriptionPlan;
-  paymentDetails?: TPaymentDetails;
-
-  clearStates: () => void;
-  updateStatus: (status: TStatus) => void;
-  updatePaymentDetails: (details: TPaymentDetails) => void;
-  updateSelectedId: (id: string) => void;
-};
-const PlanManagementContext = createContext<PlanManagementContextType | null>(
+const PlanManagementContext = createContext<TPlanManagementContext | null>(
   null,
 );
 export const usePlanManagementContext = () => {
@@ -68,11 +78,14 @@ export const usePlanManagementContext = () => {
   return planManagementContext;
 };
 
-type PlanManagementProps = {
+const PlanManagement = ({
+  children,
+  plans,
+}: {
   children?: React.ReactNode;
   plans?: TSubscriptionPlan[];
-};
-const PlanManagement = ({ children, plans }: PlanManagementProps) => {
+}) => {
+  const [localPlans, setLocalPlans] = useState(plans);
   const [paymentDetails, setPaymentDetails] = usePersistentState<
     TPaymentDetails | undefined
   >("plan_payment_details", undefined);
@@ -83,6 +96,9 @@ const PlanManagement = ({ children, plans }: PlanManagementProps) => {
     "plan_status",
     "idle",
   );
+  const updatePlans = useCallback((plans: TSubscriptionPlan[]) => {
+    setLocalPlans(plans);
+  }, []);
   const updateStatus = (status: TStatus) => {
     setStatus(status);
   };
@@ -105,7 +121,7 @@ const PlanManagement = ({ children, plans }: PlanManagementProps) => {
   return (
     <PlanManagementContext.Provider
       value={{
-        plans,
+        plans: localPlans,
         status,
         selectedId,
         selectedPlan,
@@ -115,6 +131,7 @@ const PlanManagement = ({ children, plans }: PlanManagementProps) => {
         updateStatus,
         updateSelectedId,
         updatePaymentDetails,
+        updatePlans,
       }}
     >
       {children}
@@ -127,53 +144,176 @@ export const FeatureCards = () => {
     plans,
     selectedPlan,
     // status,
-
-    clearStates,
-    updateStatus,
-    updatePaymentDetails,
   } = usePlanManagementContext();
+
+  return (
+    <div className="flex flex-col w-full gap-8">
+      <FeatureCardOptions />
+
+      <div className="hidden md:flex gap-2 flex-wrap justify-center">
+        {plans?.map((plan) => {
+          return <FeatureCardItem plan={plan} key={plan.id} />;
+        })}
+      </div>
+
+      <div className="w-full h-full md:hidden">
+        <FeatureCardItem plan={selectedPlan ?? plans?.[0]} />
+      </div>
+    </div>
+  );
+};
+export const FeatureCardItem = ({ plan }: { plan?: TSubscriptionPlan }) => {
+  const { subscription } = useUserSubscription();
   const router = useRouter();
+  const { plans, updateStatus, updatePaymentDetails, clearStates } =
+    usePlanManagementContext();
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
-  const isFreePlan = selectedPlan?.id === plans?.[0].id;
+  const isFreePlan = plan?.id === plans?.[0].id;
 
-  function onPaymentSuccess() {
-    updateStatus("payment_success");
-    updatePaymentDetails({
-      date: new Date(),
-      transactionType: "Credit Card Payment",
-      transactionId: "123456789",
-      amount: selectedPlan?.price_ngn,
-      planName: selectedPlan?.name,
-      status: "successful",
-      nextAction: () => {
-        clearStates();
-        router.push("#"); // open in app
-        // router.push("/dashboard/accounts");
-        console.log("Return home");
-      }, // to return to app
-    });
-  }
-  function onPaymentFailed() {
-    updateStatus("payment_failed");
-    updatePaymentDetails({
-      date: new Date(),
-      transactionType: "Credit Card Payment",
-      transactionId: "123456789",
-      planName: selectedPlan?.name,
-      status: "failed",
-      nextAction: () => planAction(), // to retry transaction
-    });
-  }
-  function planAction() {
+  const { popupPayment, verifyPayment, initializePayment } =
+    usePaystackPayment();
+  const { initialize, initializeState, isInitializing } = initializePayment;
+  const { verifyState, isVerifying } = verifyPayment;
+
+  const hasPaid = useRef(false);
+  const isCurrentPlan = subscription ? subscription.plan_id === plan?.id : null;
+
+  const planAction = useCallback(() => {
     if (isFreePlan) {
       updateStatus("not_paying");
-      onPaymentSuccess();
+      // onPaymentSuccess();
     } else {
       updateStatus("payment_initiated");
-      onPaymentFailed();
+      hasPaid.current = false;
+      console.log({ planId: plan?.id });
+      initialize({ planId: plan?.id ?? "" });
+      // onPaymentFailed();
     }
-  }
+  }, [isFreePlan, plan?.id, hasPaid.current, initialize, updateStatus]);
+
+  const onPaymentSuccess = useCallback(
+    (args?: {
+      date?: Date | string;
+      transactionId?: string;
+      nextAction?: () => void;
+    }) => {
+      toast.success("Payment successful");
+      updateStatus("payment_success");
+      updatePaymentDetails({
+        date: args?.date ?? new Date(),
+        transactionId: args?.transactionId,
+
+        amount: plan?.price_ngn,
+        planName: plan?.name,
+        status: "successful",
+        nextAction:
+          args?.nextAction ??
+          (() => {
+            clearStates();
+            router.push("#"); // open in app
+            // router.push("/dashboard/accounts");
+            console.log("Return home");
+          }), // to return to app
+      });
+    },
+    [
+      clearStates,
+      plan?.price_ngn,
+      plan?.name,
+      router,
+      updatePaymentDetails,
+      updateStatus,
+    ],
+  );
+
+  const onPaymentFailed = useCallback(
+    (args?: {
+      errMsg?: string;
+      date?: Date | string;
+      transactionId?: string;
+    }) => {
+      toast.error("Payment failed", {
+        description: args?.errMsg,
+        action: <Button onClick={() => planAction()}>Retry</Button>,
+        duration: 8000,
+      });
+      updateStatus("payment_failed");
+      updatePaymentDetails({
+        date: new Date(),
+        transactionId: "123456789",
+        planName: plan?.name,
+        status: "failed",
+        nextAction: () => planAction(), // to retry transaction
+      });
+    },
+    [plan?.name, planAction, updatePaymentDetails, updateStatus],
+  );
+
+  // init and payment effect
+  useEffect(() => {
+    if (initializeState && !hasPaid.current) {
+      if (initializeState.success) {
+        toast.success("Payment initialized");
+        console.dir({ initData: initializeState.data.data }, { depth: 20 });
+        // make payment
+        popupPayment({
+          access_code: initializeState.data.data.access_code,
+          callbacks: {
+            onSuccess: (res) => {
+              hasPaid.current = true;
+              console.log({ res });
+              onPaymentSuccess({
+                transactionId: res?.trans,
+                date: new Date(),
+              });
+              router.push(`/dashboard/accounts/plans/status?status=success`);
+            },
+            onError: (err) => {
+              onPaymentFailed({ errMsg: err?.message });
+              hasPaid.current = true;
+              router.push(`/dashboard/accounts/plans/status?status=error`);
+            },
+            onCancel: () => {},
+          },
+        });
+      }
+      if (!initializeState.success) {
+        updateStatus("idle"); // reset status
+        toast.error(initializeState.message, {
+          description:
+            typeof initializeState.errors === "string"
+              ? initializeState.errors
+              : initializeState.errors.plan_id,
+        });
+        console.log(
+          "ini state: ",
+          initializeState.errors,
+          initializeState.message,
+        );
+      }
+    }
+  }, [
+    initializeState,
+    onPaymentSuccess,
+    onPaymentFailed,
+    popupPayment,
+    updateStatus,
+  ]);
+
+  // verify effect
+  useEffect(() => {
+    if (verifyState) {
+      if (verifyState.success) {
+        // onPaymentSuccess();
+      }
+      if (!verifyState.success) {
+        onPaymentFailed();
+      }
+    }
+  }, [verifyState, onPaymentFailed]);
+
+  if (!plan) return null;
 
   function renderActionButton() {
     return (
@@ -181,17 +321,21 @@ export const FeatureCards = () => {
         onClick={planAction}
         size="pill"
         variant="default"
-        className="h-14 w-full"
+        className="h-14 w-full relative overflow-hidden disabled:pointer-events-none"
+        disabled={isCurrentPlan || isInitializing || isVerifying}
       >
+        {(isInitializing || isVerifying) && (
+          <span className="absolute top-0 left-0 pointer-events-none bg-inherit h-full w-full flex items-center justify-center">
+            <Loader2Icon className="animate-spin h-5 w-5" />
+          </span>
+        )}
         {isFreePlan ? "Select Plan" : "Proceed to Payment"}
       </Button>
     );
   }
 
   return (
-    <div className="flex flex-col w-full gap-8">
-      <FeatureCardOptions />
-
+    <m.div layout className="min-w-full md:min-w-xs w-xs flex flex-col gap-3">
       <Card
         className={cn(
           "border-black shadow-none bg-neutral-100",
@@ -206,20 +350,22 @@ export const FeatureCards = () => {
           onClick={() => setIsCollapsed((prev) => !prev)}
         >
           <div className="w-full h-fit flex flex-col gap-2">
-            <CardTitle className="font-normal">{selectedPlan?.name}</CardTitle>
+            <CardTitle className="font-normal">{plan?.name}</CardTitle>
             <CardDescription className="flex items-center w-fit justify-center gap-2">
               <span className="font-bold text-neutral-800 text-xl tracking-tighter">
-                ₦{selectedPlan?.price_ngn.toLocaleString()}
+                ₦{plan?.price_ngn.toLocaleString()}
               </span>
 
-              <span
-                className={cn(
-                  "font-medium text-white text-xs py-0.5 px-1.5",
-                  "bg-brand-green rounded-full whitespace-nowrap",
-                )}
-              >
-                Current plan
-              </span>
+              {isCurrentPlan && (
+                <span
+                  className={cn(
+                    "font-medium text-white text-xs py-0.5 px-1.5",
+                    "bg-brand-green rounded-full whitespace-nowrap",
+                  )}
+                >
+                  Current plan
+                </span>
+              )}
             </CardDescription>
           </div>
 
@@ -267,11 +413,11 @@ export const FeatureCards = () => {
               </div>
 
               <p className="min-h-fit font-semibold">
-                {selectedPlan?.meeting_hours}hrs
+                {plan?.meeting_hours}hrs
               </p>
             </div>
 
-            {selectedPlan?.features?.map((feat, index) => {
+            {plan?.features?.map((feat, index) => {
               if (index === 0) {
                 return null;
               }
@@ -293,7 +439,7 @@ export const FeatureCards = () => {
         </m.div>
       </Card>
       <div className="md:hidden">{renderActionButton()}</div>
-    </div>
+    </m.div>
   );
 };
 export const FeatureCardOptions = () => {
@@ -301,7 +447,7 @@ export const FeatureCardOptions = () => {
   if (!plans || plans.length < 1) return null;
 
   return (
-    <div className="flex md:hidden items-center justify-between gap-2.5 w-full">
+    <div className="flex md:hidden items-center justify-between sm:justify-center gap-2.5 w-full">
       {plans
         .map((p) => ({ id: p.id, title: p.name }))
         .map((plan) => {
@@ -334,30 +480,16 @@ export const FeatureCardOptions = () => {
     </div>
   );
 };
-export const PaymentStatusReport = () => {
-  const { paymentDetails, status } = usePlanManagementContext();
-
-  function paymentThemeEls(status: TStatus) {
-    switch (status) {
-      case "not_paying":
-      case "payment_success":
-        return {
-          icon: <CheckCircle2Icon className="text-brand-green h-32 w-32" />,
-          textColor: "text-brand-green",
-          bgColor: "bg-brand-green text-white",
-          actionText: "Back to Home",
-        };
-      case "payment_failed":
-      default:
-        return {
-          icon: <CircleXIcon className="text-red-500 h-32 w-32" />,
-          textColor: "text-red-500",
-          bgColor: "bg-red-500 text-white",
-          actionText: "Try Again",
-        };
-    }
-  }
-
+const PaymentStatusReportWrapper = ({
+  status,
+  renderAction,
+  renderMessage,
+}: {
+  status: TStatus;
+  renderMessage: React.ReactNode;
+  renderAction: React.ReactNode;
+}) => {
+  const { paymentDetails } = usePlanManagementContext();
   function renderPaymentDetails() {
     return (
       <div className="w-full flex flex-col gap-3.5">
@@ -370,13 +502,13 @@ export const PaymentStatusReport = () => {
 
           <div className="w-full flex items-center justify-between">
             <p>Date</p>
-            <p>{paymentDetails?.date.toLocaleString()}</p>
+            <p>{paymentDetails?.date?.toLocaleString()}</p>
           </div>
 
-          <div className="w-full flex items-center justify-between">
+          {/*<div className="w-full flex items-center justify-between">
             <p>Type of Transaction</p>
             <p>{paymentDetails?.transactionType}</p>
-          </div>
+          </div>*/}
 
           <div className="w-full flex items-center justify-between">
             <p>Plan</p>
@@ -392,6 +524,7 @@ export const PaymentStatusReport = () => {
 
           <div className="w-full flex items-center justify-between">
             <p>Status</p>
+
             <p className={cn(paymentThemeEls(status).textColor, "capitalize")}>
               {paymentDetails?.status}
             </p>
@@ -401,18 +534,45 @@ export const PaymentStatusReport = () => {
     );
   }
 
-  function renderSuccess() {
-    return (
+  return (
+    <div
+      className={cn(
+        "w-full h-full min-w-full bg-white",
+        "fixed top-0 left-0 right-0 bottom-0",
+        "flex items-center justify-center",
+      )}
+    >
       <div
         className={cn(
-          "bg-white h-full w-full px-4 py-14",
-          "fixed top-0 left-0 right-0 bottom-0",
+          "h-fit w-full max-w-full md:max-w-3xl px-4 py-14",
           "flex flex-col gap-8 items-center",
+          "mx-auto",
         )}
       >
         <div className="w-fit h-fit flex flex-col gap-5 items-center">
           {paymentThemeEls(status).icon}
           <div className="w-full h-fit flex flex-col items-center gap-2">
+            {renderMessage}
+          </div>
+        </div>
+
+        {renderPaymentDetails()}
+
+        {renderAction}
+      </div>
+    </div>
+  );
+};
+
+export const PaymentStatusReport = () => {
+  const { paymentDetails, status } = usePlanManagementContext();
+
+  function renderSuccess() {
+    return (
+      <PaymentStatusReportWrapper
+        status={status}
+        renderMessage={
+          <>
             <p className="font-bold text-2xl">
               Plan Updated{" "}
               <span className={cn(paymentThemeEls(status).textColor)}>
@@ -423,34 +583,27 @@ export const PaymentStatusReport = () => {
               Your payment for the underlisted plan was successful. Enjoy full
               access to the selected plan.
             </p>
-          </div>
-        </div>
-
-        {renderPaymentDetails()}
-
-        <Button
-          size="pill"
-          variant="brand-green"
-          onClick={() => paymentDetails?.nextAction?.()}
-          className={cn("h-14 w-full", paymentThemeEls(status).bgColor)}
-        >
-          {paymentThemeEls(status).actionText}
-        </Button>
-      </div>
+          </>
+        }
+        renderAction={
+          <Button
+            size="pill"
+            variant="brand-green"
+            onClick={() => paymentDetails?.nextAction?.()}
+            className={cn("h-14 w-full", paymentThemeEls(status).bgColor)}
+          >
+            {paymentThemeEls(status).actionText}
+          </Button>
+        }
+      />
     );
   }
   function renderFailed() {
     return (
-      <div
-        className={cn(
-          "bg-white h-full w-full px-4 py-14",
-          "fixed top-0 left-0 right-0 bottom-0",
-          "flex flex-col gap-8 items-center",
-        )}
-      >
-        <div className="w-fit h-fit flex flex-col gap-5 items-center">
-          {paymentThemeEls(status).icon}
-          <div className="w-full h-fit flex flex-col items-center gap-2">
+      <PaymentStatusReportWrapper
+        status={status}
+        renderMessage={
+          <>
             <p className="font-bold text-2xl">
               Payment{" "}
               <span className={cn(paymentThemeEls(status).textColor)}>
@@ -461,19 +614,18 @@ export const PaymentStatusReport = () => {
               Your payment for the underlisted plan has failed. Please try
               again.
             </p>
-          </div>
-        </div>
-
-        {renderPaymentDetails()}
-
-        <Button
-          size="pill"
-          onClick={() => paymentDetails?.nextAction?.()}
-          className={cn("h-14 w-full", paymentThemeEls(status).bgColor)}
-        >
-          {paymentThemeEls(status).actionText}
-        </Button>
-      </div>
+          </>
+        }
+        renderAction={
+          <Button
+            size="pill"
+            onClick={() => paymentDetails?.nextAction?.()}
+            className={cn("h-14 w-full", paymentThemeEls(status).bgColor)}
+          >
+            {paymentThemeEls(status).actionText}
+          </Button>
+        }
+      />
     );
   }
 
@@ -491,7 +643,25 @@ export const PaymentStatusReport = () => {
   }
 };
 
+export const PlanManagementWrapper = ({
+  plans,
+}: {
+  plans?: TSubscriptionPlan[];
+}) => {
+  const { updatePlans } = usePlanManagementContext();
+  if (plans) {
+    updatePlans(plans);
+  }
+  return (
+    <>
+      <FeatureCards />
+      <PaymentStatusReport />
+    </>
+  );
+};
+
 PlanManagement.FeatureCards = FeatureCards;
+PlanManagement.FeatureCardItem = FeatureCardItem;
 PlanManagement.FeatureCardOptions = FeatureCardOptions;
 PlanManagement.PaymentStatusReport = PaymentStatusReport;
 

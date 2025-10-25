@@ -1,9 +1,5 @@
 import { BackAction } from "@/components/back-button";
-import {
-  PlanManagement,
-  FeatureCards,
-  PaymentStatusReport,
-} from "@/features/dashboard/components/accounts/plans/plan-management";
+import { PlanUI } from "@/features/dashboard/components/accounts/plans/plan-ui";
 import { retrievePlansAction } from "@/features/dashboard/lib/server/actions";
 
 export default async function Page() {
@@ -19,10 +15,7 @@ export default async function Page() {
       </div>
 
       <div className="flex flex-col w-full gap-10">
-        <PlanManagement plans={plans.data?.data}>
-          <FeatureCards />
-          <PaymentStatusReport />
-        </PlanManagement>
+        <PlanUI plans={plans?.data?.data} />
 
         <p className="max-w-48 md:max-w-full mx-auto text-center text-xs text-neutral-500">
           &copy; 2025 MeetSession by Devon Technologies Ltd.

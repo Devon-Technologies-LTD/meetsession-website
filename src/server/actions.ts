@@ -2,10 +2,12 @@
 
 import z from "zod";
 import {
+  initiatePaymentSchema,
   loginSchema,
   resendOTPSchema,
   signupSchema,
   verifyEmailSchema,
+  verifyPaymentSchema,
 } from "@/lib/schemas";
 import { createApiClient } from "@/lib/api-client";
 import { BASE_URL } from "@/lib/constants";
@@ -18,6 +20,10 @@ import {
   TResentOTPResponse,
   TVerifyTokenResponse,
 } from "@/lib/types";
+import {
+  TPaymentInitResponse,
+  TPaymnetVerifyResponse,
+} from "@/features/dashboard/lib/types";
 
 const apiClient = createApiClient({
   baseURL: BASE_URL,
@@ -203,8 +209,88 @@ export async function resentOTPAction(formdata: FormData) {
   }
 }
 
-// TODO: implement actions for the following
-/*
- *
- *
- */
+export async function initializePaymentAction(
+  _prev: unknown,
+  formdata: FormData,
+) {
+  const dirty = Object.fromEntries(formdata);
+  const result = initiatePaymentSchema.safeParse(dirty);
+  if (!result.success) {
+    const errs = z.flattenError(result.error).fieldErrors;
+    const clientErr: {
+      success: false;
+      message: string;
+      errors: { plan_id?: string[] };
+      data: null;
+      initialData: {
+        [k: string]: FormDataEntryValue;
+      };
+    } = {
+      success: false,
+      message: result.error.message,
+      errors: { plan_id: errs.plan_id ?? undefined },
+      data: null,
+      initialData: dirty,
+    };
+    return clientErr;
+  }
+
+  const res = await apiClient.authenticated<TPaymentInitResponse>(
+    `/subscriptions/initiate-payment/${result.data.plan_id}`,
+    {
+      method: "GET",
+    },
+  );
+  if (!res.ok) {
+    return {
+      success: res.ok,
+      errors: res.error,
+      message: "Failed request",
+      data: null,
+    };
+  } else {
+    return {
+      success: res.ok,
+      data: res.data,
+      errors: null,
+      message: "Successful request",
+    };
+  }
+}
+
+export async function verifyPaymentAction(_prev: unknown, formdata: FormData) {
+  const dirty = Object.fromEntries(formdata);
+  const result = verifyPaymentSchema.safeParse(dirty);
+  if (!result.success) {
+    const errs = z.flattenError(result.error).fieldErrors;
+    return {
+      success: false,
+      message: result.error.message,
+      errors: errs,
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  const res = await apiClient.authenticated<TPaymnetVerifyResponse>(
+    `/subscriptions/verify-payment/${result.data.reference}`,
+    {
+      method: "GET",
+    },
+  );
+  if (!res.ok) {
+    return {
+      success: res.ok,
+      errors: res.error,
+      message: "Failed request",
+      data: null,
+    };
+  } else {
+    return {
+      success: res.ok,
+      data: res.data,
+      errors: null,
+      message: "Successful request",
+    };
+  }
+}
