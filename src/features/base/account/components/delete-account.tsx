@@ -32,9 +32,10 @@ import { LoginForm } from "@/components/login-form";
 
 type DeleteAccountProps = {
   email?: string;
+  token?: string;
 };
 
-export function DeleteAccount({ email }: DeleteAccountProps) {
+export function DeleteAccount({ email, token }: DeleteAccountProps) {
   const [open, setOpen] = useState(false);
   const [openAuth, setOpenAuth] = useState(false);
 
@@ -52,7 +53,6 @@ export function DeleteAccount({ email }: DeleteAccountProps) {
     const formdata = new FormData();
     formdata.append("email", values.email);
     values.reason ? formdata.append("reason", values?.reason) : null;
-
     const res = await deleteAccountAction(formdata);
     if (!res.success) {
       toast.error(res.message, {
@@ -61,6 +61,7 @@ export function DeleteAccount({ email }: DeleteAccountProps) {
             ? res.errors
             : res.errors.email + ", " + res.errors.reason,
       });
+      
       if (
         typeof res.errors === "string" &&
         res.errors.toLowerCase().includes("token")

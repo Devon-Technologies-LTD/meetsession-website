@@ -10,6 +10,7 @@ export default async function Page(props: PageProps) {
   if (token) {
     await auth.storeTokens({ accessToken: token });
   }
+
   return (
     <div className="w-full h-full">
       <DeleteAccount email={email} token={token} />

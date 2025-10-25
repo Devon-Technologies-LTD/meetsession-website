@@ -51,7 +51,7 @@ export function createAuthService(options: AuthServiceOptions) {
     }
   }
 
-  // -------- Core Methods --------
+
   async function storeTokens(tokens: AuthTokens) {
     if (!tokens.accessToken) throw new Error("Missing access token");
 
@@ -115,6 +115,6 @@ export function createAuthService(options: AuthServiceOptions) {
     getRefreshToken,
     clearTokens,
     isAccessTokenValid,
-    isRefreshTokenValid,
+    isRefreshTokenValid
   };
 }
