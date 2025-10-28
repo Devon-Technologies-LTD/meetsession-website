@@ -1,9 +1,8 @@
 import Image from "next/image";
-import { cn, separateCamelCase } from "@/lib/utils";
-
-import { getMetrics } from "../server";
+import { cn } from "@/lib/utils";
 
 import { NoiseElement } from "@/components/noise-element";
+import { Metrics } from "./metrics";
 
 export function MeasureImpact() {
   return (
@@ -18,7 +17,7 @@ export function MeasureImpact() {
     >
       <div className="w-full h-fit z-10 flex flex-col gap-10">
         <div className="flex flex-col gap-2 items-center md:items-start w-full h-fit z-10 text-center md:text-start">
-          <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-dm-sans">
+          <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold font-dm-sans mix-blend-difference">
             Measurable impact in Numbers
           </p>
           <p className="text-base md:text-lg max-w-full sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl">
@@ -34,7 +33,7 @@ export function MeasureImpact() {
         className={cn(
           "hidden md:block",
           "w-32 sm:w-64 md:w-96 lg:w-124 xl:w-172 h-auto",
-          "absolute top-1/2 -translate-y-1/2 right-0 z-10",
+          "absolute top-1/2 -translate-y-1/2 right-0 z-0",
           "after:absolute after:-top-10 lg:after:top-0 after:-right-44",
           "md:after:h-124 lg:after:h-154 xl:after:h-196",
           "md:after:w-124 lg:after:w-154 xl:after:w-196",
@@ -105,42 +104,5 @@ export function MeasureImpact() {
         ></div>
       </NoiseElement>
     </section>
-  );
-}
-
-async function Metrics() {
-  const metrics = await getMetrics();
-  if (!metrics.success || !metrics.data) {
-    return <p className="text-white text-sm italic">No analytics founds</p>;
-  }
-  const arr: { id: number; value: number; description: string }[] = [];
-  Object.entries(metrics.data).forEach(([key, val], i) => {
-    arr.push({ value: val, description: key, id: i + 1 });
-  });
-  return (
-    <div className="w-full md:w-fit h-fit gap-3.5 sm:gap-4 md:gap-5 lg:gap-6 flex flex-wrap items-center md:items-start justify-center">
-      {arr.map((itr) => (
-        <div
-          key={itr.id}
-          className="p-px rounded-xl bg-linear-to-b from-brand-blue to-brand-green"
-        >
-          <div className="w-full h-full rounded-xl bg-brand-black">
-            <div
-              className={cn(
-                "min-w-32 md:min-w-44 w-fit min-h-20 h-fit rounded-xl bg-linear-to-r from-white/10 to-transparent",
-                "p-2 sm:p-3 md:p-5 lg:p-6 flex flex-col gap-1 sm:gap-2 md:gap-3 items-center justify-center",
-              )}
-            >
-              <p className="text-4xl font-dm-sans font-black text-white text-center">
-                {itr.value}+
-              </p>
-              <p className="text-xs md:text-sm lg:text-base">
-                {separateCamelCase(itr.description)}
-              </p>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
   );
 }

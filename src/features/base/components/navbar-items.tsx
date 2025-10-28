@@ -128,9 +128,9 @@ export function NavbarItemsMobile({ navItems }: NavbarItemsProps) {
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Link href={item.link}>
-                          <span className={cn("relative z-10")}>
-                            {item.render}
-                          </span>
+                          <div className={cn("relative z-10")}>
+                            {item.render ? item.render : item.label}
+                          </div>
                         </Link>
                       </li>
                     );

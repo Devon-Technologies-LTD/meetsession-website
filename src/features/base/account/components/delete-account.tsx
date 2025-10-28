@@ -28,7 +28,8 @@ import {
 import { useRef, useState } from "react";
 import { deleteAccountAction } from "../server/actions";
 import { toast } from "sonner";
-import { LoginForm } from "@/components/login-form";
+import { SigninForm } from "@/components/signin";
+import { useRouter } from "next/navigation";
 
 type DeleteAccountProps = {
   email?: string;
@@ -38,6 +39,16 @@ type DeleteAccountProps = {
 export function DeleteAccount({ email, token }: DeleteAccountProps) {
   const [open, setOpen] = useState(false);
   const [openAuth, setOpenAuth] = useState(false);
+  const router = useRouter();
+
+  function setToken(token: string) {
+    fetch(`/api/v1/auth/set-tokens?accessToken=${token}`)
+      .then((res) => res.json())
+      .catch((err) => console.log("set token err: ", err));
+  }
+  if (token) {
+    setToken(token);
+  }
 
   const form = useForm<TDeleteAccount>({
     resolver: zodResolver(deleteAccountSchema),
@@ -52,7 +63,8 @@ export function DeleteAccount({ email, token }: DeleteAccountProps) {
   async function onSubmit(values: TDeleteAccount) {
     const formdata = new FormData();
     formdata.append("email", values.email);
-    values.reason ? formdata.append("reason", values?.reason) : null;
+    formdata.append("reason", values?.reason);
+
     const res = await deleteAccountAction(formdata);
     if (!res.success) {
       toast.error(res.message, {
@@ -64,12 +76,14 @@ export function DeleteAccount({ email, token }: DeleteAccountProps) {
       
       if (
         typeof res.errors === "string" &&
-        res.errors.toLowerCase().includes("token")
+        (res.errors.toLowerCase().includes("token") ||
+          res.errors.toLowerCase().includes("login"))
       ) {
         setOpenAuth(true); // open login dialog
       }
     } else {
       toast.success(res.message);
+      router.push("/");
     }
   }
 
@@ -78,12 +92,19 @@ export function DeleteAccount({ email, token }: DeleteAccountProps) {
     formRef.current?.requestSubmit();
   }
   function onSuccessfullLogin() {
+    // console.log("login data: ", data);
+    // const query = new URLSearchParams(searchParams.toString());
+    // query.set(
+    //   "token",
+    //   (data as { token: string; user_details: Record<string, string> }).token,
+    // );
+    // router.replace(`${pathname}?${query.toString()}`);
     setOpenAuth(false);
   }
 
   return (
-    <div className="w-full h-full bg-brand-black-dark text-white flex flex-col items-center justify-center">
-      <div className="flex flex-col items-start gap-8 w-fit">
+    <div className="w-full h-full min-h-fit px-7 py-14 md:px-10 md:py-20 bg-brand-black-dark text-white flex flex-col items-center justify-center">
+      <div className="flex flex-col items-start gap-4 md:gap-8 w-fit h-fit">
         <div className="flex flex-col items-start justify-start">
           <p className="text-3xl font-bold font-dm-sans">Delete Your Account</p>
           <p className="text-sm md:text-base">
@@ -91,14 +112,14 @@ export function DeleteAccount({ email, token }: DeleteAccountProps) {
           </p>
         </div>
 
-        <div className="flex flex-col gap-5 rounded-xl bg-white max-w-5xl w-full p-10 text-brand-black">
+        <div className="flex flex-col gap-5 rounded-xl bg-white max-w-5xl w-full p-5 md:p-10 text-brand-black">
           <p className="text-2xl font-bold font-dm-sans">
             Confirm Account Deletion
           </p>
 
           <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4 w-full h-fit"
+            className="flex flex-col gap-4 w-full h-full"
             ref={formRef}
           >
             <Form {...form}>
@@ -125,12 +146,12 @@ export function DeleteAccount({ email, token }: DeleteAccountProps) {
                 name="reason"
                 render={({ field }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Reason for Deletion (Optional)</FormLabel>
+                    <FormLabel>Reason for Deletion</FormLabel>
                     <FormControl>
                       <textarea
-                        {...field}
                         className="py-2 px-4 rounded-md border border-border text-sm"
                         placeholder="Reason for deleting account"
+                        {...field}
                         rows={5}
                       ></textarea>
                     </FormControl>
@@ -199,6 +220,7 @@ type DeleteAccountDialogProps = {
   onSuccess?: () => void;
   onClose?: () => void;
 };
+
 function DeleteAccountDialog({
   open,
   onOpenChange,
@@ -252,19 +274,21 @@ function LoginDialog({
 }: {
   open?: boolean;
   setOpen?: (open: boolean) => void;
-  onSuccess?: () => void;
+  onSuccess?: (data?: unknown) => void;
 }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Login to confirm account deletion</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-4xl font-bold font-dm-sans text-center">
+            Login To Proceed
+          </DialogTitle>
+          <DialogDescription className="text-neutral-700 text-center font-dm-sans">
             To proceed with the account deletion process, please log in to your
             account.
           </DialogDescription>
         </DialogHeader>
-        <LoginForm onSuccessAction={onConfirmLogin} />
+        <SigninForm onSuccessAction={onConfirmLogin} />
       </DialogContent>
     </Dialog>
   );

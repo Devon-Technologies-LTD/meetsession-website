@@ -73,6 +73,8 @@
   --color-brand-blue-dark: var(--brand-blue-color-dark);
   --color-brand-blue-midnight: var(--brand-midnight-blue-color);
 
+  --color-brand-sky: var(--brand-sky-color);
+
   --image-noise: var(--bg-noise);
 }
 
@@ -124,6 +126,7 @@
   --brand-blue-color-light: rgb(61, 121, 147);
   --brand-blue-color-default: rgb(20, 108, 148);
   --brand-blue-color-dark: rgb(17, 56, 74);
+  --brand-sky-color: rgba(25, 183, 255, 1);
 
   --brand-midnight-blue-color: rgba(0, 31, 45, 1);
 
@@ -133,7 +136,6 @@
   --brand-black-color-light: rgb(48, 48, 48);
   --brand-black-color-default: rgb(0, 22, 31);
   --brand-black-color-dark: rgb(0, 0, 0);
-
 
   --bg-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
 }
@@ -284,6 +286,14 @@
     --noise-intensity: 0.3;
     --noise-opacity: 0.7;
   }
+}
+
+@layer components {}
+
+.pill {
+  min-height: 2.5rem;
+  border-radius: 20px;
+  padding: 1.5rem;
 }
 
 @layer base {

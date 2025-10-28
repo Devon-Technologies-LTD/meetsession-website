@@ -1,7 +1,8 @@
 import { AppleStoreLogo } from "@/components/icons/apple-store-logo";
 import { PlayStoreLogo } from "@/components/icons/play-store-logo";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { DownloadAppButton } from "./download-app-button";
+import { TAppOption } from "../lib/types";
 
 export function DownloadApps() {
   return (
@@ -53,16 +54,7 @@ export function DownloadApps() {
 
           <div className="flex flex-col md:flex-row items-center gap-3 md:gap-5 w-full md:w-fit">
             {appOptions.map((option) => {
-              return (
-                <Button
-                  key={option.id}
-                  variant="secondary"
-                  className="text-sm font-medium h-12 px-8 w-full md:w-fit"
-                >
-                  <option.icon />
-                  <span className="text-sm font-medium">{option.title}</span>
-                </Button>
-              );
+              return <DownloadAppButton option={option} key={option.id} />;
             })}
           </div>
         </div>
@@ -71,7 +63,17 @@ export function DownloadApps() {
   );
 }
 
-const appOptions = [
-  { id: 1, icon: AppleStoreLogo, title: "Apple App Store" },
-  { id: 2, icon: PlayStoreLogo, title: "Google Play Store" },
+const appOptions: TAppOption[] = [
+  {
+    id: 1,
+    icon: <AppleStoreLogo />,
+    title: "Apple App Store",
+    link: "https://apps.apple.com/ng/app/meetsession/id6751320453",
+  },
+  {
+    id: 2,
+    icon: <PlayStoreLogo />,
+    title: "Google Play Store",
+    link: "https://play.google.com/store/apps/details?id=com.meet_session.io",
+  },
 ];
