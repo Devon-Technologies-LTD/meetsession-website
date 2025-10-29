@@ -16,6 +16,9 @@ export type TFullUser = {
   last_name: string;
   phone_number: string;
   email: string;
+  password: string;
+  confirm_password: string;
+  new_password: string;
   gender: string;
   date_of_birth: string;
   user_type: TUserType;
