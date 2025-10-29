@@ -8,6 +8,7 @@ import { TProfile, TProfileResponse } from "../lib/types";
 import { createAuthService } from "@/lib/auth-service";
 import { revalidatePath } from "next/cache";
 import z from "zod";
+import { TUserCurrentPlan } from "@/lib/types";
 
 const apiClient = createApiClient({
   baseURL: BASE_URL,
@@ -149,4 +150,31 @@ export async function uploadProfileImage(_prev: unknown, formdata: FormData) {
     };
   }
   */
+}
+
+export async function retrieveSubscriptionAction() {
+  const res = await apiClient.authenticated<{
+    message: string;
+    data: TUserCurrentPlan;
+  }>("/subscriptions/fetch-subscription", {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    return {
+      success: res.ok,
+      data: null,
+      errors: res.error,
+      message: "Failed to retrieve subscription",
+      status: res.status,
+    };
+  } else {
+    return {
+      success: res.ok,
+      data: res.data,
+      errors: null,
+      message: "Successfully retrieved subscription",
+      status: res.status,
+    };
+  }
 }
