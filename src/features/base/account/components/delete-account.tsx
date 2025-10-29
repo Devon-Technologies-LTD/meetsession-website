@@ -73,6 +73,7 @@ export function DeleteAccount({ email, token }: DeleteAccountProps) {
             ? res.errors
             : res.errors.email + ", " + res.errors.reason,
       });
+      
       if (
         typeof res.errors === "string" &&
         (res.errors.toLowerCase().includes("token") ||

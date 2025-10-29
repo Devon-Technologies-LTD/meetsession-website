@@ -47,10 +47,10 @@ const PaymentStatusReportWrapper = () => {
             <p>{selectedPlan?.name}</p>
           </div>
 
-          {selectedPlan?.price_ngn !== undefined && (
+          {selectedPlan?.price !== undefined && (
             <div className="w-full flex items-center justify-between">
               <p>Amount Paid</p>
-              <p>{selectedPlan?.price_ngn}</p>
+              <p>{selectedPlan?.price}</p>
             </div>
           )}
 
@@ -83,16 +83,9 @@ const PaymentStatusReportWrapper = () => {
         "flex flex-col justify-start gap-2",
       )}
     >
-      <Button
-        variant="ghost"
-        className="w-fit h-fit flex items-center gap-1.5 hover:cursor-pointer active:bg-neutral-100"
-        onClick={() => router.push("/dashboard/accounts/plans")}
-      >
-        <ArrowLeftIcon />
-        <span>Back</span>
-      </Button>
 
       <div className={cn("flex flex-col items-center justify-center")}>
+
         <div
           className={cn(
             "h-fit w-full max-w-full md:max-w-3xl px-4 py-14",
@@ -100,6 +93,14 @@ const PaymentStatusReportWrapper = () => {
             "mx-auto",
           )}
         >
+          <Button
+            variant="ghost"
+            className="w-fit h-fit flex  gap-1.5 hover:cursor-pointer active:bg-neutral-100"
+            onClick={() => router.push("/dashboard/accounts/plans")}
+          >
+            <ArrowLeftIcon />
+            <span>Back</span>
+          </Button>
           <div className="w-fit h-fit flex flex-col gap-5 items-center">
             {transactionDetails?.status === "successful" ? (
               <SuccessIcon className="text-brand-green h-24 md:h-28 w-24 md:w-28" />
@@ -131,12 +132,11 @@ const PaymentStatusReportWrapper = () => {
               ) : null}
             </div>
           </div>
-
           {renderPaymentDetails()}
-
           <Button
             size="pill"
-            onClick={() => transactionDetails?.nextAction?.()}
+            // onClick={() => transactionDetails?.nextAction?.()}
+            onClick={() => router.push("/dashboard/accounts")}
             className={cn(
               "h-14 w-full",
               {

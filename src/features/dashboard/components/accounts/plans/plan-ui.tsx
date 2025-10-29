@@ -31,7 +31,6 @@ export function PlanUI<T extends TSubscriptionPlan>({
   plans?: T[];
 }) {
   const [selectedId, setSelectedId] = useState(plans?.[0].id ?? "");
-  // update selected plan
   function updateSelectedId(id: string) {
     setSelectedId(id);
   }
@@ -76,7 +75,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const { initialize, initializeState, isInitializing } = initializePayment;
   const { verifyState, isVerifying } = verifyPayment;
 
-  const isFreePlan = plan?.price_ngn === 0;
+  const isFreePlan = plan?.price === 0;
   const isCurrentPlan = subscription ? subscription.plan_id === plan?.id : null;
 
   const planAction = useCallback(() => {
@@ -232,7 +231,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
             <CardTitle className="font-normal">{plan?.name}</CardTitle>
             <CardDescription className="flex items-center w-fit justify-center gap-2">
               <span className="font-bold text-neutral-800 text-xl tracking-tighter">
-                ₦{plan?.price_ngn.toLocaleString()}
+                ₦{plan?.price.toLocaleString()}
               </span>
 
               {isCurrentPlan && (

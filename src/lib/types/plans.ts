@@ -15,7 +15,7 @@ export type TSubscriptionPlanFeature = {
 export type TSubscriptionPlan = {
   id: string;
   name: string;
-  price_ngn: number;
+  price: number;
   meeting_hours: number;
   features?: TSubscriptionPlanFeature[];
 };

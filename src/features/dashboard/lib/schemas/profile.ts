@@ -9,6 +9,9 @@ export const updateProfileSchema = z.object({
   gender: z.string().optional(),
   date_of_birth: z.string().optional(),
   profile_image: z.string().optional(),
+  old_password: z.string().optional(),
+  new_password: z.string().optional(),
+  confirm_password: z.string().optional(),
 });
 
 export type TUpdateProfile = z.infer<typeof updateProfileSchema>;
