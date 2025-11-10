@@ -7,6 +7,7 @@ export type TUserSnapshot = {
   last_name: string;
   user_type: string;
 };
+export type TUserType = "USER" | "ADMIN" | "PLATFORM_ADMIN";
 
 export type TFullUser = {
   id: string;
@@ -15,9 +16,12 @@ export type TFullUser = {
   last_name: string;
   phone_number: string;
   email: string;
+  password: string;
+  confirm_password: string;
+  new_password: string;
   gender: string;
   date_of_birth: string;
-  user_type: string;
+  user_type: TUserType;
   status: TStatus;
   profile_image: string;
   app_version: string;

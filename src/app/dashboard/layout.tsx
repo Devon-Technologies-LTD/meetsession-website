@@ -1,4 +1,5 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { UserSubscriptionProvider } from "@/context/use-user-subscription";
 import { AppSidebar } from "@/features/dashboard/components/app-sidebar";
 
 export default function DashboardLayout({
@@ -9,7 +10,9 @@ export default function DashboardLayout({
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
-      <main className="w-full h-full p-4">{children}</main>
+      <UserSubscriptionProvider>
+        <main className="w-full h-full p-4">{children}</main>
+      </UserSubscriptionProvider>
     </SidebarProvider>
   );
 }
