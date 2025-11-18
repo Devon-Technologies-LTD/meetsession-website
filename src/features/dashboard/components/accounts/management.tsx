@@ -1,3 +1,5 @@
+"use client";
+
 import {
   BellRingIcon,
   CircleAlertIcon,
@@ -10,34 +12,61 @@ import {
 import { Tile } from "../tiles";
 import { CaretRightIcon } from "@/components/icons/caret-right-icon";
 import { LogoutButton } from "@/components/ui/logout-button";
-import { getUser } from "../../server/actions";
 import Link from "next/link";
 import { ProfileImage } from "@/components/ui/profile-image";
 import { ManageAccountIcon } from "@/components/icons/manage-account-icon";
+import { useEffect } from "react";
+import { useUserSubscription } from "@/context/use-user-subscription";
 
-export async function Management() {
-  const user = await getUser();
+type TManagementProps = {
+  userImage?: string;
+  userName?: string;
+  userEmail?: string;
+};
+export function Management(props: TManagementProps) {
+  const { updateSubscription, subscription } = useUserSubscription();
+  const phoneNumber = "+2348109435439"; // 
+  useEffect(() => {
+    fetch(`/api/v1/subscription/current-subscription`, {
+      method: "GET",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data === "string") {
+          updateSubscription(undefined);
+        } else {
+          updateSubscription(data);
+        }
+      })
+      .catch((err) => {
+        console.log({ err });
+        updateSubscription(undefined);
+      });
+  }, [updateSubscription]);
+
+  const planName = subscription?.plan_snapshot.name;
 
   return (
     <div className="flex flex-col gap-5 items-start w-full h-fit min-h-full">
       <Tile className="bg-brand-green-dark/10 w-full px-3.5 flex-row gap-2.5">
-        <ProfileImage imageUrl={user?.profile_image} />
+        <ProfileImage imageUrl={props?.userImage} />
 
         <div className="w-fit text-start font-dm-sans flex flex-col gap-1">
-          <p className="font-bold text-lg">
-            {user?.first_name} {user?.last_name}
-          </p>
+          <p className="font-bold text-lg">{props.userName}</p>
 
-          <p className="font-light text-sm">{user?.email}</p>
+          <p className="font-light text-sm">{props.userEmail}</p>
 
-          <div className="flex items-center gap-2">
-            <span className="text-brand-green">
-              <CrownIcon className="w-6 h-6" />
-            </span>
-            <span className="text-xs w-fit h-fit py-1.5 px-2.5 bg-brand-green font-semibold text-white rounded-full">
-              Pro Tier
-            </span>
-          </div>
+          {planName && (
+            <div className="flex items-center gap-2">
+              <span className="text-brand-green">
+                <CrownIcon className="w-6 h-6" />
+              </span>
+
+              <span className="text-xs w-fit h-fit py-1.5 px-2.5 bg-brand-green font-semibold text-white rounded-full">
+                {subscription.plan_snapshot.name}
+              </span>
+            </div>
+          )}
         </div>
       </Tile>
 
@@ -57,14 +86,18 @@ export async function Management() {
               </Tile.TileItem>
             </Link>
 
-            <Tile.TileItem
-              prefixIcon={<LockKeyholeIcon className="h-6 w-6" />}
-              suffixIcon={<CaretRightIcon className="w-3 h-3" />}
-            >
-              <p className="text-sm font-semibold">Change Password</p>
-              <p className="text-xs text-neutral-500">Update your password</p>
-            </Tile.TileItem>
+            <Link href="/dashboard/accounts/change-password">
+              <Tile.TileItem
+                prefixIcon={<LockKeyholeIcon className="h-6 w-6" />}
+                suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+              >
+                <p className="text-sm font-semibold">Change Password</p>
+                <p className="text-xs text-neutral-500">Update your password</p>
+              </Tile.TileItem>
+            </Link>
+
           </Tile>
+
         </div>
 
         <div className="flex flex-col gap-5 items-start w-full h-full min-h-full">
@@ -85,9 +118,12 @@ export async function Management() {
                         Manage your subscription
                       </p>
                     </div>
-                    <span className="whitespace-nowrap bg-yellow-600 text-white px-2 py-1 rounded-full text-[9px] font-semibold">
-                      Pro Tier
-                    </span>
+
+                    {planName && (
+                      <span className="whitespace-nowrap bg-yellow-600 text-white px-2 py-1 rounded-full text-[9px] font-semibold">
+                        {planName}
+                      </span>
+                    )}
                   </div>
                 </Tile.TileItem>
               </Link>
@@ -122,6 +158,8 @@ export async function Management() {
             </p>
             <Tile className="bg-neutral-100">
               <Tile.TileItem
+                onClick={() => window.open(`https://wa.me/${phoneNumber}`, "_blank")}
+                className="cursor-pointer"
                 prefixIcon={<HeadsetIcon className="h-6 w-6" />}
                 suffixIcon={<CaretRightIcon className="w-3 h-3" />}
               >
@@ -130,18 +168,25 @@ export async function Management() {
                   Contact us with questions
                 </p>
               </Tile.TileItem>
+
+              <Link href="/dashboard/about-us">
+                <Tile.TileItem
+                  prefixIcon={<CircleAlertIcon className="h-6 w-6" />}
+                  suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+                >
+                  <p className="text-sm font-semibold">About MeetSession</p>
+                  <p className="text-xs text-neutral-500">
+                    Know more about our app
+                  </p>
+                </Tile.TileItem>
+              </Link>
+
               <Tile.TileItem
-                prefixIcon={<CircleAlertIcon className="h-6 w-6" />}
-                suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+                onClick={() => window.open(`https://wa.me/${phoneNumber}`, "_blank")}
+                className="cursor-pointer"
               >
-                <p className="text-sm font-semibold">About MeetSession</p>
-                <p className="text-xs text-neutral-500">
-                  Know more about our app
-                </p>
-              </Tile.TileItem>
-              <Tile.TileItem>
                 <div className="p-3.5 rounded-lg bg-neutral-900 text-white flex items-center justify-between">
-                  <p className="text-sm font-semibold">Contact Support</p>
+                  <p className="text-sm font-semibold">Contact Support via WhatsApp</p>
                   <CaretRightIcon className="h-3 w-3" />
                 </div>
               </Tile.TileItem>
@@ -162,3 +207,37 @@ export async function Management() {
     </div>
   );
 }
+
+/*
+{
+    "subRes": {
+        "message": "User subscription fetched",
+        "data": {
+            "id": "2a5e5613-c9e5-44c5-a75c-58af2ed6c79f",
+            "user_id": "46d0c09c-4149-47e7-a8fb-e184f90375db",
+            "plan_id": "a7bc5fc6-ebb9-424d-99a9-4bac5a495e01",
+            "meeting_hours": 0,
+            "start_date": "2025-10-13T13:02:32.093755Z",
+            "end_date": "2025-10-13T13:02:32.093755Z",
+            "created_by": {
+                "email": "sre@devontech.io",
+                "last_name": "Admin",
+                "user_type": "PLATFORM_ADMIN",
+                "first_name": "DevonTech"
+            },
+            "plan_snapshot": {
+                "name": "Basic",
+                "price_ngn": 4999,
+                "meeting_hours": 30
+            },
+            "feature_snapshot_list": null,
+            "coupon_snapshot": null,
+            "status": "ACTIVE",
+            "created_at": "2025-10-13T13:02:32.093861Z",
+            "updated_at": "2025-10-13T13:02:32.093861Z",
+            "DeletedAt": null
+        }
+    },
+    "msg": "Data retrieved"
+}
+ */
