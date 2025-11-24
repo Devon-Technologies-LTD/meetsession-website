@@ -3,6 +3,7 @@ import { InstagramIcon } from "@/components/icons/instagram-icon";
 import { LinkedinIcon } from "@/components/icons/linkedin-icon";
 import { LogoDynamic } from "@/components/icons/logo-dynamic";
 import { TwitterIcon } from "@/components/icons/twitter-icon";
+import { YouTubeIcon } from "@/components/icons/youtube-icon";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
@@ -11,13 +12,13 @@ const socials = [
     id: 1,
     icon: FacebookIcon,
     title: "Facebook",
-    href: "https://www.facebook.com/DevonTechLtd/",
+    href: "https://www.facebook.com/profile.php?id=61571581541306",
   },
   {
     id: 2,
     icon: InstagramIcon,
     title: "Instagram",
-    href: "https://www.instagram.com/devon_tech_ltd/",
+    href: "https://www.instagram.com/devon_tech_?igsh=MXcyaTJ5ZHVubnY2dw==",
   },
   {
     id: 3,
@@ -29,7 +30,13 @@ const socials = [
     id: 4,
     icon: TwitterIcon,
     title: "X",
-    href: "https://twitter.com/DevonTechLtd/",
+    href: "https://x.com/devontechio?s=21&t=MSYMhx7Evn6oXwhwVmOj6A",
+  },
+  {
+    id: 5,
+    title: "YouTube",
+    href: "https://www.youtube.com/@DevonTechnologiesltd",
+    icon: YouTubeIcon,
   },
 ];
 
