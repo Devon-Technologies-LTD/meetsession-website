@@ -13,7 +13,7 @@ jobs:
       - name: Delete old staging/preprod images
         uses: actions/delete-package-versions@v5
         with:
-          package-name: "frontend"
+          package-name: "meetsession/frontend"
           package-type: "container"
           min-versions-to-keep: 10
           delete-only-untagged-versions: false
@@ -24,7 +24,7 @@ jobs:
       - name: Delete untagged images (dangling)
         uses: actions/delete-package-versions@v5
         with:
-          package-name: "frontend"
+          package-name: "meetsession/frontend"
           package-type: "container"
           min-versions-to-keep: 0
           delete-only-untagged-versions: true
