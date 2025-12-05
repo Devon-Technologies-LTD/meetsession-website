@@ -10,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ChipItem } from "@/components/ui/chip-item";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import {
   ArrowRightIcon,
@@ -20,10 +19,6 @@ import {
   UsersRoundIcon,
 } from "lucide-react";
 
-import {
-  motion as m,
-  // Variants
-} from "motion/react";
 import Link from "next/link";
 import { Fragment } from "react";
 /*
