@@ -93,7 +93,7 @@ function VideoTutorialCards() {
   >(() => {
     const set = new Set(videos.map((vid) => vid.category));
     let id = 1;
-    let items = [{ id, name: "All", active: true }];
+    const items = [{ id, name: "All", active: true }];
     set.forEach((i) => {
       id++;
       items.push({ id, name: i, active: false });
@@ -126,6 +126,7 @@ function VideoTutorialCards() {
       <div className="flex flex-wrap items-center gap-4">
         {categories.map((cat) => (
           <button
+            key={cat.name}
             className={cn(
               "transition-all rounded-2xl",
               "text-white py-3 px-6 cursor-pointer",
