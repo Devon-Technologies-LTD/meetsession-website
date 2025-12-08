@@ -11,9 +11,9 @@ export function ChipItem({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 text-white",
-        "font-dm-sans text-base w-fit bg-white/10",
-        "rounded-full px-6 py-3 border border-border",
+        "flex items-center gap-1 md:gap-2 text-white",
+        "rounded-full px-3 md:px-6 py-1.5 md:py-3 border border-border",
+        "font-dm-sans text-sm md:text-base w-fit bg-white/10 tracking-tighter",
         className,
       )}
       {...props}
