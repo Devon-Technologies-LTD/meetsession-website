@@ -29,16 +29,16 @@ export function VideoTutorials() {
     >
       <div className={cn("flex flex-col gap-3 items-center")}>
         <ChipItem className="text-red-400 border-red-400 bg-red-500/20 border-[1px]">
-          <YoutubeIcon />
+          <YoutubeIcon className="size-4 md:size-6" />
           Video Tutorials
         </ChipItem>
 
-        <p className="text-6xl font-bold text-white font-dm-sans tracking-tighter">
+        <p className="text-3xl md:text-6xl font-bold text-white font-dm-sans tracking-tighter">
           Learn MeetSession{" "}
           <span className="text-emerald-500">From Video Tutorials</span>
         </p>
 
-        <p className="text-base md:text-xl text-neutral-400 max-w-160 mx-auto">
+        <p className="text-sm md:text-xl text-neutral-400 max-w-160 mx-auto">
           Watch step-by-step tutorials to master every feature of MeetSession.
           From beginner basics to advanced skills.
         </p>
@@ -48,22 +48,31 @@ export function VideoTutorials() {
         <VideoTutorialCards />
       </div>
 
-      <div className={cn("flex flex-col gap-4 items-center")}>
+      <div className={cn("flex flex-col gap-2 md:gap-4 items-center")}>
         <Link
-          href=""
+          href="https://www.youtube.com/@DevonTechnologiesltd"
           className={cn(
             buttonVariants({ variant: "destructive" }),
-            "font-dm-sans font-semibold",
-            "h-fit w-fit rounded-2xl",
+            "h-fit w-fit rounded-lg md:rounded-2xl",
+            "font-dm-sans font-semibold px-2 md:px-4 py-1 md:py-2",
           )}
+          target="_blank"
         >
-          <Item className="px-1 md:px-2 py-1 md:py-2 text-base md:text-lg">
+          <Item
+            className={cn(
+              "text-sm md:text-lg",
+              "px-1 md:px-2 py-1 md:py-2",
+              "flex-row flex-nowrap gap-2 md:gap-4",
+            )}
+          >
             <ItemMedia>
-              <YoutubeIcon className="size-5 md:size-6" />
+              <YoutubeIcon className="size-4 md:size-6" />
             </ItemMedia>
-            <ItemContent>Subscribe to Our YouTube Channel</ItemContent>
+            <ItemContent className="w-fit">
+              Subscribe to Our YouTube Channel
+            </ItemContent>
             <ItemMedia>
-              <ChevronRightIcon className="size-5 md:size-6" />
+              <ChevronRightIcon className="size-4 md:size-6" />
             </ItemMedia>
           </Item>
         </Link>
@@ -77,7 +86,11 @@ export function VideoTutorials() {
 
 function VideoTutorialCards() {
   return (
-    <div className={cn("flex flex-wrap gap-5 items-center justify-center")}>
+    <div
+      className={cn(
+        "flex flex-wrap gap-2.5 md:gap-5 items-center justify-center",
+      )}
+    >
       {Array.from({ length: 6 }).map((_, idx) => (
         <VideoTutorialCard key={idx} />
       ))}
@@ -97,7 +110,7 @@ function VideoTutorialCard() {
       <CardContent className="p-0 text-white">
         <div
           className={cn(
-            "h-60 w-full",
+            "h-40 md:h-60 w-full",
             "bg-brand-black text-sm font-medium",
             "relative flex items-center justify-center",
           )}
@@ -105,14 +118,23 @@ function VideoTutorialCard() {
           <p className="text-neutral-400">Image go here</p>
 
           {/* floating items*/}
-          <p className="py-2 px-4 absolute top-4 left-4 bg-brand-green/70 rounded-md">
+          <p
+            className={cn(
+              "text-xs md:text-base",
+              "absolute top-4 left-4",
+              "py-1 md:py-2 px-2 md:px-4",
+              "bg-brand-green/70 rounded-md",
+            )}
+          >
             Getting started
           </p>
           <div
             className={cn(
+              "text-xs md:text-base",
+              "rounded-lg bg-black/70",
               "absolute top-5 right-4",
               "flex items-center gap-2",
-              "px-2.5 py-1.5 rounded-lg bg-black/70",
+              "px-1.5 md:px-2.5 py-0.5 md:py-1.5",
             )}
           >
             <ClockIcon className="size-4" />
@@ -120,10 +142,11 @@ function VideoTutorialCard() {
           </div>
           <div
             className={cn(
-              "absolute bottom-0 left-0",
-              "flex items-center gap-2",
-              "bg-linear-to-b from-transparent to-foreground w-full",
               "pl-4 py-4",
+              "text-xs md:text-base",
+              "absolute bottom-0 left-0",
+              "flex items-center gap-1 md:gap-2",
+              "bg-linear-to-b from-transparent to-foreground/90 w-full",
             )}
           >
             <EyeIcon className="size-4" />
@@ -131,9 +154,11 @@ function VideoTutorialCard() {
           </div>
         </div>
       </CardContent>
-      <CardHeader className="flex flex-col gap-4 items-start text-start text-white">
-        <CardTitle>Title goes here please</CardTitle>
-        <CardDescription className="text-neutral-400">
+      <CardHeader className="flex flex-col gap-1 md:gap-4 items-start text-start text-white">
+        <CardTitle className="text-sm md:text-base">
+          Title goes here please
+        </CardTitle>
+        <CardDescription className="text-xs md:text-sm text-neutral-400">
           Ut, quisque nibh quisque, id consectetur ante efficitur etiam turpis.
         </CardDescription>
         <Link
