@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -24,7 +27,7 @@ export function VideoTutorials() {
         "w-full h-full",
         "flex flex-col gap-12",
         "px-7 py-10 md:px-20 md:py-40",
-        "bg-brand-black-dark text-white text-center",
+        "bg-brand-green-black text-white text-center",
       )}
     >
       <div className={cn("flex flex-col gap-3 items-center")}>
@@ -85,20 +88,96 @@ export function VideoTutorials() {
 }
 
 function VideoTutorialCards() {
+  const [categories, setCategories] = useState<
+    { id: number; name: string; active: boolean }[]
+  >(() => {
+    const set = new Set(videos.map((vid) => vid.category));
+    let id = 1;
+    let items = [{ id, name: "All", active: true }];
+    set.forEach((i) => {
+      id++;
+      items.push({ id, name: i, active: false });
+    });
+    return items;
+  });
+  const [filteredVideos, setFilteredVideos] = useState<typeof videos>(videos);
+
+  function filterVideos(category: string) {
+    setCategories((prev) => {
+      return prev.map((i) =>
+        i.name.toLowerCase() === category.toLowerCase()
+          ? { ...i, active: true }
+          : { ...i, active: false },
+      );
+    });
+
+    if (category.toLowerCase() === "all") {
+      setFilteredVideos(videos);
+    } else {
+      const filtered = videos.filter(
+        (video) => video.category.toLowerCase() === category.toLowerCase(),
+      );
+      setFilteredVideos(filtered);
+    }
+  }
+
   return (
-    <div
-      className={cn(
-        "flex flex-wrap gap-2.5 md:gap-5 items-center justify-center",
-      )}
-    >
-      {Array.from({ length: 6 }).map((_, idx) => (
-        <VideoTutorialCard key={idx} />
-      ))}
+    <div className="flex flex-col gap-10 w-full items-center">
+      <div className="flex flex-wrap items-center gap-4">
+        {categories.map((cat) => (
+          <button
+            className={cn(
+              "transition-all rounded-2xl",
+              "text-white py-3 px-6 cursor-pointer",
+              [
+                cat.active
+                  ? "bg-brand-green shadow-lg shadow-brand-green-light/40 font-semibold"
+                  : "border border-slate-700 bg-white/5 font-medium text-slate-400",
+              ],
+            )}
+            onClick={() => filterVideos(cat.name)}
+          >
+            {cat.name}
+          </button>
+        ))}
+      </div>
+
+      <div
+        className={cn(
+          "flex flex-wrap gap-2.5 md:gap-5 items-center justify-center",
+        )}
+      >
+        {filteredVideos.map((vid, idx) => (
+          <VideoTutorialCard
+            key={idx}
+            name={vid.title}
+            description={vid.description}
+            category={vid.category}
+            link={vid.link}
+            views={vid.views}
+            duration={vid.duration}
+          />
+        ))}
+      </div>
     </div>
   );
 }
 
-function VideoTutorialCard() {
+function VideoTutorialCard({
+  link,
+  name,
+  views,
+  category,
+  duration,
+  description,
+}: {
+  name: string;
+  link: string;
+  views: string;
+  category: string;
+  duration: string;
+  description?: string;
+}) {
   return (
     <Card
       className={cn(
@@ -110,26 +189,35 @@ function VideoTutorialCard() {
       <CardContent className="p-0 text-white">
         <div
           className={cn(
-            "h-40 md:h-60 w-full",
+            "h-40 md:h-52 w-full",
             "bg-brand-black text-sm font-medium",
             "relative flex items-center justify-center",
           )}
         >
-          <p className="text-neutral-400">Image go here</p>
+          <iframe
+            src={link}
+            title="How to Use Drafts in MeetSession"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+            className="h-full w-full"
+          ></iframe>
 
           {/* floating items*/}
           <p
             className={cn(
+              "pointer-events-none",
               "text-xs md:text-base",
               "absolute top-4 left-4",
               "py-1 md:py-2 px-2 md:px-4",
               "bg-brand-green/70 rounded-md",
             )}
           >
-            Getting started
+            {category}
           </p>
           <div
             className={cn(
+              "pointer-events-none",
               "text-xs md:text-base",
               "rounded-lg bg-black/70",
               "absolute top-5 right-4",
@@ -138,11 +226,12 @@ function VideoTutorialCard() {
             )}
           >
             <ClockIcon className="size-4" />
-            <span>6:20</span>
+            <span>{duration}</span>
           </div>
           <div
             className={cn(
               "pl-4 py-4",
+              "pointer-events-none",
               "text-xs md:text-base",
               "absolute bottom-0 left-0",
               "flex items-center gap-1 md:gap-2",
@@ -150,19 +239,17 @@ function VideoTutorialCard() {
             )}
           >
             <EyeIcon className="size-4" />
-            <p>45K views</p>
+            <p>{views}</p>
           </div>
         </div>
       </CardContent>
       <CardHeader className="flex flex-col gap-1 md:gap-4 items-start text-start text-white">
-        <CardTitle className="text-sm md:text-base">
-          Title goes here please
-        </CardTitle>
+        <CardTitle className="text-sm md:text-base">{name}</CardTitle>
         <CardDescription className="text-xs md:text-sm text-neutral-400">
-          Ut, quisque nibh quisque, id consectetur ante efficitur etiam turpis.
+          {description}
         </CardDescription>
         <Link
-          href="#"
+          href={link}
           className="flex items-center gap-2 text-xs md:text-sm text-brand-green font-medium"
         >
           <p>Watch Tutorial</p>
@@ -172,3 +259,60 @@ function VideoTutorialCard() {
     </Card>
   );
 }
+
+const videos = [
+  {
+    id: 1,
+    link: "",
+    title: "",
+    duration: "",
+    category: "ite",
+    views: "",
+    description: "",
+  },
+  {
+    id: 2,
+    link: "",
+    title: "",
+    duration: "",
+    category: "ite",
+    views: "",
+    description: "",
+  },
+  {
+    id: 3,
+    link: "",
+    title: "",
+    duration: "",
+    category: "itad",
+    views: "",
+    description: "",
+  },
+  {
+    id: 4,
+    link: "",
+    title: "",
+    duration: "",
+    category: "itad",
+    views: "",
+    description: "",
+  },
+  {
+    id: 5,
+    link: "",
+    title: "",
+    duration: "",
+    category: "pds",
+    views: "",
+    description: "",
+  },
+  {
+    id: 6,
+    link: "",
+    title: "",
+    duration: "",
+    category: "mes",
+    views: "",
+    description: "",
+  },
+];
