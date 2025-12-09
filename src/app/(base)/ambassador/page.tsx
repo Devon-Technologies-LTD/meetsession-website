@@ -1,3 +1,9 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,10 +15,13 @@ import {
 import { ChipItem } from "@/components/ui/chip-item";
 import { cn } from "@/lib/utils";
 import {
+  ArrowRightIcon,
   AwardIcon,
   BrainIcon,
   BriefcaseIcon,
+  CheckIcon,
   ChevronsLeftRightIcon,
+  CircleCheckBigIcon,
   EyeIcon,
   LaptopIcon,
   MegaphoneIcon,
@@ -36,13 +45,12 @@ export default function Page() {
       )}
     >
       <HeroSection />
-
       <GrowthOpportunitiesSection />
-
       <MentorshipTrack />
-
       <HowItWorks />
-      <div className={cn()}></div>
+      <Benefits />
+      <FAQs />
+      <CTA />
     </div>
   );
 }
@@ -95,7 +103,7 @@ function HeroSection() {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-3 items-center">
+        <div className="flex flex-row gap-1.5 md:gap-3 items-normal md:items-center">
           {metrics.map((metric) => (
             <div
               key={metric.id}
@@ -125,6 +133,7 @@ function HeroSection() {
 
       <div
         className={cn(
+          "hidden md:block",
           "w-148 h-148 bg-neutral-950 rounded-[64px]",
           "bg-[url('/image/ms-ambassador-bg.jpg')] bg-no-repeat bg-cover bg-center",
         )}
@@ -291,7 +300,7 @@ function MentorshipTrack() {
         ))}
       </div>
 
-      <div className="flex items-center gap-3 w-full justify-center">
+      <div className="flex flex-col md:flex-row items-center gap-3 w-full justify-center">
         <ChipItem className="bg-brand-green/5 border-brand-green text-brand-green text-sm md:text-base">
           <span>💼</span> <span>Priority internship pathways</span>
         </ChipItem>
@@ -449,4 +458,284 @@ const steps = [
     description:
       "Track your progress, achieve milestones, earn rewards, and unlock exclusive opportunities. Build portfolio while making a real impact.",
   },
+];
+
+function Benefits() {
+  const colours = [
+    "before:bg-blue-700",
+    "before:bg-brand-green",
+    "before:bg-purple-600",
+    "before:bg-brand-green",
+  ];
+  function colourSelector(index: number) {
+    return colours[(index + 1) % colours.length];
+  }
+
+  return (
+    <div
+      className={cn(
+        "bg-white",
+        "w-full min-h-fit",
+        "py-10 md:py-52 px-7 md:px-16",
+        "flex flex-col gap-12 md:gap-16 bg-white",
+      )}
+    >
+      <div className="flex flex-col items-center gap-3 w-full h-fit text-center">
+        <p className="text-3xl md:text-5xl tracking-tighter">
+          Ambassador Benefits & Perks
+        </p>
+        <p className="w-full max-w-3xl mx-auto text-center text-base md:text-lg font-quicksand">
+          Everything you need to success as a campus ambassador, plus exclusive
+          rewards for your dedication and impact.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap flex-col md:flex-row gap-5 justify-center w-full">
+        {benefits.map((benefit, idx) => (
+          <div
+            key={benefit.id}
+            className={cn(
+              "flex flex-col items-start gap-4",
+              "border border-border rounded-2xl p-6",
+              "w-full max-w-full md:max-w-72 relative overflow-hidden",
+              "before:absolute before:top-0 before:left-0 before:w-full before:h-2",
+              `${colourSelector(idx)}`,
+            )}
+          >
+            <p className="text-base md:text-xl font-medium">{benefit.name}</p>
+            <ul className="font-quicksand text-xs md:text-sm font-medium flex flex-col gap-2 w-full">
+              {benefit.options.map((option, i) => (
+                <li
+                  key={i}
+                  className="flex items-start justify-start gap-2 text-start"
+                >
+                  <CheckIcon className="h-5 w-5 text-brand-green" />
+                  <span>{option}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-8 items-center max-w-screen-xl mx-auto">
+        <div className="flex flex-col items-start text-start gap-2.5 md:gap-4.5 w-full md:w-1/2">
+          <p className="font-semibold text-xl md:text-3xl">
+            Real Impact, Real Opportunities
+          </p>
+          <p className="font-quicksand font-medium">
+            As a MeetSession Campus Ambassador, you&apos;re not just promoting a
+            product—you&apos;re leading a movement to transform how students
+            engage with their education. Your work creates lasting impact on
+            your campus community.
+          </p>
+          <ul className="flex flex-col gap-3.5 w-full">
+            {perks.map((perk) => (
+              <li
+                key={perk.id}
+                className="flex items-start justify-start gap-2 md:gap-4 text-start"
+              >
+                <div
+                  className={cn(
+                    "p-1.5 rounded-lg",
+                    "flex items-center justify-center",
+                    "bg-brand-green-extralight/20 text-brand-green",
+                  )}
+                >
+                  <CheckIcon className="w-4 h-4 md:w-5 md:h-5" />
+                </div>
+                <div className="flex flex-col gap-1 w-full">
+                  <p className="font-semibold text-base">{perk.title}</p>
+                  <p className="text-xs md:text-sm font-quicksand">
+                    {perk.description}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="sm:h-120 md:h-144 rounded-[52px] bg-sky-100 w-full md:w-1/2 bg-[url('/image/ms-ambassador-perks.jpg')] bg-cover bg-center"></div>
+      </div>
+    </div>
+  );
+}
+const perks = [
+  {
+    id: 1,
+    title: "Flexible Schedule",
+    description:
+      "Balance ambassadorship with your studies and other commitments",
+  },
+  {
+    id: 2,
+    title: "Ongoing Support",
+    description: "Dedicated team support and resources to help you succeed",
+  },
+  {
+    id: 3,
+    title: "Created Freedom",
+    description: "Design and execute intiatives that resonate with your campus",
+  },
+];
+const benefits = [
+  {
+    id: 1,
+    name: "Starter Kit",
+    options: [
+      "Official MeetSession merchandise",
+      "Welcome package with branded items",
+      "Digital ambassador toolkit",
+      "Access to marketing materials",
+    ],
+  },
+  {
+    id: 2,
+    name: "Premium Access",
+    options: [
+      "Free premium MeetSession account",
+      "Transcription credits",
+      "Early access to new features",
+      "Priority customer support",
+    ],
+  },
+  {
+    id: 3,
+    name: "Professional Growth",
+    options: [
+      "Monthly skill-building workshops",
+      "Mentorship with industry experts",
+      "LinkedIn recommendation letters",
+      "Resume-building opportunities",
+    ],
+  },
+  {
+    id: 4,
+    name: "Rewards & Recognition",
+    options: [
+      "Performance based incentives",
+      "Exclusive networking events",
+      "Certificate of completion",
+    ],
+  },
+];
+
+function FAQs() {
+  return (
+    <div
+      className={cn(
+        "bg-white",
+        "w-full min-h-fit",
+        "py-10 md:py-52 px-7 md:px-16",
+        "flex flex-col gap-12 md:gap-16 bg-neutral-50",
+      )}
+    >
+      <div className="flex flex-col items-center gap-3 w-full h-fit text-center">
+        <p className="text-3xl md:text-5xl tracking-tighter">
+          Frequently Asked Questions
+        </p>
+
+        <p className="w-full max-w-3xl mx-auto text-center text-base md:text-lg font-quicksand">
+          Everything you need to know about the Campus Ambassador Program
+        </p>
+      </div>
+
+      <Accordion
+        type="single"
+        collapsible
+        className="w-full max-w-screen-xl mx-auto"
+      >
+        {questions.map((question) => (
+          <AccordionItem
+            key={question.id}
+            value={String(question.id)}
+            className="bg-white rounded-xl px-4 py-2 font-quicksand text-start"
+          >
+            <AccordionTrigger className="font-medium md:text-base hover:no-underline cursor-pointer">
+              {question.question}
+            </AccordionTrigger>
+            <AccordionContent>{question.answer}</AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
+
+      <div className="flex flex-col gap-2 w-full text-center">
+        <p>Still have questions?</p>
+        <p className="text-brand-green">
+          Contact our team at{" "}
+          <a href="mailto:ambassador@meetsession.com">
+            ambassador@meetsession.io
+          </a>
+        </p>
+      </div>
+    </div>
+  );
+}
+const questions = [
+  {
+    id: 1,
+    question: "Who can apply to become a Campus Ambassador?",
+    answer:
+      "Any undergraduate student who is currently enrolled in a college or university.",
+  },
+];
+
+function CTA() {
+  return (
+    <div
+      className={cn(
+        "w-full min-w-full min-h-fit",
+        "py-0 md:py-20 px-0 md:px-16",
+        "flex flex-col gap-12 md:gap-16 bg-white",
+      )}
+    >
+      <div
+        className={cn(
+          "h-full max-w-screen-xl w-full mx-auto bg-black rounded-none md:rounded-[52px] text-white py-20 px-10",
+          "flex flex-col gap-5",
+        )}
+      >
+        <div className="flex flex-col items-center gap-3 w-full h-fit text-start md:text-center">
+          <p className="text-3xl md:text-5xl tracking-tighter">
+            Ready to Lead the Change?
+          </p>
+
+          <p className="w-full max-w-3xl mx-auto text-start md:text-center text-base md:text-lg font-quicksand">
+            Join hundreds of student leaders who are transforming their campuses
+            and building the future of collaborative learning
+          </p>
+        </div>
+
+        <ul className="flex flex-col md:flex-row items-start md:items-center gap-4 justify-center text-sm md:text-base">
+          {offers.map((offer) => (
+            <li key={offer.id} className="flex items-center gap-2">
+              <CircleCheckBigIcon className="w-5 h-5" />
+              <p>{offer.item}</p>
+            </li>
+          ))}
+        </ul>
+
+        <div className="font-quicksand flex flex-col md:flex-row gap-4 w-full justify-center">
+          <Button className="bg-neutral-50 hover:bg-neutral-200 text-neutral-800 py-4">
+            Apply Now
+            <ArrowRightIcon />
+          </Button>
+
+          <Button variant="outline" className="bg-transparent">
+            Download Program Guide
+          </Button>
+        </div>
+
+        <p className="font-quicksand text-xs md:text-sm text-neutral-200">
+          Applications are reviewed on a rolling basis. Apply today to secure
+          your spot!
+        </p>
+      </div>
+    </div>
+  );
+}
+const offers = [
+  { id: 1, item: "No application fee" },
+  { id: 2, item: "Flexible schedule" },
+  { id: 3, item: "Exclusive perks" },
 ];
