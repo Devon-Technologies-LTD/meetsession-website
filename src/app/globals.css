@@ -65,6 +65,8 @@
   --color-brand-green-light: var(--brand-green-color-light);
   --color-brand-green: var(--brand-green-color-default);
   --color-brand-green-dark: var(--brand-green-color-dark);
+  --color-brand-green-extradark: var(--brand-green-color-extradark);
+  --color-brand-green-black: var(--brand-green-color-black);
 
   --color-brand-blue-foreground: var(--brand-blue-color-foreground);
   --color-brand-blue-extralight: var(--brand-blue-color-extralight);
@@ -119,6 +121,8 @@
   --brand-green-color-light: rgb(76, 187, 145);
   --brand-green-color-default: rgb(32, 160, 126);
   --brand-green-color-dark: rgb(34, 157, 113);
+  --brand-green-color-extradark: hsla(183, 100%, 12%, 1);
+  --brand-green-color-black: hsla(197, 100%, 6%, 1);
 
   /* colours blue */
   --brand-blue-color-foreground: rgba(119, 156, 172, 1);
