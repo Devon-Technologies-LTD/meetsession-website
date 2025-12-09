@@ -1,9 +1,11 @@
+/*
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+*/
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -49,7 +51,7 @@ export default function Page() {
       <MentorshipTrack />
       <HowItWorks />
       <Benefits />
-      <FAQs />
+      {/*<FAQs />*/}
       <CTA />
     </div>
   );
@@ -620,6 +622,7 @@ const benefits = [
   },
 ];
 
+/*
 function FAQs() {
   return (
     <div
@@ -679,6 +682,7 @@ const questions = [
       "Any undergraduate student who is currently enrolled in a college or university.",
   },
 ];
+*/
 
 function CTA() {
   return (
