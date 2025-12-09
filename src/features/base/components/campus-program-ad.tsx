@@ -60,8 +60,8 @@ export function CampusProgramAd() {
           <div
             className={cn(
               "relative h-96 md:h-116 w-full",
-              "border-[2px] border-brand-green-extradark/80",
               "rounded-3xl p-2 md:p-5 overflow-hidden",
+              "border-[2px] border-brand-green-extradark/80",
               "flex flex-col items-start md:items-center justify-end",
               "after:absolute after:h-full after:w-full after:top-0 after:left-0",
               "bg-[url('/image/ms-ambassador-bg.jpg')] bg-cover bg-center bg-no-repeat",
@@ -136,7 +136,7 @@ export function CampusProgramAd() {
           </div>
 
           <Link
-            href="/ambassador"
+            href="/ambassadors"
             className={cn(
               buttonVariants(),
               "bg-brand-green hover:bg-brand-green-light",
