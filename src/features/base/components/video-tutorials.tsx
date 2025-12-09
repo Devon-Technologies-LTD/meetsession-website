@@ -145,7 +145,7 @@ function VideoTutorialCards() {
 
       <div
         className={cn(
-          "flex flex-wrap gap-2.5 md:gap-5 items-center justify-center",
+          "flex flex-wrap gap-2.5 md:gap-5 items-normal justify-center",
         )}
       >
         {filteredVideos.map((vid, idx) => (
@@ -264,11 +264,64 @@ function VideoTutorialCard({
 const videos = [
   {
     id: 1,
-    link: "",
-    title: "",
-    duration: "",
-    category: "",
-    views: "",
+    link: "https://www.youtube.com/embed/8XOVWs3ghYY",
+    title: "How to use Drafts in MeetSession",
+    duration: "01:53",
+    category: "Draft",
+    views: "30",
     description: "",
   },
+
+  {
+    id: 2,
+    link: "https://www.youtube.com/embed/Dox8LqcK1Uc",
+    title: "How To use AI Summarisation Feature in MeetSession",
+    duration: "01:04",
+    category: "Summary",
+    views: "104",
+    description: "",
+  },
+
+  {
+    id: 3,
+    link: "https://www.youtube.com/embed/cWZoZCgdH4k",
+    title: "How to Import Audio on MeetSession",
+    duration: "01:14",
+    category: "Recording",
+    views: "3",
+    description: "",
+  
+  },
+
+  {
+    id: 4,
+    link: "https://www.youtube.com/embed/TN-JAMX_GAw",
+    title: "How to Enable Biometric on MeetSession",
+    duration: "00:32",
+    category: "Biometrics",
+    views: "89",
+    description: "",
+  },
+
+  {
+    id: 5,
+    link: "https://www.youtube.com/embed/PLoZzbd141c",
+    title: "How to Export Trancripts in MeetSession",
+    duration: "01:37",
+    category: "Transcripts",
+    views: "199",
+    description: "",
+  },
+
+  {
+    id: 6,
+    link: "https://www.youtube.com/embed/ZWf4-Fdeivw",
+    title: "Manage your Transcripts on MeetSession",
+    duration: "01:25",
+    category: "Transcripts",
+    views: "248",
+    description: "",
+  },
+
 ];
+
