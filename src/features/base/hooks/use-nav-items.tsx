@@ -71,6 +71,13 @@ export function useNavItems() {
     },
     {
       id: 7,
+      label: "campusAmbassadors",
+      render: "Campus Ambassador",
+      type: "links",
+      link: "/ambassadors",
+    },
+    {
+      id: 8,
       label: "Download App",
       render: (
         <Link
