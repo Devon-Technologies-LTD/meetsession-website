@@ -91,7 +91,7 @@ function SignupForm({
                     <Input
                       id={field.name}
                       placeholder="First Name"
-                      className="pill py-6 text-sm md:text-base placeholder:text-gray-300 focus-visible:ring-0"
+                      className="pill py-6 text-base placeholder:text-gray-300 focus-visible:ring-0"
                       {...field}
                     />
                   </FormControl>
@@ -112,7 +112,7 @@ function SignupForm({
                     <Input
                       id={field.name}
                       placeholder="Last Name"
-                      className="pill py-6 text-sm md:text-base placeholder:text-gray-300 focus-visible:ring-0"
+                      className="pill py-6 text-base placeholder:text-gray-300 focus-visible:ring-0"
                       {...field}
                     />
                   </FormControl>
@@ -134,7 +134,7 @@ function SignupForm({
                   <Input
                     id={field.name}
                     placeholder="Enter your email address"
-                    className="pill py-6 text-sm md:text-base placeholder:text-gray-300 focus-visible:ring-0"
+                    className="pill py-6 text-base placeholder:text-gray-300 focus-visible:ring-0"
                     {...field}
                   />
                 </FormControl>
