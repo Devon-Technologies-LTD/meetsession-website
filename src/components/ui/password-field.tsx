@@ -18,7 +18,7 @@ export function PasswordField({
         id={id}
         type={isPassword ? "password" : "text"}
         className={cn(
-          "pill py-6 text-sm md:text-base placeholder:text-gray-300 focus-visible:ring-0",
+          "pill py-6 text-base placeholder:text-gray-300 focus-visible:ring-0",
           className,
         )}
         {...props}
