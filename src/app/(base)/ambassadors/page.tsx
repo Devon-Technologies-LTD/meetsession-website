@@ -93,15 +93,23 @@ function HeroSection() {
               "w-full h-fit",
             )}
           >
-            <Button className="bg-white py-7 px-6 text-neutral-600 hover:bg-gray-100 text-sm md:text-base">
+            <button
+              className={cn(
+                "rounded-xl bg-white hover:bg-gray-100 px-6 h-16",
+                "transition-all text-neutral-600 text-sm md:text-base",
+              )}
+            >
               Apply Now
-            </Button>
-            <Button
-              variant="outline"
-              className="bg-transparent py-6.5 px-6 border-2 text-sm md:text-base text-white"
+            </button>
+            <button
+              className={cn(
+                "bg-transparent rounded-xl",
+                "px-6 border-2 h-16",
+                "transition-all text-sm md:text-base text-white",
+              )}
             >
               Learn More
-            </Button>
+            </button>
           </div>
         </div>
 
@@ -720,12 +728,12 @@ function CTA() {
         </ul>
 
         <div className="font-quicksand flex flex-col md:flex-row gap-4 w-full justify-center">
-          <Button className="bg-neutral-50 hover:bg-neutral-200 text-neutral-800 py-4">
+          <Button className="bg-neutral-50 hover:bg-neutral-200 text-neutral-800 px-6! h-14">
             Apply Now
             <ArrowRightIcon />
           </Button>
 
-          <Button variant="outline" className="bg-transparent">
+          <Button variant="outline" className="bg-transparent px-6 h-14">
             Download Program Guide
           </Button>
         </div>
