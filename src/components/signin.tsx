@@ -76,7 +76,7 @@ export function SigninForm({ onSuccessAction: onSuccess }: LoginFormProps) {
                   <Input
                     id={field.name}
                     placeholder="example@email.com"
-                    className="pill py-6 text-sm md:text-base placeholder:text-gray-300 focus-visible:ring-0"
+                    className="pill py-6 text-base placeholder:text-gray-300 focus-visible:ring-0"
                     {...field}
                   />
                 </FormControl>
