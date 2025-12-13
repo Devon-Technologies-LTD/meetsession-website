@@ -63,8 +63,8 @@ export function Hero() {
 
         <p className="text-sm md:text-base font-normal md:font-light max-w-full md:max-w-96">
           MeetSession helps lawyers, students, secretaries and corporate staff
-          record meetings, lectures, conferences, cross examination sessions and
-          stores them neatly in folders for instant access.
+          record meetings, lectures, conferences, and cross examination sessions
+          and stores them neatly in folders for instant access.
         </p>
 
         <div className="flex flex-col gap-2 w-full">
