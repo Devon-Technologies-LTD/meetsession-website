@@ -101,7 +101,7 @@ function HeroSection() {
             >
               Apply Now
             </button>
-            <button
+            {/*<button
               className={cn(
                 "bg-transparent rounded-xl",
                 "px-6 border-2 h-16",
@@ -109,7 +109,7 @@ function HeroSection() {
               )}
             >
               Learn More
-            </button>
+            </button>*/}
           </div>
         </div>
 
@@ -733,9 +733,9 @@ function CTA() {
             <ArrowRightIcon />
           </Button>
 
-          <Button variant="outline" className="bg-transparent px-6 h-14">
+          {/*<Button variant="outline" className="bg-transparent px-6 h-14">
             Download Program Guide
-          </Button>
+          </Button>*/}
         </div>
 
         <p className="font-quicksand text-xs md:text-sm text-neutral-200">
