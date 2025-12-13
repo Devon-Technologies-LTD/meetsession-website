@@ -6,7 +6,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 */
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -37,6 +36,7 @@ import {
   UserPlusIcon,
   UsersIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 export default function Page() {
   return (
@@ -93,14 +93,18 @@ function HeroSection() {
               "w-full h-fit",
             )}
           >
-            <button
+            <Link
+              href="https://forms.gle/JA2Nr1WKJP3zc2UE9"
+              target="_blank"
+              rel="noopener noreferrer"
               className={cn(
                 "rounded-xl bg-white hover:bg-gray-100 px-6 h-16",
                 "transition-all text-neutral-600 text-sm md:text-base",
+                "flex items-center",
               )}
             >
-              Apply Now
-            </button>
+              <button className="pointer-events-none w-full">Apply Now</button>
+            </Link>
             {/*<button
               className={cn(
                 "bg-transparent rounded-xl",
@@ -728,10 +732,21 @@ function CTA() {
         </ul>
 
         <div className="font-quicksand flex flex-col md:flex-row gap-4 w-full justify-center">
-          <Button className="bg-neutral-50 hover:bg-neutral-200 text-neutral-800 px-6! h-14">
-            Apply Now
-            <ArrowRightIcon />
-          </Button>
+          <Link
+            href="https://forms.gle/JA2Nr1WKJP3zc2UE9"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={cn(
+              "bg-neutral-50 hover:bg-neutral-200 px-6! h-14",
+              "font-medium text-sm text-neutral-800",
+              "flex items-center transition-all rounded-md",
+            )}
+          >
+            <button className="flex items-center justify-center gap-1 pointer-events-none w-full">
+              Apply Now
+              <ArrowRightIcon />
+            </button>
+          </Link>
 
           {/*<Button variant="outline" className="bg-transparent px-6 h-14">
             Download Program Guide
