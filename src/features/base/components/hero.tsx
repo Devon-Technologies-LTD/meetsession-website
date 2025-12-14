@@ -56,15 +56,15 @@ export function Hero() {
         )}
       >
         <div className="text-4xl md:text-5xl font-bold font-dm-sans">
-          <p>Your Legal Transcript,</p>
+          <p>Your Transcript,</p>
           <p>Organized and Ready </p>
           <p className="text-brand-green-dark">Anytime, Anywhere.</p>
         </div>
 
         <p className="text-sm md:text-base font-normal md:font-light max-w-full md:max-w-96">
-          Meet session helps lawyers and organizations record meetings or
-          cross-examinations and stores them neatly in folders for instant
-          access.
+          MeetSession helps lawyers, students, secretaries and corporate staff
+          record meetings, lectures, conferences, and cross examination sessions
+          and stores them neatly in folders for instant access.
         </p>
 
         <div className="flex flex-col gap-2 w-full">
