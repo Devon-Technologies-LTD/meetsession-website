@@ -231,7 +231,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
             <CardTitle className="font-normal">{plan?.name}</CardTitle>
             <CardDescription className="flex items-center w-fit justify-center gap-2">
               <span className="font-bold text-neutral-800 text-xl tracking-tighter">
-                ₦{plan?.price.toLocaleString()}
+                ₦{plan?.price}
               </span>
 
               {isCurrentPlan && (

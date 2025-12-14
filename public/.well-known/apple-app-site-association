@@ -1,0 +1,11 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "D3KQQ12345.com.meet_session.io",    
+        "paths": ["*"]
+      }
+    ]
+  }
+}
