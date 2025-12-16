@@ -1,0 +1,15 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.meet_session.io",
+            "sha256_cert_fingerprints": [
+                "af:fe:b1:08:a7:d8:d7:9c:67:dd:89:e2:de:9d:4c:e9:10:0e:3c:46:7a:88:a7:3a:0a:10:ab:d5:41:ca:70:92",
+                "e6:7f:76:1b:f9:a2:2c:a1:69:ef:93:a0:eb:02:0b:78:0f:59:38:c4:c8:4c:23:40:bc:30:7e:3d:3f:5d:ea:cf"
+            ]
+        }
+    }
+]

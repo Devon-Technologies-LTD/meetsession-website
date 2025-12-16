@@ -50,10 +50,8 @@ export function Management(props: TManagementProps) {
     <div className="flex flex-col gap-5 items-start w-full h-fit min-h-full">
       <Tile className="bg-brand-green-dark/10 w-full px-3.5 flex-row gap-2.5">
         <ProfileImage imageUrl={props?.userImage} />
-
         <div className="w-fit text-start font-dm-sans flex flex-col gap-1">
           <p className="font-bold text-lg">{props.userName}</p>
-
           <p className="font-light text-sm">{props.userEmail}</p>
 
           {planName && (

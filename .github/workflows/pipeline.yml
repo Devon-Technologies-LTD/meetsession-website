@@ -229,7 +229,8 @@ jobs:
             script: |
               set -e
               # APP_DIR="/mnt/production_volume/products/MeetSession-frontend"
-              APP_DIR="/opt/products/meetsession/fe-production"
+              # APP_DIR="/opt/products/meetsession/fe-production"
+              APP_DIR="/opt/products/meetsession/frontend"
               IMAGE_NAME=${{ env.IMAGE_NAME }}
               IMAGE_TAG=${{ env.IMAGE_TAG }}
               GHCR_PAT=${{ env.GHCR_PAT }}
@@ -262,3 +263,4 @@ jobs:
               echo ${{ secrets.GHCR_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
               docker compose pull
               docker compose -f compose.yml up -d
+

@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-
 import { createAuthService } from "./lib/auth-service";
 import { ALGORITHM, SECRET_KEY } from "./lib/constants";
 import { setServerCookie } from "./server/set-cookie";
@@ -11,7 +10,7 @@ import {
   protectedPaths,
 } from "./routes";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const res = NextResponse.next();
 
