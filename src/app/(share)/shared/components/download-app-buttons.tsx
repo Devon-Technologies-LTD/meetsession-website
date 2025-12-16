@@ -3,14 +3,62 @@
 import { Button } from "@/components/ui/button";
 import { PlayCircle } from "lucide-react";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 
 export function DownloadAppButtons() {
+  const searchParams = useSearchParams();
+  const meetId = searchParams.get("meet_id");
+
+  const tryOpenApp = (storeUrl: string) => {
+    if (!meetId) {
+      // No meeting ID, just open the store
+      window.open(storeUrl, "_blank");
+      return;
+    }
+
+    // Try to open the app with deep link
+    const deepLinkUrl = `meetsession://shared?meet_id=${meetId}`;
+
+    let appOpened = false;
+    const timeout = setTimeout(() => {
+      if (!appOpened) {
+        // App not installed, redirect to store
+        window.location.href = storeUrl;
+      }
+    }, 2000);
+
+    // Detect if app opened
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        appOpened = true;
+        clearTimeout(timeout);
+      }
+    };
+
+    const handleBlur = () => {
+      appOpened = true;
+      clearTimeout(timeout);
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleBlur);
+
+    // Try to open the app
+    window.location.href = deepLinkUrl;
+
+    // Cleanup after timeout
+    setTimeout(() => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleBlur);
+    }, 3000);
+  };
+
   const handleGooglePlayLink = () => {
-    window.open("https://play.google.com/store/apps/details?id=com.meet_session.io", "_blank");
+    tryOpenApp("https://play.google.com/store/apps/details?id=com.meet_session.io");
   };
 
   const handleAppleStoreLink = () => {
-    window.open("https://apps.apple.com/us/app/meetsession/id6751320453", "_blank");
+    tryOpenApp("https://apps.apple.com/us/app/meetsession/id6751320453");
   };
 
   return (
