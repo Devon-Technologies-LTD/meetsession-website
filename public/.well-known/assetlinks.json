@@ -7,6 +7,8 @@
             "namespace": "android_app",
             "package_name": "com.meet_session.io",
             "sha256_cert_fingerprints": [
+                "B9:55:1B:9E:72:2F:33:86:5F:34:23:18:59:91:E5:23:F5:69:9F:A7:92:A4:19:11:53:D0:ED:5F:19:8C:36:30",
+                "E6:7F:76:1B:F9:A2:2C:A1:69:EF:93:A0:EB:02:0B:78:0F:59:38:C4:C8:4C:23:40:BC:30:7E:3D:3F:5D:EA:CF",
                 "af:fe:b1:08:a7:d8:d7:9c:67:dd:89:e2:de:9d:4c:e9:10:0e:3c:46:7a:88:a7:3a:0a:10:ab:d5:41:ca:70:92",
                 "e6:7f:76:1b:f9:a2:2c:a1:69:ef:93:a0:eb:02:0b:78:0f:59:38:c4:c8:4c:23:40:bc:30:7e:3d:3f:5d:ea:cf"
             ]
