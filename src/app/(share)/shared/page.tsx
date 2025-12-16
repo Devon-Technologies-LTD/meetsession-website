@@ -5,6 +5,7 @@ import { BASE_URL } from "@/lib/constants";
 import { AudioPlayer } from "./components/audio-player";
 import { ActionButtons } from "./components/action-buttons";
 import { DownloadAppButtons } from "./components/download-app-buttons";
+import { DeepLinkHandler } from "./components/deep-link-handler";
 
 async function getSharedMeeting(meetId: string): Promise<SharedMeetingResponse> {
   const apiUrl = `${BASE_URL}/share-hub/view-shared/${meetId}`;
@@ -99,6 +100,9 @@ export default async function SharedMeetingPage({
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
+      {/* Deep link handler - automatically redirects to app if installed */}
+      <DeepLinkHandler meetId={meetId} />
+
       <BackAction className="mb-8 cursor-pointer" name={meetingData.title} />
       <div className="relative mb-8 overflow-hidden rounded-xl bg-linear-to-b from-[#146C94]  to-[#22AD78] p-8 text-white shadow-lg">
         <div className="row flex justify-between items-center">
