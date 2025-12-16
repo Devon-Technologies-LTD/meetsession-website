@@ -19,14 +19,33 @@ export function DeepLinkHandler({ meetId }: DeepLinkHandlerProps) {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const isAndroid = /Android/.test(navigator.userAgent);
 
+    // Check if we're in test mode (add ?test=true to URL to test without redirecting)
+    const urlParams = new URLSearchParams(window.location.search);
+    const isTestMode = urlParams.get("test") === "true";
+
+    // Log for testing purposes
+    console.log("🔗 Deep Link Testing:");
+    console.log("  - Deep Link URL:", deepLinkUrl);
+    console.log("  - Device Type:", isIOS ? "iOS" : isAndroid ? "Android" : "Desktop");
+    console.log("  - Will redirect to:", isIOS ? "App Store" : isAndroid ? "Play Store" : "Stay on web");
+    console.log("  - Test Mode:", isTestMode ? "ON (won't redirect)" : "OFF");
+
+    if (isTestMode) {
+      console.log("⚠️ Test mode enabled. Add the deep link to test manually:");
+      console.log("   Copy this URL:", deepLinkUrl);
+      return; // Don't redirect in test mode
+    }
+
     // Try to open the app
     let appOpened = false;
     const timeout = setTimeout(() => {
       if (!appOpened) {
         // App is not installed, redirect to store
         if (isIOS) {
+          console.log("📱 Redirecting to App Store...");
           window.location.href = appStoreUrl;
         } else if (isAndroid) {
+          console.log("📱 Redirecting to Play Store...");
           window.location.href = playStoreUrl;
         }
         // For desktop, do nothing (show web page)
@@ -38,6 +57,7 @@ export function DeepLinkHandler({ meetId }: DeepLinkHandlerProps) {
       if (document.hidden) {
         appOpened = true;
         clearTimeout(timeout);
+        console.log("✅ App opened successfully!");
       }
     };
 
@@ -45,6 +65,7 @@ export function DeepLinkHandler({ meetId }: DeepLinkHandlerProps) {
     const handleBlur = () => {
       appOpened = true;
       clearTimeout(timeout);
+      console.log("✅ App opened successfully!");
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -52,6 +73,7 @@ export function DeepLinkHandler({ meetId }: DeepLinkHandlerProps) {
 
     // Attempt to open the app
     if (isIOS || isAndroid) {
+      console.log("🚀 Attempting to open app...");
       window.location.href = deepLinkUrl;
     }
 
