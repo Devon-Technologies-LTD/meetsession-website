@@ -101,7 +101,7 @@ export default async function SharedMeetingPage({
   return (
     <div className="container mx-auto max-w-7xl px-4 py-8">
       {/* Deep link handler - automatically redirects to app if installed */}
-      <DeepLinkHandler meetId={meetId} />
+      {/* <DeepLinkHandler meetId={meetId} /> */}
 
       <BackAction className="mb-8 cursor-pointer" name={meetingData.title} />
       <div className="relative mb-8 overflow-hidden rounded-xl bg-linear-to-b from-[#146C94]  to-[#22AD78] p-8 text-white shadow-lg">
@@ -124,7 +124,7 @@ export default async function SharedMeetingPage({
       </div>
 
       {/* Action Buttons */}
-      <ActionButtons meetingData={meetingData} />
+      <ActionButtons meetingData={meetingData} meetId={meetId} />
       {/* <AudioPlayer audioUrl={meetingData.audio_link} /> */}
 
       <Card>
