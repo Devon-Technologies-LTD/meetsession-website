@@ -47,9 +47,13 @@ export const usePaystackPayment = () => {
   );
 
   const initialize = useCallback(
-    ({ planId }: { planId: string }) => {
+    ({ tierId, subscriptionType, callbackUrl }: { tierId: string; subscriptionType: string; callbackUrl?: string }) => {
       const formdata = new FormData();
-      formdata.append("plan_id", planId);
+      formdata.append("tier_id", tierId);
+      formdata.append("subscription_type", subscriptionType);
+      if (callbackUrl) {
+        formdata.append("callback_url", callbackUrl);
+      }
       startTransition(() => {
         initAction(formdata);
       });
@@ -75,9 +79,9 @@ export const usePaystackPayment = () => {
 
       // ✅ Dynamically import PaystackPop only when needed
       const PaystackPop = (await import("@paystack/inline-js")).default;
-      
+
       const popup = new PaystackPop();
-      
+
       if (access_code) {
         popup.resumeTransaction(access_code, {
           onSuccess(tranx) {

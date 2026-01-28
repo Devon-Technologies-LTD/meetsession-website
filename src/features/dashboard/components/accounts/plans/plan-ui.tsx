@@ -25,12 +25,16 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { usePlanManagementContext } from "@/features/dashboard/hooks/use-plan-management";
 
+export type TBillingCycle = "monthly" | "quarterly" | "annual";
+
 export function PlanUI<T extends TSubscriptionPlan>({
   plans,
 }: {
   plans?: T[];
 }) {
   const [selectedId, setSelectedId] = useState(plans?.[0].id ?? "");
+  const [billingCycle, setBillingCycle] = useState<TBillingCycle>("monthly");
+
   function updateSelectedId(id: string) {
     setSelectedId(id);
   }
@@ -38,6 +42,27 @@ export function PlanUI<T extends TSubscriptionPlan>({
 
   return (
     <div className="flex flex-col w-full gap-8">
+      <div className="flex justify-center w-full">
+        <div className="flex bg-neutral-100 p-1.5 rounded-full border border-black/5">
+          {(["monthly", "quarterly", "annual"] as TBillingCycle[]).map(
+            (cycle) => (
+              <button
+                key={cycle}
+                onClick={() => setBillingCycle(cycle)}
+                className={cn(
+                  "px-6 py-2 rounded-full text-xs font-semibold transition-all capitalize",
+                  billingCycle === cycle
+                    ? "bg-white text-black shadow-sm"
+                    : "text-neutral-500 hover:text-black",
+                )}
+              >
+                {cycle}
+              </button>
+            ),
+          )}
+        </div>
+      </div>
+
       <PlanUIOptions
         plans={plans}
         selectedId={selectedId}
@@ -45,11 +70,22 @@ export function PlanUI<T extends TSubscriptionPlan>({
       />
       <div className="hidden md:flex gap-2 flex-wrap justify-center">
         {plans?.map((plan) => {
-          return <PlanUIItem plans={plans} plan={plan} key={plan.id} />;
+          return (
+            <PlanUIItem
+              plans={plans}
+              plan={plan}
+              key={plan.id}
+              billingCycle={billingCycle}
+            />
+          );
         })}
       </div>
       <div className="w-full h-full md:hidden">
-        <PlanUIItem plans={plans} plan={selectedPlan ?? plans?.[0]} />
+        <PlanUIItem
+          plans={plans}
+          plan={selectedPlan ?? plans?.[0]}
+          billingCycle={billingCycle}
+        />
       </div>
     </div>
   );
@@ -58,9 +94,11 @@ export function PlanUI<T extends TSubscriptionPlan>({
 export function PlanUIItem<T extends TSubscriptionPlan>({
   plans,
   plan,
+  billingCycle,
 }: {
   plans?: T[];
   plan?: T;
+  billingCycle: TBillingCycle;
 }) {
   const { updateSelectedPlan, updatePaymentStatus, updateTransactionDetails } =
     usePlanManagementContext();
@@ -75,7 +113,19 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const { initialize, initializeState, isInitializing } = initializePayment;
   const { verifyState, isVerifying } = verifyPayment;
 
-  const isFreePlan = plan?.price === 0;
+  const currentPrice =
+    plan?.price ??
+    Number(
+      plan?.features?.find((f) => f.key === `${billingCycle}_subscription`)
+        ?.value ?? 0,
+    );
+
+  const meetingHours =
+    plan?.meeting_hours ??
+    plan?.features?.find((f) => f.key === "join_online_meeting")?.value ??
+    0;
+
+  const isFreePlan = currentPrice === 0;
   const isCurrentPlan = subscription ? subscription.plan_id === plan?.id : null;
 
   const planAction = useCallback(() => {
@@ -97,7 +147,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     } else {
       hasPaid.current = false;
       updatePaymentStatus("payment_initiated");
-      initialize({ planId: plan?.id ?? "" });
+      const subType = `${billingCycle}_subscription`;
+      const callbackUrl = window.location.origin + window.location.pathname;
+      initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
     }
   }, [
     isFreePlan,
@@ -156,7 +208,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
                 transactionId: "",
                 date: new Date(),
                 nextAction: () => {
-                  initialize({ planId: plan?.id ?? "" });
+                  const subType = `${billingCycle}_subscription`;
+                  const callbackUrl = window.location.origin + window.location.pathname;
+                  initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
                 },
               });
               console.log("payment err: ", err);
@@ -164,7 +218,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
                 router.push("/dashboard/accounts/plans/status");
               });
             },
-            onCancel: () => {},
+            onCancel: () => { },
           },
         });
       }
@@ -176,7 +230,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
           description:
             typeof initializeState.errors === "string"
               ? initializeState.errors
-              : initializeState.errors.plan_id,
+              : initializeState.errors.tier_id,
         });
       }
     }
@@ -231,7 +285,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
             <CardTitle className="font-normal">{plan?.name}</CardTitle>
             <CardDescription className="flex items-center w-fit justify-center gap-2">
               <span className="font-bold text-neutral-800 text-xl tracking-tighter">
-                ₦{plan?.price}
+                ₦{currentPrice?.toLocaleString()}
               </span>
 
               {isCurrentPlan && (
@@ -271,17 +325,17 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
           animate={
             isCollapsed
               ? {
-                  height: 0,
-                  opacity: 0,
-                  display: "none",
-                  transition: { duration: 0.2 },
-                }
+                height: 0,
+                opacity: 0,
+                display: "none",
+                transition: { duration: 0.2 },
+              }
               : {
-                  display: "block",
-                  height: "auto",
-                  opacity: 1,
-                  transition: { duration: 0.4 },
-                }
+                display: "block",
+                height: "auto",
+                opacity: 1,
+                transition: { duration: 0.4 },
+              }
           }
         >
           <CardContent className="flex flex-col w-full gap-4 h-full">
@@ -291,28 +345,40 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
               </div>
 
               <p className="min-h-fit font-semibold">
-                {plan?.meeting_hours}hrs
+                {meetingHours === -1 ? "Unlimited" : `${meetingHours}hrs`}
               </p>
             </div>
 
-            {plan?.features?.map((feat, index) => {
-              if (index === 0) {
-                return null;
-              }
+            {plan?.features
+              ?.filter(
+                (feat) =>
+                  !feat.key.includes("_subscription") &&
+                  feat.key !== "join_online_meeting",
+              )
+              .map((feat) => {
+                return (
+                  <div
+                    key={feat.key}
+                    className="w-full text-xs font-normal h-fit flex items-center gap-2"
+                  >
+                    <div className="w-full h-fit flex flex-col gap-1 flex-1">
+                      <span>{feat.label}</span>
+                    </div>
 
-              return (
-                <div
-                  key={feat.key}
-                  className="w-full text-xs font-normal h-fit flex items-center gap-2"
-                >
-                  <div className="w-full h-fit flex flex-col gap-1 flex-1">
-                    <span>{feat.label}</span>
+                    <div className="min-h-fit font-semibold capitalize">
+                      {typeof feat.value === "boolean" ? (
+                        feat.value ? (
+                          <CircleCheckIcon className="w-4 h-4 text-brand-green" />
+                        ) : (
+                          "N/A"
+                        )
+                      ) : (
+                        feat.value
+                      )}
+                    </div>
                   </div>
-
-                  <p className="min-h-fit font-semibold">{feat.status}</p>
-                </div>
-              );
-            })}
+                );
+              })}
           </CardContent>
         </m.div>
       </Card>
