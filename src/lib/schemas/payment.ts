@@ -1,7 +1,9 @@
 import z from "zod";
 
 export const initiatePaymentSchema = z.object({
-  plan_id: z.string({ error: "Plan ID is required" }),
+  tier_id: z.string({ error: "Tier ID is required" }),
+  subscription_type: z.string({ error: "Subscription type is required" }),
+  callback_url: z.string().optional(),
 });
 
 export type TInitiatePayment = z.infer<typeof initiatePaymentSchema>;

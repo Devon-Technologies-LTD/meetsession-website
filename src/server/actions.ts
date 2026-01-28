@@ -220,7 +220,7 @@ export async function initializePaymentAction(
     const clientErr: {
       success: false;
       message: string;
-      errors: { plan_id?: string[] };
+      errors: { tier_id?: string[] };
       data: null;
       initialData: {
         [k: string]: FormDataEntryValue;
@@ -228,17 +228,21 @@ export async function initializePaymentAction(
     } = {
       success: false,
       message: result.error.message,
-      errors: { plan_id: errs.plan_id ?? undefined },
+      errors: { tier_id: errs.tier_id ?? undefined },
       data: null,
       initialData: dirty,
     };
     return clientErr;
   }
-
+  // tiers/initiate-payment
   const res = await apiClient.authenticated<TPaymentInitResponse>(
-    `/subscriptions/initiate-payment/${result.data.plan_id}`,
+    `/tiers/initiate-payment`,
     {
-      method: "GET",
+      method: "POST",
+      data: {
+        tier_id: result.data.tier_id,
+        subscription_type: result.data.subscription_type,
+      },
     },
   );
   if (!res.ok) {

@@ -22,12 +22,19 @@ export async function retrievePlansAction(params?: retrievePlansParams) {
     message: string;
     data: TSubscriptionPlan[];
   };
+  // const res = await apiClient.authenticated<TResponse>(
+  //   `/subscriptions${params?.withFeature && "?with_feature=true"}`,
+  //   {
+  //     method: "GET",
+  //   },
+  // );
   const res = await apiClient.authenticated<TResponse>(
-    `/subscriptions${params?.withFeature && "?with_feature=true"}`,
+    `/tiers${params?.withFeature && "?with_feature=true"}`,
     {
       method: "GET",
     },
   );
+  // {{MS_staging}}/tiers?with_feature=true
 
   if (!res.ok) {
     return {
