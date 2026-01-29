@@ -245,6 +245,7 @@ export async function initializePaymentAction(
       },
     },
   );
+  
   if (!res.ok) {
     return {
       success: res.ok,
