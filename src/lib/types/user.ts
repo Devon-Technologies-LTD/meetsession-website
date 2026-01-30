@@ -32,8 +32,14 @@ export type TFullUser = {
 };
 
 export type TLoginResponse = {
-  token: TTokens;
+  token: string;
+  refresh_token: string;
   user_details: TUser;
+  language?: {
+    name: string;
+    code: string;
+    country_code: string;
+  };
 };
 
 export type TResentOTPResponse = {

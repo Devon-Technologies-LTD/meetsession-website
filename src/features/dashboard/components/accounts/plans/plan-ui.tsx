@@ -113,12 +113,12 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const { initialize, initializeState, isInitializing } = initializePayment;
   const { verifyState, isVerifying } = verifyPayment;
 
+  const featurePrice = plan?.features?.find(
+    (f) => f.key === `${billingCycle}_subscription`,
+  )?.value;
+
   const currentPrice =
-    plan?.price ??
-    Number(
-      plan?.features?.find((f) => f.key === `${billingCycle}_subscription`)
-        ?.value ?? 0,
-    );
+    featurePrice !== undefined ? Number(featurePrice) : (plan?.price ?? 0);
 
   const meetingHours =
     plan?.meeting_hours ??
@@ -149,6 +149,8 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       updatePaymentStatus("payment_initiated");
       const subType = `${billingCycle}_subscription`;
       const callbackUrl = window.location.origin + window.location.pathname;
+      console.log(subType);
+      console.log(plan?.id);
       initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
     }
   }, [
@@ -159,7 +161,8 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     router,
     updatePaymentStatus,
     updateSelectedPlan,
-    updateTransactionDetails /*updateStatus*/,
+    updateTransactionDetails, /*updateStatus*/
+    billingCycle,
   ]);
 
   // verify effect
