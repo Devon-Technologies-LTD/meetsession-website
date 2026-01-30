@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { loginSchema, TLogin } from "@/lib/schemas";
 import {
   Form,
@@ -20,6 +19,7 @@ import { TLoginResponse } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { Label } from "./ui/label";
 import { PasswordField } from "./ui/password-field";
+import { GoogleSignInButton } from "./ui/google-signin-button";
 
 type LoginFormProps = {
   onSuccessAction?: (response?: TLoginResponse | null) => void;
@@ -120,6 +120,29 @@ export function SigninForm({ onSuccessAction: onSuccess }: LoginFormProps) {
           )}
           Login
         </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
+        <GoogleSignInButton
+          onSuccess={(response) => {
+            toast.success("Successfully signed in with Google!");
+            onSuccess?.(response?.data);
+          }}
+          onError={(error) => {
+            toast.error(
+              error?.error || "Failed to sign in with Google"
+            );
+          }}
+        />
       </form>
     </div>
   );
