@@ -224,3 +224,29 @@ export async function retrieveSubscriptionAction() {
     };
   }
 }
+export async function retrieveTierAction() {
+  const res = await apiClient.authenticated<{
+    message: string;
+    data: TUserCurrentPlan;
+  }>("/tiers/fetch-tier", {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    return {
+      success: res.ok,
+      data: null,
+      errors: res.error,
+      message: "Failed to retrieve subscription",
+      status: res.status,
+    };
+  } else {
+    return {
+      success: res.ok,
+      data: res.data,
+      errors: null,
+      message: "Successfully retrieved subscription",
+      status: res.status,
+    };
+  }
+}
