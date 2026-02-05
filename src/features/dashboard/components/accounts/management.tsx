@@ -27,7 +27,7 @@ export function Management(props: TManagementProps) {
   const { updateSubscription, subscription } = useUserSubscription();
   const phoneNumber = "+2348109435439"; // 
   useEffect(() => {
-    fetch(`/api/v1/subscription/current-subscription`, {
+    fetch(`/api/v1/tier`, {
       method: "GET",
     })
       .then((res) => res.json())
