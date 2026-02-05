@@ -245,7 +245,7 @@ export async function initializePaymentAction(
       },
     },
   );
-  
+
   if (!res.ok) {
     return {
       success: res.ok,
@@ -278,7 +278,7 @@ export async function verifyPaymentAction(_prev: unknown, formdata: FormData) {
   }
 
   const res = await apiClient.authenticated<TPaymnetVerifyResponse>(
-    `/subscriptions/verify-payment/${result.data.reference}`,
+    `/tiers/verify-payment/${result.data.reference}`,
     {
       method: "GET",
     },
