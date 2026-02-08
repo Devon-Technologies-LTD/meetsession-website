@@ -410,9 +410,9 @@ export function PlanUIOptions<T extends TSubscriptionPlan>({
             <div
               key={plan.id}
               className={cn(
-                "p-2",
+                "p-4",
                 "hover:cursor-pointer",
-                "h-20 w-16 rounded-lg bg-neutral-100",
+                "h-20 w-24 rounded-lg bg-neutral-100",
                 "flex flex-col items-center justify-between",
                 "transition-all scale-100 text-neutral-800",
                 {
