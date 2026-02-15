@@ -69,7 +69,24 @@ export function Management(props: TManagementProps) {
       </Tile>
 
       <div className="flex flex-col md:flex-row gap-5 items-start w-full h-full min-h-full">
+
+        
         <div className="w-full h-fit flex flex-col gap-4">
+           <p className="text-sm text-neutral-400 font-medium">
+            All Meetings
+          </p>
+          <Tile className="bg-neutral-100">
+            <Link href="/dashboard/folders">
+              <Tile.TileItem
+                prefixIcon={<CircleUserRoundIcon className="h-6 w-6" />}
+                suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+              >
+                <p className="text-sm font-semibold">Meeting</p>
+                <p className="text-xs text-neutral-500">See all meetings</p>
+              </Tile.TileItem>
+            </Link>
+          </Tile>
+
           <p className="text-sm text-neutral-400 font-medium">
             Profile & Personal
           </p>
@@ -93,9 +110,7 @@ export function Management(props: TManagementProps) {
                 <p className="text-xs text-neutral-500">Update your password</p>
               </Tile.TileItem>
             </Link>
-
           </Tile>
-
         </div>
 
         <div className="flex flex-col gap-5 items-start w-full h-full min-h-full">
