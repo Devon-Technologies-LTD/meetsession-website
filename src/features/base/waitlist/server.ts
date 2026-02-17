@@ -3,12 +3,7 @@
 
 import z from "zod";
 import { waitlistSchema } from "./lib/types"
-import { createApiClient } from "@/lib/api-client";
-import { BASE_URL } from "@/lib/constants";
-
-const apiClient = createApiClient({
-  baseURL: BASE_URL,
-});
+import { apiClient } from "@/lib/server-api";
 
 
 export async function joinWaitlistAction(formdata: FormData) {

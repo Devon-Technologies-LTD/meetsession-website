@@ -1,11 +1,6 @@
 "use server";
 
-import { createApiClient } from "@/lib/api-client";
-import { BASE_URL } from "@/lib/constants";
-
-const apiClient = createApiClient({
-  baseURL: BASE_URL,
-});
+import { apiClient } from "@/lib/server-api";
 
 export type TChatSessionItem = {
   id: string;
