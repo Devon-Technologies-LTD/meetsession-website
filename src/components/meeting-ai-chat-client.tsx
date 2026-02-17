@@ -30,13 +30,13 @@ function renderInlineMarkdown(text: string, keyPrefix: string): ReactNode[] {
       nodes.push(
         <strong key={`${keyPrefix}-b-${idx}`}>
           {token.slice(2, -2)}
-        </strong>,
+        </strong>
       );
     } else if (token.startsWith("*")) {
       nodes.push(
         <em key={`${keyPrefix}-i-${idx}`}>
           {token.slice(1, -1)}
-        </em>,
+        </em>
       );
     }
 
@@ -51,95 +51,93 @@ function renderInlineMarkdown(text: string, keyPrefix: string): ReactNode[] {
   return nodes;
 }
 
-function renderMarkdown(content: string): ReactNode {
+function renderMarkdown(content: string, msgId: string): ReactNode {
   const lines = content.split("\n");
   const elements: ReactNode[] = [];
-  let listType: "ul" | "ol" | null = null;
-  let listItems: string[] = [];
-  let listIndex = 0;
+  let listItems: ReactNode[] = [];
+  let listKey = 0;
 
-  function flushList() {
-    if (!listType || listItems.length === 0) return;
-    const items = listItems.map((item, index) => (
-      <li key={`li-${listIndex}-${index}`}>{item}</li>
-    ));
-    if (listType === "ul") {
+  const flushList = () => {
+    if (listItems.length > 0) {
       elements.push(
-        <ul key={`ul-${listIndex}`} className="list-disc ml-4 space-y-1">
-          {items}
-        </ul>,
+        <ul key={`${msgId}-ul-${listKey++}`} className="list-disc list-inside space-y-0.5 my-1">
+          {listItems}
+        </ul>
       );
-    } else {
-      elements.push(
-        <ol key={`ol-${listIndex}`} className="list-decimal ml-4 space-y-1">
-          {items}
-        </ol>,
-      );
+      listItems = [];
     }
-    listType = null;
-    listItems = [];
-    listIndex += 1;
-  }
+  };
 
-  lines.forEach((raw, index) => {
-    const line = raw.trim();
-    if (line === "") {
+  lines.forEach((line, i) => {
+    const key = `${msgId}-line-${i}`;
+
+    // H3
+    if (line.startsWith("### ")) {
       flushList();
-      return;
-    }
-
-    const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
-    if (headingMatch) {
-      const level = headingMatch[1].length;
-      const text = headingMatch[2];
-      flushList();
-      const headingContent = renderInlineMarkdown(text, `h-${index}`);
-      const HeadingTag = level <= 3 ? ("h3" as const) : ("p" as const);
       elements.push(
-        <HeadingTag
-          key={`h-${index}`}
-          className="font-semibold text-sm mb-1"
-        >
-          {headingContent}
-        </HeadingTag>,
+        <p key={key} className="font-semibold text-sm mt-2 mb-0.5">
+          {renderInlineMarkdown(line.slice(4), key)}
+        </p>
       );
-      return;
     }
-
-    const orderedMatch = line.match(/^(\d+)\.\s+(.*)$/);
-    if (orderedMatch) {
-      const item = orderedMatch[2];
-      if (listType !== "ol") {
+    // H2
+    else if (line.startsWith("## ")) {
+      flushList();
+      elements.push(
+        <p key={key} className="font-bold text-sm mt-2 mb-0.5">
+          {renderInlineMarkdown(line.slice(3), key)}
+        </p>
+      );
+    }
+    // H1
+    else if (line.startsWith("# ")) {
+      flushList();
+      elements.push(
+        <p key={key} className="font-bold text-base mt-2 mb-1">
+          {renderInlineMarkdown(line.slice(2), key)}
+        </p>
+      );
+    }
+    // Bullet list (- or *)
+    else if (/^[-*]\s/.test(line)) {
+      listItems.push(
+        <li key={key}>
+          {renderInlineMarkdown(line.slice(2), key)}
+        </li>
+      );
+    }
+    // Numbered list
+    else if (/^\d+\.\s/.test(line)) {
+      const text = line.replace(/^\d+\.\s/, "");
+      if (listItems.length === 0) {
+        // switch to ordered — flush any prior ul first
         flushList();
-        listType = "ol";
       }
-      listItems.push(item);
-      return;
+      listItems.push(
+        <li key={key} style={{ listStyleType: "decimal" }}>
+          {renderInlineMarkdown(text, key)}
+        </li>
+      );
     }
-
-    const unorderedMatch = line.match(/^[-*]\s+(.*)$/);
-    if (unorderedMatch) {
-      const item = unorderedMatch[1];
-      if (listType !== "ul") {
-        flushList();
-        listType = "ul";
-      }
-      listItems.push(item);
-      return;
+    // Empty line
+    else if (line.trim() === "") {
+      flushList();
     }
-
-    flushList();
-    elements.push(
-      <p key={`p-${index}`} className="whitespace-pre-wrap">
-        {renderInlineMarkdown(line, `p-${index}`)}
-      </p>,
-    );
+    // Normal paragraph line
+    else {
+      flushList();
+      elements.push(
+        <p key={key} className="leading-snug">
+          {renderInlineMarkdown(line, key)}
+        </p>
+      );
+    }
   });
 
   flushList();
-
-  return <>{elements}</>;
+  return <div className="space-y-0.5">{elements}</div>;
 }
+
 
 export function MeetingAIChatClient({ meetingId, initialChatData }: Props) {
   const [chatData, setChatData] = useState<TMeetingChatData | null>(
@@ -200,8 +198,8 @@ export function MeetingAIChatClient({ meetingId, initialChatData }: Props) {
     <div className="flex flex-col gap-4 border border-neutral-200 rounded-2xl p-4 h-[60vh]">
       <div className="flex-1 overflow-y-auto">
         {!chatData ||
-        !chatData.chat_session ||
-        chatData.chat_session.length === 0 ? (
+          !chatData.chat_session ||
+          chatData.chat_session.length === 0 ? (
           <div className="h-full flex items-center justify-center">
             <p className="text-xs text-neutral-500 text-center">
               Ask a question about this meeting to start chatting with AI.
@@ -212,18 +210,17 @@ export function MeetingAIChatClient({ meetingId, initialChatData }: Props) {
             {chatData.chat_session.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex ${
-                  msg.role === "user" ? "justify-end" : "justify-start"
-                }`}
+                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-2xl px-3 py-2 ${
-                    msg.role === "user"
-                      ? "bg-brand-blue text-white rounded-br-sm"
-                      : "bg-neutral-100 text-neutral-900 rounded-bl-sm"
-                  }`}
+                  className={`max-w-[80%] rounded-2xl px-3 py-2 ${msg.role === "user"
+                    ? "bg-brand-blue text-white rounded-br-sm"
+                    : "bg-neutral-100 text-neutral-900 rounded-bl-sm"
+                    }`}
                 >
-                  {renderMarkdown(msg.content)}
+                  {msg.role === "assistant"
+                    ? renderMarkdown(msg.content, msg.id)
+                    : msg.content}
                 </div>
               </div>
             ))}

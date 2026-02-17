@@ -70,9 +70,9 @@ export function Management(props: TManagementProps) {
 
       <div className="flex flex-col md:flex-row gap-5 items-start w-full h-full min-h-full">
 
-        
+
         <div className="w-full h-fit flex flex-col gap-4">
-           <p className="text-sm text-neutral-400 font-medium">
+          <p className="text-sm text-neutral-400 font-medium">
             All Meetings
           </p>
           <Tile className="bg-neutral-100">
