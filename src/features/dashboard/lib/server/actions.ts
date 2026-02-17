@@ -1,17 +1,12 @@
 "use server";
 
-import { createApiClient } from "@/lib/api-client";
-import { BASE_URL } from "@/lib/constants";
+import { apiClient } from "@/lib/server-api";
 import { TSubscriptionPlan } from "@/lib/types";
 import { TQueryParams } from "@/lib/types";
 import { updateProfileSchema } from "../schemas";
 import { TProfile } from "../types";
 import { revalidatePath } from "next/cache";
 import z from "zod";
-
-const apiClient = createApiClient({
-  baseURL: BASE_URL,
-});
 
 type retrievePlansParams = TQueryParams & {
   withFeature?: boolean;

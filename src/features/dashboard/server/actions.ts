@@ -1,24 +1,11 @@
 "use server";
 
-import { createApiClient } from "@/lib/api-client";
+import { apiClient, auth } from "@/lib/server-api";
 import { updateProfileSchema } from "../lib/schemas";
-import { ALGORITHM, BASE_URL, SECRET_KEY } from "@/lib/constants";
-import { setServerCookie } from "@/server/set-cookie";
 import { TProfile, TProfileResponse } from "../lib/types";
-import { createAuthService } from "@/lib/auth-service";
 import { revalidatePath } from "next/cache";
 import z from "zod";
 import { TUserCurrentPlan } from "@/lib/types";
-
-const apiClient = createApiClient({
-  baseURL: BASE_URL,
-});
-
-const auth = createAuthService({
-  secret: SECRET_KEY,
-  algorithm: ALGORITHM,
-  setCookie: setServerCookie,
-});
 
 export async function getUser() {
   return await auth.getUserDetails();
