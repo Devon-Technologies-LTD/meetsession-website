@@ -50,7 +50,7 @@ export function GoogleSignInButton({ onSuccess, onError }: GoogleSignInButtonPro
       try {
         const idToken = response.credential;
         console.log("ID Token received:", idToken ? idToken.substring(0, 20) + "..." : "null");
-        
+
         console.log("Sending request to backend...");
         const res = await fetch("/api/v1/auth/google", {
           method: "POST",

@@ -19,6 +19,7 @@ type ApiClientOptions = {
   cookieNames?: { access?: string; refresh?: string };
   timeout?: number; // request timeout in ms (default: 10000)
   logger?: { log: (msg: string) => void; error: (msg: string) => void };
+  skipTokenStorage?: boolean;
 };
 
 type RequestOptions<TData = unknown> = {
@@ -62,6 +63,7 @@ class ApiClient {
   private enableRefresh: boolean;
   private axios: AxiosInstance;
   private logger?: ApiClientOptions["logger"];
+  private skipTokenStorage: boolean;
 
   // refresh lock
   private refreshPromise: Promise<string | null> | null = null;
@@ -78,6 +80,7 @@ class ApiClient {
     };
     this.enableRefresh = options.enableRefresh ?? false;
     this.logger = options.logger;
+    this.skipTokenStorage = options.skipTokenStorage ?? false;
 
     this.axios = axios.create({
       baseURL: this.baseURL,
@@ -196,11 +199,16 @@ class ApiClient {
     if (!this.refreshPromise) {
       this.refreshPromise = (async () => {
         const tokens = await this.refreshToken!();
-        if (tokens?.accessToken) {
-          await this.storeToken(this.cookieNames.access, tokens.accessToken);
-        }
-        if (tokens?.refreshToken) {
-          await this.storeToken(this.cookieNames.refresh, tokens.refreshToken);
+        if (!this.skipTokenStorage) {
+          if (tokens?.accessToken) {
+            await this.storeToken(this.cookieNames.access, tokens.accessToken);
+          }
+          if (tokens?.refreshToken) {
+            await this.storeToken(
+              this.cookieNames.refresh,
+              tokens.refreshToken,
+            );
+          }
         }
         return tokens?.accessToken ?? null;
       })();

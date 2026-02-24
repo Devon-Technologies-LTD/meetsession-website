@@ -9,11 +9,7 @@ import {
   verifyEmailSchema,
   verifyPaymentSchema,
 } from "@/lib/schemas";
-import { createApiClient } from "@/lib/api-client";
-import { BASE_URL } from "@/lib/constants";
-import { createAuthService } from "@/lib/auth-service";
-import { SECRET_KEY, ALGORITHM } from "@/lib/constants";
-import { setServerCookie } from "./set-cookie";
+import { apiClient, auth } from "@/lib/server-api";
 import {
   TFullUser,
   TLoginResponse,
@@ -25,15 +21,7 @@ import {
   TPaymnetVerifyResponse,
 } from "@/features/dashboard/lib/types";
 
-const apiClient = createApiClient({
-  baseURL: BASE_URL,
-});
 
-const auth = createAuthService({
-  secret: SECRET_KEY,
-  algorithm: ALGORITHM,
-  setCookie: setServerCookie,
-});
 
 // user signin
 export async function signoutAction() {
