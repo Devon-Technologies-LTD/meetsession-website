@@ -16,14 +16,14 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={cn(
-        "min-h-full h-full w-full z-0",
-        "relative overflow-hidden",
+        "min-h-dvh w-full z-0",
+        "relative overflow-x-hidden",
         "bg-linear-to-b via-gray-200 via-20% to-white to-30%",
         generateFrom(),
       )}
     >
       <AuthEllipses className="absolute -top-28 left-1/2 -translate-x-1/2 h-72 w-120 md:w-full -z-0" />
-      <div className="w-full h-full z-10 flex flex-col gap-6">
+      <div className="w-full min-h-dvh z-10 flex flex-col gap-6">
         {children}
 
         <p className="text-muted-foreground text-center text-xs">
