@@ -62,7 +62,10 @@ export async function loginAction(formdata: FormData) {
     };
   } else {
     await auth.storeTokens({
-      tokens: { accessToken: res.data.token },
+      tokens: {
+        accessToken: res.data.token,
+        refreshToken: res.data.refresh_token,
+      },
       user: res.data.user_details,
     });
     return {
