@@ -127,17 +127,28 @@ class ApiClient {
 
     if (this.getAccessToken) {
       retrieved = await this.getAccessToken();
+      if (!retrieved) return null;
+
+      const key = new TextEncoder().encode(SECRET_KEY);
+      const decrypted = await tokenDecryptor({
+        algorithm: ALGORITHM,
+        encrypted: retrieved,
+        key,
+      });
+
+      // `getAccessToken` may return either a raw JWT or an encrypted cookie payload.
+      token = decrypted?.token ?? retrieved;
     } else {
       const cookieStore = await cookies();
       retrieved = cookieStore.get(this.cookieNames.access)?.value ?? null;
+      const key = new TextEncoder().encode(SECRET_KEY);
+      const decrypted = await tokenDecryptor({
+        algorithm: ALGORITHM,
+        encrypted: retrieved,
+        key,
+      });
+      token = decrypted?.token ?? null;
     }
-    const key = new TextEncoder().encode(SECRET_KEY);
-    const decrypted = await tokenDecryptor({
-      algorithm: ALGORITHM,
-      encrypted: retrieved,
-      key,
-    });
-    token = decrypted?.token ?? null;
 
     if (!token) return null;
 

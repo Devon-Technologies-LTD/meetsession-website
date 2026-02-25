@@ -17,18 +17,21 @@ export async function retrievePlansAction(params?: retrievePlansParams) {
     message: string;
     data: TSubscriptionPlan[];
   };
+  const withFeatureQuery = params?.withFeature ? "?with_feature=true" : "";
   // const res = await apiClient.authenticated<TResponse>(
-  //   `/subscriptions${params?.withFeature && "?with_feature=true"}`,
+  //   `/subscriptions${withFeatureQuery}`,
   //   {
   //     method: "GET",
   //   },
   // );
   const res = await apiClient.authenticated<TResponse>(
-    `/tiers${params?.withFeature && "?with_feature=true"}`,
+    `/tiers${withFeatureQuery}`,
     {
       method: "GET",
     },
   );
+
+  console.log(res);
   // {{MS_staging}}/tiers?with_feature=true
 
   if (!res.ok) {
