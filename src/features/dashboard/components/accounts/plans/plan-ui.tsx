@@ -24,13 +24,16 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { usePlanManagementContext } from "@/features/dashboard/hooks/use-plan-management";
+import { trialStartAction } from "@/server/actions";
 
 export type TBillingCycle = "monthly" | "quarterly" | "annual";
 
 export function PlanUI<T extends TSubscriptionPlan>({
   plans,
+  isTrialEligible,
 }: {
   plans?: T[];
+  isTrialEligible?: boolean;
 }) {
   const [selectedId, setSelectedId] = useState(plans?.[0].id ?? "");
   const [billingCycle, setBillingCycle] = useState<TBillingCycle>("monthly");
@@ -76,6 +79,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
               plan={plan}
               key={plan.id}
               billingCycle={billingCycle}
+              isTrialEligible={isTrialEligible}
             />
           );
         })}
@@ -85,6 +89,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
           plans={plans}
           plan={selectedPlan ?? plans?.[0]}
           billingCycle={billingCycle}
+          isTrialEligible={isTrialEligible}
         />
       </div>
     </div>
@@ -95,10 +100,12 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   plans,
   plan,
   billingCycle,
+  isTrialEligible,
 }: {
   plans?: T[];
   plan?: T;
   billingCycle: TBillingCycle;
+  isTrialEligible?: boolean;
 }) {
   const { updateSelectedPlan, updatePaymentStatus, updateTransactionDetails } =
     usePlanManagementContext();
@@ -112,6 +119,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     usePaystackPayment();
   const { initialize, initializeState, isInitializing } = initializePayment;
   const { verifyState, isVerifying } = verifyPayment;
+  const [isStartingTrial, setIsStartingTrial] = useState(false);
 
   const featurePrice = plan?.features?.find(
     (f) => f.key === `${billingCycle}_subscription`,
@@ -125,14 +133,43 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     plan?.features?.find((f) => f.key === "join_online_meeting")?.value ??
     0;
 
-  const isFreePlan = currentPrice === 0;
+  const isFreePlan = Boolean(isTrialEligible || currentPrice === 0);
   const isCurrentPlan = subscription ? subscription.plan_id === plan?.id : null;
 
-  const planAction = useCallback(() => {
+  const planAction = useCallback(async () => {
     const selectedPlan = plans?.find(
       (p) => p.id === plan?.id,
     ) as TSubscriptionPlan;
     updateSelectedPlan(selectedPlan);
+
+    if (isTrialEligible && plan?.id) {
+      setIsStartingTrial(true);
+      const formdata = new FormData();
+      formdata.append("tier_id", plan.id);
+      formdata.append("coupon_code", "");
+
+      const trialRes = await trialStartAction(undefined, formdata);
+      setIsStartingTrial(false);
+
+      if (trialRes.success) {
+        toast.success("Free trial activated");
+        updatePaymentStatus("not_paying");
+        updateTransactionDetails({
+          status: "successful",
+          nextAction: () => {
+            console.log("success next action: launch MeetSession mobile app");
+          },
+        });
+        router.push("/dashboard/accounts/plans/status");
+      } else {
+        toast.error(
+          typeof trialRes.errors === "string"
+            ? trialRes.errors
+            : trialRes.message,
+        );
+      }
+      return;
+    }
 
     if (isFreePlan) {
       updatePaymentStatus("not_paying");
@@ -157,6 +194,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     isFreePlan,
     plan?.id,
     initialize,
+    isTrialEligible,
     plans,
     router,
     updatePaymentStatus,
@@ -261,10 +299,14 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         size="pill"
         variant="default"
         className="h-14 w-full relative overflow-hidden disabled:pointer-events-none"
-        disabled={isCurrentPlan || isInitializing || isVerifying}
+        disabled={isCurrentPlan || isInitializing || isVerifying || isStartingTrial}
       >
-        {(isInitializing || isVerifying) && <Spinner />}
-        {isFreePlan ? "Select Plan" : "Proceed to Payment"}
+        {(isInitializing || isVerifying || isStartingTrial) && <Spinner />}
+        {isStartingTrial
+          ? "Activating Trial..."
+          : isFreePlan
+            ? "Select Plan"
+            : "Proceed to Payment"}
       </Button>
     );
   }

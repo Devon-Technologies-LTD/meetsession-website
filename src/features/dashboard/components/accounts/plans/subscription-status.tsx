@@ -25,6 +25,22 @@ export function SubscriptionStatus() {
 const PaymentStatusReportWrapper = () => {
   const router = useRouter();
   const { transactionDetails, selectedPlan } = usePlanManagementContext();
+
+  function handleProceedWithApp() {
+    if (typeof window === "undefined") return;
+    const deepLinkUrl = "meetsession://";
+    const appStoreUrl = "https://apps.apple.com/us/app/meetsession/id6751320453";
+    const playStoreUrl =
+      "https://play.google.com/store/apps/details?id=com.meetsession.app";
+    const isAndroid = /android/i.test(navigator.userAgent);
+    const storeUrl = isAndroid ? playStoreUrl : appStoreUrl;
+
+    window.location.href = deepLinkUrl;
+    window.setTimeout(() => {
+      window.location.href = storeUrl;
+    }, 1500);
+  }
+
   function renderPaymentDetails() {
     return (
       <div className="w-full flex flex-col gap-3.5">
@@ -148,6 +164,16 @@ const PaymentStatusReportWrapper = () => {
           >
             {transactionDetails?.status}
           </Button>
+
+          {transactionDetails?.status === "successful" && (
+            <Button
+              size="pill"
+              onClick={handleProceedWithApp}
+              className="h-14 w-full bg-black text-white"
+            >
+              Proceed with App
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import {
   loginSchema,
   resendOTPSchema,
   signupSchema,
+  trialStartSchema,
   verifyEmailSchema,
   verifyPaymentSchema,
 } from "@/lib/schemas";
@@ -289,4 +290,49 @@ export async function verifyPaymentAction(_prev: unknown, formdata: FormData) {
       message: "Successful request",
     };
   }
+}
+
+export async function trialStartAction(_prev: unknown, formdata: FormData) {
+  const dirty = Object.fromEntries(formdata);
+  const result = trialStartSchema.safeParse(dirty);
+
+  if (!result.success) {
+    const errs = z.flattenError(result.error).fieldErrors;
+    return {
+      success: false,
+      message: result.error.message,
+      errors: errs,
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  const res = await apiClient.authenticated<{ message: string; data: null }>(
+    "/tiers/trial-start",
+    {
+      method: "POST",
+      data: {
+        tier_id: result.data.tier_id,
+        coupon_code: result.data.coupon_code ?? "",
+      },
+    },
+  );
+
+  if (!res.ok) {
+    return {
+      success: false,
+      errors: res.error,
+      message: "Failed request",
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  return {
+    success: true,
+    data: res.data,
+    errors: null,
+    message: "Successful request",
+    initialData: dirty,
+  };
 }
