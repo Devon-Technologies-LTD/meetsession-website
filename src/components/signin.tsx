@@ -150,8 +150,14 @@ export function SigninForm({ onSuccessAction: onSuccess }: LoginFormProps) {
 
 export function Signin() {
   const router = useRouter();
+  const DEFAULT_TIER_ID = "00000000-0000-0000-0000-000000000000";
   // success handler
-  function onSuccess() {
+  function onSuccess(response?: TLoginResponse | null) {
+    const tierId = response?.user_details?.tier_id;
+    if (tierId === DEFAULT_TIER_ID) {
+      router.push("/dashboard/accounts/plans");
+      return;
+    }
     router.push(`/dashboard/accounts`);
   }
 
