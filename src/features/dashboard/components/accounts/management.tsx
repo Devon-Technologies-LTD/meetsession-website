@@ -15,7 +15,7 @@ import { LogoutButton } from "@/components/ui/logout-button";
 import Link from "next/link";
 import { ProfileImage } from "@/components/ui/profile-image";
 import { ManageAccountIcon } from "@/components/icons/manage-account-icon";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useUserSubscription } from "@/context/use-user-subscription";
 
 type TManagementProps = {
@@ -25,6 +25,7 @@ type TManagementProps = {
 };
 export function Management(props: TManagementProps) {
   const { updateSubscription, subscription } = useUserSubscription();
+  const [showAllMeetings, setShowAllMeetings] = useState(false);
   const phoneNumber = "+2348109435439"; // 
   useEffect(() => {
     fetch(`/api/v1/tier`, {
@@ -43,6 +44,14 @@ export function Management(props: TManagementProps) {
         updateSubscription(undefined);
       });
   }, [updateSubscription]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const { origin, hostname } = window.location;
+    const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
+    const isAllowedProd = origin === "https://meetsession-website.vercel.app";
+    setShowAllMeetings(isLocalHost || isAllowedProd);
+  }, []);
 
   const planName = subscription?.plan_snapshot.name;
 
@@ -72,20 +81,24 @@ export function Management(props: TManagementProps) {
 
 
         <div className="w-full h-fit flex flex-col gap-4">
-          <p className="text-sm text-neutral-400 font-medium">
-            All Meetings
-          </p>
-          <Tile className="bg-neutral-100">
-            <Link href="/dashboard/folders">
-              <Tile.TileItem
-                prefixIcon={<CircleUserRoundIcon className="h-6 w-6" />}
-                suffixIcon={<CaretRightIcon className="w-3 h-3" />}
-              >
-                <p className="text-sm font-semibold">Meeting</p>
-                <p className="text-xs text-neutral-500">See all meetings</p>
-              </Tile.TileItem>
-            </Link>
-          </Tile>
+          {showAllMeetings && (
+            <>
+              <p className="text-sm text-neutral-400 font-medium">
+                All Meetings
+              </p>
+              <Tile className="bg-neutral-100">
+                <Link href="/dashboard/folders">
+                  <Tile.TileItem
+                    prefixIcon={<CircleUserRoundIcon className="h-6 w-6" />}
+                    suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+                  >
+                    <p className="text-sm font-semibold">Meeting</p>
+                    <p className="text-xs text-neutral-500">See all meetings</p>
+                  </Tile.TileItem>
+                </Link>
+              </Tile>
+            </>
+          )}
 
           <p className="text-sm text-neutral-400 font-medium">
             Profile & Personal

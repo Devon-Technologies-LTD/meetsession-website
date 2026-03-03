@@ -40,6 +40,9 @@ export const userSchema = z.object({
   is_onboarded: z.boolean(),
   user_type: z.string(),
   app_version: z.string().optional(),
+  subscription_status: z.string().optional(),
+  subscription_type: z.string().optional(),
+  tier_id: z.string().optional(),
 });
 export type TUser = z.infer<typeof userSchema>;
 
