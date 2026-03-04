@@ -31,7 +31,7 @@ const PaymentStatusReportWrapper = () => {
     const deepLinkUrl = "meetsession://";
     const appStoreUrl = "https://apps.apple.com/us/app/meetsession/id6751320453";
     const playStoreUrl =
-      "https://play.google.com/store/apps/details?id=com.meetsession.app";
+      "https://play.google.com/store/apps/details?id=com.meet_session.io&pcampaignid=web_share";
     const isAndroid = /android/i.test(navigator.userAgent);
     const storeUrl = isAndroid ? playStoreUrl : appStoreUrl;
 
