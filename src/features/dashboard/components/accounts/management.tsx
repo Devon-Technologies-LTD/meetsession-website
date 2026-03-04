@@ -22,6 +22,7 @@ type TManagementProps = {
   userImage?: string;
   userName?: string;
   userEmail?: string;
+  subscriptionType?: string;
 };
 export function Management(props: TManagementProps) {
   const { updateSubscription, subscription } = useUserSubscription();
@@ -54,6 +55,8 @@ export function Management(props: TManagementProps) {
   }, []);
 
   const planName = subscription?.plan_snapshot.name;
+  const isTrialSubscription = props.subscriptionType === "TRIAL_SUBSCRIPTION";
+  const subscriptionBadge = isTrialSubscription ? "Free Trial" : planName;
 
   return (
     <div className="flex flex-col gap-5 items-start w-full h-fit min-h-full">
@@ -63,14 +66,14 @@ export function Management(props: TManagementProps) {
           <p className="font-bold text-lg">{props.userName}</p>
           <p className="font-light text-sm">{props.userEmail}</p>
 
-          {planName && (
+          {subscriptionBadge && (
             <div className="flex items-center gap-2">
               <span className="text-brand-green">
                 <CrownIcon className="w-6 h-6" />
               </span>
 
               <span className="text-xs w-fit h-fit py-1.5 px-2.5 bg-brand-green font-semibold text-white rounded-full">
-                {subscription.plan_snapshot.name}
+                {subscriptionBadge}
               </span>
             </div>
           )}
@@ -145,9 +148,9 @@ export function Management(props: TManagementProps) {
                       </p>
                     </div>
 
-                    {planName && (
+                    {subscriptionBadge && (
                       <span className="whitespace-nowrap bg-yellow-600 text-white px-2 py-1 rounded-full text-[9px] font-semibold">
-                        {planName}
+                        {subscriptionBadge}
                       </span>
                     )}
                   </div>

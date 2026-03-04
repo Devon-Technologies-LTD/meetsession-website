@@ -31,9 +31,11 @@ export type TBillingCycle = "monthly" | "quarterly" | "annual";
 export function PlanUI<T extends TSubscriptionPlan>({
   plans,
   isTrialEligible,
+  isUserOnTrial,
 }: {
   plans?: T[];
   isTrialEligible?: boolean;
+  isUserOnTrial?: boolean;
 }) {
   const [selectedId, setSelectedId] = useState(plans?.[0].id ?? "");
   const [billingCycle, setBillingCycle] = useState<TBillingCycle>("monthly");
@@ -80,6 +82,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
               key={plan.id}
               billingCycle={billingCycle}
               isTrialEligible={isTrialEligible}
+              isUserOnTrial={isUserOnTrial}
             />
           );
         })}
@@ -90,6 +93,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
           plan={selectedPlan ?? plans?.[0]}
           billingCycle={billingCycle}
           isTrialEligible={isTrialEligible}
+          isUserOnTrial={isUserOnTrial}
         />
       </div>
     </div>
@@ -101,11 +105,13 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   plan,
   billingCycle,
   isTrialEligible,
+  isUserOnTrial,
 }: {
   plans?: T[];
   plan?: T;
   billingCycle: TBillingCycle;
   isTrialEligible?: boolean;
+  isUserOnTrial?: boolean;
 }) {
   const { updateSelectedPlan, updatePaymentStatus, updateTransactionDetails } =
     usePlanManagementContext();
@@ -133,8 +139,10 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     plan?.features?.find((f) => f.key === "join_online_meeting")?.value ??
     0;
 
-  const isFreePlan = Boolean(isTrialEligible || currentPrice === 0);
+  const canStartTrial = Boolean(isTrialEligible && !isUserOnTrial);
+  const isFreePlan = Boolean(currentPrice === 0);
   const isCurrentPlan = subscription ? subscription.plan_id === plan?.id : null;
+  const shouldDisableAction = Boolean(isCurrentPlan) && !isUserOnTrial;
 
   const planAction = useCallback(async () => {
     const selectedPlan = plans?.find(
@@ -142,7 +150,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     ) as TSubscriptionPlan;
     updateSelectedPlan(selectedPlan);
 
-    if (isTrialEligible && plan?.id) {
+    console.log(canStartTrial, plan?.id, isTrialEligible, isUserOnTrial);
+
+    if (canStartTrial && plan?.id) {
       setIsStartingTrial(true);
       const formdata = new FormData();
       formdata.append("tier_id", plan.id);
@@ -171,6 +181,14 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       return;
     }
 
+    console.log("plan action: ", {
+      isFreePlan,
+      planId: plan?.id,
+      canStartTrial,
+      isTrialEligible,
+      isUserOnTrial,
+    });
+
     if (isFreePlan) {
       updatePaymentStatus("not_paying");
       updateTransactionDetails({
@@ -180,13 +198,12 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         },
       });
       router.push("/dashboard/accounts/plans/status");
-      // onPaymentSuccess();
     } else {
       hasPaid.current = false;
       updatePaymentStatus("payment_initiated");
       const subType = `${billingCycle}_subscription`;
       const callbackUrl = window.location.origin + window.location.pathname;
-      console.log(subType);
+      console.log("subType: " +  subType);
       console.log(plan?.id);
       initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
     }
@@ -194,7 +211,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     isFreePlan,
     plan?.id,
     initialize,
-    isTrialEligible,
+    canStartTrial,
     plans,
     router,
     updatePaymentStatus,
@@ -219,8 +236,6 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     if (initializeState && !hasPaid.current) {
       if (initializeState.success) {
         toast.success("Payment initialized");
-
-        // make payment
         popupPayment({
           access_code: initializeState.data.data.access_code,
           callbacks: {
@@ -299,14 +314,16 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         size="pill"
         variant="default"
         className="h-14 w-full relative overflow-hidden disabled:pointer-events-none"
-        disabled={isCurrentPlan || isInitializing || isVerifying || isStartingTrial}
+        disabled={shouldDisableAction || isInitializing || isVerifying || isStartingTrial}
       >
         {(isInitializing || isVerifying || isStartingTrial) && <Spinner />}
         {isStartingTrial
           ? "Activating Trial..."
           : isFreePlan
             ? "Select Plan"
-            : "Proceed to Payment"}
+            : isUserOnTrial
+              ? "Upgrade to Paid Plan"
+              : "Proceed to Payment"}
       </Button>
     );
   }

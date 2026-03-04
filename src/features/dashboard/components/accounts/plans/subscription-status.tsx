@@ -3,6 +3,7 @@
 import { FailIcon } from "@/components/icons/fail-icon";
 import { SuccessIcon } from "@/components/icons/success-icon";
 import { Button } from "@/components/ui/button";
+import { openMeetSessionApp } from "@/app/(share)/shared/components/deep-link-handler";
 import { usePlanManagementContext } from "@/features/dashboard/hooks/use-plan-management";
 import { cn } from "@/lib/utils";
 import { ArrowLeftIcon } from "lucide-react";
@@ -27,18 +28,10 @@ const PaymentStatusReportWrapper = () => {
   const { transactionDetails, selectedPlan } = usePlanManagementContext();
 
   function handleProceedWithApp() {
-    if (typeof window === "undefined") return;
-    const deepLinkUrl = "meetsession://";
-    const appStoreUrl = "https://apps.apple.com/us/app/meetsession/id6751320453";
-    const playStoreUrl =
-      "https://play.google.com/store/apps/details?id=com.meet_session.io&pcampaignid=web_share";
-    const isAndroid = /android/i.test(navigator.userAgent);
-    const storeUrl = isAndroid ? playStoreUrl : appStoreUrl;
-
-    window.location.href = deepLinkUrl;
-    window.setTimeout(() => {
-      window.location.href = storeUrl;
-    }, 1500);
+    openMeetSessionApp({
+      deepLinkUrl: "meetsession://",
+      fallbackDelayMs: 1500,
+    });
   }
 
   function renderPaymentDetails() {
