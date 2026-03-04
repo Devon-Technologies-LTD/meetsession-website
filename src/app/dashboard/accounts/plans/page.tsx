@@ -7,6 +7,7 @@ export default async function Page() {
   const plans = await retrievePlansAction({ withFeature: true });
   const user = await getUser();
   const DEFAULT_TIER_ID = "00000000-0000-0000-0000-000000000000";
+  const isUserOnTrial = user?.subscription_type === "TRIAL_SUBSCRIPTION";
   const isTrialEligible = Boolean(
     user &&
       (
@@ -25,7 +26,9 @@ export default async function Page() {
 
       <div className="w-full h-fit">
         <p className="text-sm font-medium">
-          {isTrialEligible
+          {isUserOnTrial
+            ? "You are currently on Free Trial. You can switch to any paid plan anytime."
+            : isTrialEligible
             ? "Activate your 7-day free trial by selecting a plan. Please click on the 'Select Plan' button to get started. You can cancel anytime during the trial period without any charges."
             : "Try Out a New Plan. You can always switch back anytime you like"}
         </p>
@@ -33,7 +36,11 @@ export default async function Page() {
 
       <div className="flex flex-col w-full gap-10">
       {plans?.success && (
-          <PlanUI plans={plans?.data?.data} isTrialEligible={isTrialEligible} />
+          <PlanUI
+            plans={plans?.data?.data}
+            isTrialEligible={isTrialEligible}
+            isUserOnTrial={isUserOnTrial}
+          />
         )}
 
         <p className="max-w-48 md:max-w-full mx-auto text-center text-xs text-neutral-500">

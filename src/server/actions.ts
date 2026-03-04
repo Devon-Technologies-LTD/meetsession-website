@@ -226,6 +226,7 @@ export async function initializePaymentAction(
     };
     return clientErr;
   }
+  console.log("initialize payment action: ", result.data);
   // tiers/initiate-payment
   const res = await apiClient.authenticated<TPaymentInitResponse>(
     `/tiers/initiate-payment`,
@@ -237,6 +238,8 @@ export async function initializePaymentAction(
       },
     },
   );
+
+  console.log("initialize payment response: ", res);
 
   if (!res.ok) {
     return {
