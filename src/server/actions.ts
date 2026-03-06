@@ -235,6 +235,9 @@ export async function initializePaymentAction(
       data: {
         tier_id: result.data.tier_id,
         subscription_type: result.data.subscription_type,
+        ...(result.data.callback_url
+          ? { callback_url: result.data.callback_url }
+          : {}),
       },
     },
   );
@@ -278,6 +281,7 @@ export async function verifyPaymentAction(_prev: unknown, formdata: FormData) {
       method: "GET",
     },
   );
+  console.log("verify payment response: ", res);
   if (!res.ok) {
     return {
       success: res.ok,

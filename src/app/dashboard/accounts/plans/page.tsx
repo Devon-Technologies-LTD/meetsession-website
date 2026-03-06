@@ -40,6 +40,7 @@ export default async function Page() {
             plans={plans?.data?.data}
             isTrialEligible={isTrialEligible}
             isUserOnTrial={isUserOnTrial}
+            userEmail={user?.email}
           />
         )}
 
