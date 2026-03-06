@@ -23,6 +23,7 @@ export type TPlanManagementContext = {
 export type TPaymentDetails = {
   transactionId?: string;
   date?: string | Date;
+  amount?: number;
   status: "idle" | "pending" | "successful" | "failed";
   nextAction?: () => void;
 };

@@ -13,6 +13,7 @@ export default async function Page() {
           userName={`${user?.first_name} ${user?.last_name}`}
           userEmail={user?.email}
           userImage={user?.profile_image}
+          subscriptionType={user?.subscription_type}
         />
       </div>
     </div>

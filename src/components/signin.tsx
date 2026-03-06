@@ -2,7 +2,6 @@
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import { loginSchema, TLogin } from "@/lib/schemas";
 import {
   Form,
@@ -20,6 +19,7 @@ import { TLoginResponse } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import { Label } from "./ui/label";
 import { PasswordField } from "./ui/password-field";
+import { GoogleSignInButton } from "./ui/google-signin-button";
 
 type LoginFormProps = {
   onSuccessAction?: (response?: TLoginResponse | null) => void;
@@ -120,6 +120,29 @@ export function SigninForm({ onSuccessAction: onSuccess }: LoginFormProps) {
           )}
           Login
         </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
+        <GoogleSignInButton
+          onSuccess={(response) => {
+            toast.success("Successfully signed in with Google!");
+            onSuccess?.(response?.data);
+          }}
+          onError={(error) => {
+            toast.error(
+              error?.error || "Failed to sign in with Google"
+            );
+          }}
+        />
       </form>
     </div>
   );
@@ -127,8 +150,14 @@ export function SigninForm({ onSuccessAction: onSuccess }: LoginFormProps) {
 
 export function Signin() {
   const router = useRouter();
+  const DEFAULT_TIER_ID = "00000000-0000-0000-0000-000000000000";
   // success handler
-  function onSuccess() {
+  function onSuccess(response?: TLoginResponse | null) {
+    const tierId = response?.user_details?.tier_id;
+    if (tierId === DEFAULT_TIER_ID) {
+      router.push("/dashboard/accounts/plans");
+      return;
+    }
     router.push(`/dashboard/accounts`);
   }
 

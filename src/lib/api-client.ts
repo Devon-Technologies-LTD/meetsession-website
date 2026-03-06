@@ -19,6 +19,7 @@ type ApiClientOptions = {
   cookieNames?: { access?: string; refresh?: string };
   timeout?: number; // request timeout in ms (default: 10000)
   logger?: { log: (msg: string) => void; error: (msg: string) => void };
+  skipTokenStorage?: boolean;
 };
 
 type RequestOptions<TData = unknown> = {
@@ -62,6 +63,7 @@ class ApiClient {
   private enableRefresh: boolean;
   private axios: AxiosInstance;
   private logger?: ApiClientOptions["logger"];
+  private skipTokenStorage: boolean;
 
   // refresh lock
   private refreshPromise: Promise<string | null> | null = null;
@@ -78,6 +80,7 @@ class ApiClient {
     };
     this.enableRefresh = options.enableRefresh ?? false;
     this.logger = options.logger;
+    this.skipTokenStorage = options.skipTokenStorage ?? false;
 
     this.axios = axios.create({
       baseURL: this.baseURL,
@@ -124,17 +127,28 @@ class ApiClient {
 
     if (this.getAccessToken) {
       retrieved = await this.getAccessToken();
+      if (!retrieved) return null;
+
+      const key = new TextEncoder().encode(SECRET_KEY);
+      const decrypted = await tokenDecryptor({
+        algorithm: ALGORITHM,
+        encrypted: retrieved,
+        key,
+      });
+
+      // `getAccessToken` may return either a raw JWT or an encrypted cookie payload.
+      token = decrypted?.token ?? retrieved;
     } else {
       const cookieStore = await cookies();
       retrieved = cookieStore.get(this.cookieNames.access)?.value ?? null;
+      const key = new TextEncoder().encode(SECRET_KEY);
+      const decrypted = await tokenDecryptor({
+        algorithm: ALGORITHM,
+        encrypted: retrieved,
+        key,
+      });
+      token = decrypted?.token ?? null;
     }
-    const key = new TextEncoder().encode(SECRET_KEY);
-    const decrypted = await tokenDecryptor({
-      algorithm: ALGORITHM,
-      encrypted: retrieved,
-      key,
-    });
-    token = decrypted?.token ?? null;
 
     if (!token) return null;
 
@@ -196,11 +210,16 @@ class ApiClient {
     if (!this.refreshPromise) {
       this.refreshPromise = (async () => {
         const tokens = await this.refreshToken!();
-        if (tokens?.accessToken) {
-          await this.storeToken(this.cookieNames.access, tokens.accessToken);
-        }
-        if (tokens?.refreshToken) {
-          await this.storeToken(this.cookieNames.refresh, tokens.refreshToken);
+        if (!this.skipTokenStorage) {
+          if (tokens?.accessToken) {
+            await this.storeToken(this.cookieNames.access, tokens.accessToken);
+          }
+          if (tokens?.refreshToken) {
+            await this.storeToken(
+              this.cookieNames.refresh,
+              tokens.refreshToken,
+            );
+          }
         }
         return tokens?.accessToken ?? null;
       })();
@@ -274,8 +293,33 @@ class ApiClient {
   // -------- Helpers --------
   private extractError(err: unknown): { message: string; status?: number } {
     if (axios.isAxiosError(err)) {
+      const responseData = err.response?.data;
+      let messageFromPayload: string | undefined;
+
+      if (responseData && typeof responseData === "object") {
+        const payload = responseData as Record<string, unknown>;
+        const nestedData = payload.data;
+
+        if (Array.isArray(nestedData)) {
+          const firstStringError = nestedData.find(
+            (item): item is string => typeof item === "string",
+          );
+          if (firstStringError) {
+            messageFromPayload = firstStringError;
+          }
+        }
+
+        if (!messageFromPayload && typeof payload.error === "string") {
+          messageFromPayload = payload.error;
+        }
+
+        if (!messageFromPayload && typeof payload.message === "string") {
+          messageFromPayload = payload.message;
+        }
+      }
+
       return {
-        message: err.response?.data?.message || err.message || "API Error",
+        message: messageFromPayload || err.message || "API Error",
         status: err.response?.status,
       };
     }

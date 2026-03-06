@@ -1,24 +1,11 @@
 "use server";
 
-import { createApiClient } from "@/lib/api-client";
+import { apiClient, auth } from "@/lib/server-api";
 import { updateProfileSchema } from "../lib/schemas";
-import { ALGORITHM, BASE_URL, SECRET_KEY } from "@/lib/constants";
-import { setServerCookie } from "@/server/set-cookie";
 import { TProfile, TProfileResponse } from "../lib/types";
-import { createAuthService } from "@/lib/auth-service";
 import { revalidatePath } from "next/cache";
 import z from "zod";
 import { TUserCurrentPlan } from "@/lib/types";
-
-const apiClient = createApiClient({
-  baseURL: BASE_URL,
-});
-
-const auth = createAuthService({
-  secret: SECRET_KEY,
-  algorithm: ALGORITHM,
-  setCookie: setServerCookie,
-});
 
 export async function getUser() {
   return await auth.getUserDetails();
@@ -203,6 +190,32 @@ export async function retrieveSubscriptionAction() {
     message: string;
     data: TUserCurrentPlan;
   }>("/subscriptions/fetch-subscription", {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    return {
+      success: res.ok,
+      data: null,
+      errors: res.error,
+      message: "Failed to retrieve subscription",
+      status: res.status,
+    };
+  } else {
+    return {
+      success: res.ok,
+      data: res.data,
+      errors: null,
+      message: "Successfully retrieved subscription",
+      status: res.status,
+    };
+  }
+}
+export async function retrieveTierAction() {
+  const res = await apiClient.authenticated<{
+    message: string;
+    data: TUserCurrentPlan;
+  }>("/tiers/fetch-tier", {
     method: "GET",
   });
 

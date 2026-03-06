@@ -33,16 +33,22 @@ export type TPlanManagementContext = {
 };
 
 export type TPaymentInitResponse = {
-  paystack_request_status: number;
-  meta: Record<string, string> | null;
-  code: string;
-  type: string;
-  status: boolean;
+  paystack_request_status?: number;
+  meta?: Record<string, string> | null;
+  code?: string;
+  type?: string;
+  status?: boolean;
   message: string;
   data: {
-    authorization_url: string;
-    access_code: string;
-    reference: string;
+    authorization_url?: string;
+    access_code?: string;
+    reference?: string;
+    Reference?: string;
+    payment_url?: string;
+    amount?: number;
+    plan_code?: string;
+    subscription_type?: string;
+    tier?: string;
   };
 };
 

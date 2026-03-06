@@ -3,6 +3,7 @@
 import { FailIcon } from "@/components/icons/fail-icon";
 import { SuccessIcon } from "@/components/icons/success-icon";
 import { Button } from "@/components/ui/button";
+import { openMeetSessionApp } from "@/app/(share)/shared/components/deep-link-handler";
 import { usePlanManagementContext } from "@/features/dashboard/hooks/use-plan-management";
 import { cn } from "@/lib/utils";
 import { ArrowLeftIcon } from "lucide-react";
@@ -25,6 +26,14 @@ export function SubscriptionStatus() {
 const PaymentStatusReportWrapper = () => {
   const router = useRouter();
   const { transactionDetails, selectedPlan } = usePlanManagementContext();
+
+  function handleProceedWithApp() {
+    openMeetSessionApp({
+      deepLinkUrl: "meetsession://",
+      fallbackDelayMs: 1500,
+    });
+  }
+
   function renderPaymentDetails() {
     return (
       <div className="w-full flex flex-col gap-3.5">
@@ -148,6 +157,16 @@ const PaymentStatusReportWrapper = () => {
           >
             {transactionDetails?.status}
           </Button>
+
+          {transactionDetails?.status === "successful" && (
+            <Button
+              size="pill"
+              onClick={handleProceedWithApp}
+              className="h-14 w-full bg-black text-white"
+            >
+              Proceed with App
+            </Button>
+          )}
         </div>
       </div>
     </div>

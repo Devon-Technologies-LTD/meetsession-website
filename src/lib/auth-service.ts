@@ -10,6 +10,7 @@ type AuthTokens = {
 
 interface AuthServiceOptions {
   secret: string; // used for token encryption
+  baseURL?: string; // used for refresh token request
   algorithm?: string;
   cookieNames?: { access?: string; refresh?: string; user?: string };
   setCookie?: (
@@ -144,6 +145,51 @@ export function createAuthService(options: AuthServiceOptions) {
     return exp ? Date.now() < exp * 1000 : true;
   }
 
+  async function refreshTokens(): Promise<string | null> {
+    const refreshToken = await getRefreshToken();
+    if (!refreshToken) return null;
+
+    try {
+      const response = await fetch(`${options.baseURL}/auth/refresh-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh: refreshToken }),
+      });
+
+      if (!response.ok) {
+        // If refresh fails, clear tokens
+        await clearTokens();
+        return null;
+      }
+
+      const data = await response.json();
+      const newTokens = data.data; // Assuming response structure { message: "...", data: { token: "...", refresh: "..." } }
+
+      if (!newTokens?.token) {
+        throw new Error("Invalid refresh response");
+      }
+
+      await storeTokens({
+        tokens: {
+          accessToken: newTokens.token,
+          refreshToken: newTokens.refresh,
+        },
+      });
+
+      return newTokens.token;
+    } catch (error) {
+      if (options.logger) {
+        options.logger.error(`Token refresh failed: ${error}`);
+      } else {
+        console.error("Token refresh failed:", error);
+      }
+      await clearTokens();
+      return null;
+    }
+  }
+
   return {
     storeTokens,
     getUserDetails,
@@ -154,5 +200,6 @@ export function createAuthService(options: AuthServiceOptions) {
     isRefreshTokenValid,
     encryptToken,
     decryptToken,
+    refreshTokens,
   };
 }

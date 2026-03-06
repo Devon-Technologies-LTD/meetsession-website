@@ -1,12 +1,9 @@
 "use server";
 
-import { createApiClient } from "@/lib/api-client";
-import { BASE_URL } from "@/lib/constants";
+import { apiClient } from "@/lib/server-api";
 import { TImpact } from "./lib/schemas";
 
-const apiClient = createApiClient({
-  baseURL: BASE_URL,
-});
+
 
 export async function getMetrics() {
   const res = await apiClient.unauthenticated<{

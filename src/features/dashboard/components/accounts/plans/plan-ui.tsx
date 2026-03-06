@@ -24,13 +24,24 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { usePlanManagementContext } from "@/features/dashboard/hooks/use-plan-management";
+import { trialStartAction } from "@/server/actions";
+
+export type TBillingCycle = "monthly" | "quarterly" | "annual";
 
 export function PlanUI<T extends TSubscriptionPlan>({
   plans,
+  isTrialEligible,
+  isUserOnTrial,
+  userEmail,
 }: {
   plans?: T[];
+  isTrialEligible?: boolean;
+  isUserOnTrial?: boolean;
+  userEmail?: string;
 }) {
   const [selectedId, setSelectedId] = useState(plans?.[0].id ?? "");
+  const [billingCycle, setBillingCycle] = useState<TBillingCycle>("monthly");
+
   function updateSelectedId(id: string) {
     setSelectedId(id);
   }
@@ -38,6 +49,27 @@ export function PlanUI<T extends TSubscriptionPlan>({
 
   return (
     <div className="flex flex-col w-full gap-8">
+      <div className="flex justify-center w-full">
+        <div className="flex bg-neutral-100 p-1.5 rounded-full border border-black/5">
+          {(["monthly", "quarterly", "annual"] as TBillingCycle[]).map(
+            (cycle) => (
+              <button
+                key={cycle}
+                onClick={() => setBillingCycle(cycle)}
+                className={cn(
+                  "px-6 py-2 rounded-full text-xs font-semibold transition-all capitalize",
+                  billingCycle === cycle
+                    ? "bg-white text-black shadow-sm"
+                    : "text-neutral-500 hover:text-black",
+                )}
+              >
+                {cycle}
+              </button>
+            ),
+          )}
+        </div>
+      </div>
+
       <PlanUIOptions
         plans={plans}
         selectedId={selectedId}
@@ -45,11 +77,28 @@ export function PlanUI<T extends TSubscriptionPlan>({
       />
       <div className="hidden md:flex gap-2 flex-wrap justify-center">
         {plans?.map((plan) => {
-          return <PlanUIItem plans={plans} plan={plan} key={plan.id} />;
+          return (
+            <PlanUIItem
+              plans={plans}
+              plan={plan}
+              key={plan.id}
+              billingCycle={billingCycle}
+              isTrialEligible={isTrialEligible}
+              isUserOnTrial={isUserOnTrial}
+              userEmail={userEmail}
+            />
+          );
         })}
       </div>
       <div className="w-full h-full md:hidden">
-        <PlanUIItem plans={plans} plan={selectedPlan ?? plans?.[0]} />
+        <PlanUIItem
+          plans={plans}
+          plan={selectedPlan ?? plans?.[0]}
+          billingCycle={billingCycle}
+          isTrialEligible={isTrialEligible}
+          isUserOnTrial={isUserOnTrial}
+          userEmail={userEmail}
+        />
       </div>
     </div>
   );
@@ -58,9 +107,17 @@ export function PlanUI<T extends TSubscriptionPlan>({
 export function PlanUIItem<T extends TSubscriptionPlan>({
   plans,
   plan,
+  billingCycle,
+  isTrialEligible,
+  isUserOnTrial,
+  userEmail,
 }: {
   plans?: T[];
   plan?: T;
+  billingCycle: TBillingCycle;
+  isTrialEligible?: boolean;
+  isUserOnTrial?: boolean;
+  userEmail?: string;
 }) {
   const { updateSelectedPlan, updatePaymentStatus, updateTransactionDetails } =
     usePlanManagementContext();
@@ -73,16 +130,71 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const { popupPayment, verifyPayment, initializePayment } =
     usePaystackPayment();
   const { initialize, initializeState, isInitializing } = initializePayment;
-  const { verifyState, isVerifying } = verifyPayment;
+  const { verifyState, verify, isVerifying } = verifyPayment;
+  const [isStartingTrial, setIsStartingTrial] = useState(false);
+  const hasCheckedCallbackReference = useRef(false);
 
-  const isFreePlan = plan?.price === 0;
+  const featurePrice = plan?.features?.find(
+    (f) => f.key === `${billingCycle}_subscription`,
+  )?.value;
+
+  const currentPrice =
+    featurePrice !== undefined ? Number(featurePrice) : (plan?.price ?? 0);
+
+  const meetingHours =
+    plan?.meeting_hours ??
+    plan?.features?.find((f) => f.key === "join_online_meeting")?.value ??
+    0;
+
+  const canStartTrial = Boolean(isTrialEligible && !isUserOnTrial);
+  const isFreePlan = Boolean(currentPrice === 0);
   const isCurrentPlan = subscription ? subscription.plan_id === plan?.id : null;
+  const shouldDisableAction = Boolean(isCurrentPlan) && !isUserOnTrial;
 
-  const planAction = useCallback(() => {
+  const planAction = useCallback(async () => {
     const selectedPlan = plans?.find(
       (p) => p.id === plan?.id,
     ) as TSubscriptionPlan;
     updateSelectedPlan(selectedPlan);
+
+    console.log(canStartTrial, plan?.id, isTrialEligible, isUserOnTrial);
+
+    if (canStartTrial && plan?.id) {
+      setIsStartingTrial(true);
+      const formdata = new FormData();
+      formdata.append("tier_id", plan.id);
+      formdata.append("coupon_code", "");
+
+      const trialRes = await trialStartAction(undefined, formdata);
+      setIsStartingTrial(false);
+
+      if (trialRes.success) {
+        toast.success("Free trial activated");
+        updatePaymentStatus("not_paying");
+        updateTransactionDetails({
+          status: "successful",
+          nextAction: () => {
+            console.log("success next action: launch MeetSession mobile app");
+          },
+        });
+        router.push("/dashboard/accounts/plans/status");
+      } else {
+        toast.error(
+          typeof trialRes.errors === "string"
+            ? trialRes.errors
+            : trialRes.message,
+        );
+      }
+      return;
+    }
+
+    console.log("plan action: ", {
+      isFreePlan,
+      planId: plan?.id,
+      canStartTrial,
+      isTrialEligible,
+      isUserOnTrial,
+    });
 
     if (isFreePlan) {
       updatePaymentStatus("not_paying");
@@ -93,78 +205,143 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         },
       });
       router.push("/dashboard/accounts/plans/status");
-      // onPaymentSuccess();
     } else {
       hasPaid.current = false;
       updatePaymentStatus("payment_initiated");
-      initialize({ planId: plan?.id ?? "" });
+      const subType = `${billingCycle}_subscription`;
+      const callbackUrl = window.location.origin + window.location.pathname;
+      console.log("subType: " +  subType);
+      console.log(plan?.id);
+      initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
     }
   }, [
     isFreePlan,
     plan?.id,
     initialize,
+    canStartTrial,
+    isTrialEligible,
+    isUserOnTrial,
     plans,
     router,
     updatePaymentStatus,
     updateSelectedPlan,
-    updateTransactionDetails /*updateStatus*/,
+    updateTransactionDetails, /*updateStatus*/
+    billingCycle,
   ]);
+
+  // verify payment after return from hosted payment page
+  useEffect(() => {
+    if (typeof window === "undefined" || hasCheckedCallbackReference.current) {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const callbackReference =
+      params.get("reference") ?? params.get("trxref") ?? "";
+
+    if (!callbackReference) return;
+
+    hasCheckedCallbackReference.current = true;
+    hasPaid.current = true;
+    updatePaymentStatus("payment_pending");
+    verify({ reference: callbackReference });
+  }, [updatePaymentStatus, verify]);
 
   // verify effect
   useEffect(() => {
-    if (verifyState) {
-      console.log("Transaction verified");
-      // if (typeof window !== "undefined") {
-      //   window.location.href = `/dashboard/accounts/plans/status`;
-      //   // router.push(`/dashboard/accounts/plans/status`);
-      // }
+    if (!verifyState) return;
+
+    const verifyMessage = (
+      verifyState.success ? verifyState.data?.message : verifyState.message
+    ) ?? "";
+    const normalizedVerifyMessage = verifyMessage.toLowerCase();
+    const verifyPayload = verifyState.data?.data as
+      | {
+          status?: string | boolean;
+          reference?: string;
+          id?: string | number;
+          amount?: number;
+          paid_at?: string;
+        }
+      | undefined;
+
+    const nestedStatus = verifyPayload?.status;
+    const normalizedNestedStatus =
+      typeof nestedStatus === "string" ? nestedStatus.toLowerCase() : nestedStatus;
+    const hasExplicitVerifyFailure =
+      normalizedVerifyMessage.includes("failed") ||
+      normalizedVerifyMessage.includes("error") ||
+      normalizedNestedStatus === "failed" ||
+      normalizedNestedStatus === "error" ||
+      normalizedNestedStatus === false;
+
+    if (verifyState.success && !hasExplicitVerifyFailure) {
+      updatePaymentStatus("payment_success");
+      updateTransactionDetails({
+        status: "successful",
+        transactionId:
+          verifyPayload?.reference ??
+          (verifyPayload?.id ? String(verifyPayload.id) : ""),
+        amount: verifyPayload?.amount,
+        date: verifyPayload?.paid_at ? new Date(verifyPayload.paid_at) : new Date(),
+      });
+      toast.success(verifyMessage || "Payment successfully verified");
+      requestAnimationFrame(() => {
+        router.push("/dashboard/accounts/plans/status");
+      });
+      return;
     }
-  }, [verifyState]);
+
+    updatePaymentStatus("payment_failed");
+    toast.error(
+      verifyState.success
+        ? verifyState.data?.message || "Payment verification failed"
+        : verifyState.message || "Payment verification failed",
+    );
+  }, [verifyState, router, updatePaymentStatus, updateTransactionDetails]);
 
   // init and payment effect
   useEffect(() => {
     if (initializeState && !hasPaid.current) {
       if (initializeState.success) {
         toast.success("Payment initialized");
-
-        // make payment
+        const initData = initializeState.data.data;
         popupPayment({
-          access_code: initializeState.data.data.access_code,
+          access_code: initData.access_code,
+          payment_url: initData.payment_url ?? initData.authorization_url,
+          plan_code: initData.plan_code,
+          reference: initData.Reference ?? initData.reference,
+          email: userEmail ?? subscription?.created_by?.email,
           callbacks: {
             onSuccess: (res) => {
               hasPaid.current = true;
-              updatePaymentStatus("payment_success");
+              updatePaymentStatus("payment_pending");
               updateTransactionDetails({
-                status: "successful",
-                transactionId: res?.trans,
+                status: "pending",
+                transactionId: res?.reference ?? res?.trans,
                 date: new Date(),
-                nextAction: () => {
-                  console.log(
-                    "success next action: launch MeetSession mobile app",
-                  );
-                },
-              });
-              requestAnimationFrame(() => {
-                router.push("/dashboard/accounts/plans/status");
               });
             },
             onError: (err) => {
               hasPaid.current = true;
               updatePaymentStatus("payment_failed");
               updateTransactionDetails({
-                status: "successful",
+                status: "failed",
                 transactionId: "",
                 date: new Date(),
                 nextAction: () => {
-                  initialize({ planId: plan?.id ?? "" });
+                  const subType = `${billingCycle}_subscription`;
+                  const callbackUrl = window.location.origin + window.location.pathname;
+                  initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
                 },
               });
               console.log("payment err: ", err);
-              requestAnimationFrame(() => {
-                router.push("/dashboard/accounts/plans/status");
-              });
+              toast.error(err?.message || "Payment setup failed");
             },
-            onCancel: () => {},
+            onCancel: () => {
+              updatePaymentStatus("payment_failed");
+              toast.warning("Payment was cancelled.");
+            },
           },
         });
       }
@@ -172,11 +349,24 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         /*
         updateStatus("idle"); // reset status
         */
+        const initializeErrorDescription =
+          typeof initializeState.errors === "string"
+            ? initializeState.errors
+            : Array.isArray(initializeState.errors?.tier_id)
+              ? initializeState.errors.tier_id.join(", ")
+              : initializeState.errors?.tier_id;
+
+        const normalizedInitError = (
+          initializeErrorDescription || initializeState.message || ""
+        ).toLowerCase();
+
+        if (normalizedInitError.includes("already on this tier")) {
+          toast.error("You already have this plan. Choose another tier.");
+          return;
+        }
+
         toast.error(initializeState.message, {
-          description:
-            typeof initializeState.errors === "string"
-              ? initializeState.errors
-              : initializeState.errors.plan_id,
+          description: initializeErrorDescription,
         });
       }
     }
@@ -184,6 +374,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     initializeState,
     popupPayment,
     initialize,
+    billingCycle,
+    userEmail,
+    subscription?.created_by?.email,
     plan?.id,
     router,
     updatePaymentStatus,
@@ -204,10 +397,16 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         size="pill"
         variant="default"
         className="h-14 w-full relative overflow-hidden disabled:pointer-events-none"
-        disabled={isCurrentPlan || isInitializing || isVerifying}
+        disabled={shouldDisableAction || isInitializing || isVerifying || isStartingTrial}
       >
-        {(isInitializing || isVerifying) && <Spinner />}
-        {isFreePlan ? "Select Plan" : "Proceed to Payment"}
+        {(isInitializing || isVerifying || isStartingTrial) && <Spinner />}
+        {isStartingTrial
+          ? "Activating Trial..."
+          : isFreePlan
+            ? "Select Plan"
+            : isUserOnTrial
+              ? "Upgrade to Paid Plan"
+              : "Proceed to Payment"}
       </Button>
     );
   }
@@ -231,7 +430,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
             <CardTitle className="font-normal">{plan?.name}</CardTitle>
             <CardDescription className="flex items-center w-fit justify-center gap-2">
               <span className="font-bold text-neutral-800 text-xl tracking-tighter">
-                ₦{plan?.price}
+                ₦{currentPrice?.toLocaleString()}
               </span>
 
               {isCurrentPlan && (
@@ -271,17 +470,17 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
           animate={
             isCollapsed
               ? {
-                  height: 0,
-                  opacity: 0,
-                  display: "none",
-                  transition: { duration: 0.2 },
-                }
+                height: 0,
+                opacity: 0,
+                display: "none",
+                transition: { duration: 0.2 },
+              }
               : {
-                  display: "block",
-                  height: "auto",
-                  opacity: 1,
-                  transition: { duration: 0.4 },
-                }
+                display: "block",
+                height: "auto",
+                opacity: 1,
+                transition: { duration: 0.4 },
+              }
           }
         >
           <CardContent className="flex flex-col w-full gap-4 h-full">
@@ -291,28 +490,40 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
               </div>
 
               <p className="min-h-fit font-semibold">
-                {plan?.meeting_hours}hrs
+                {meetingHours === -1 ? "Unlimited" : `${meetingHours}hrs`}
               </p>
             </div>
 
-            {plan?.features?.map((feat, index) => {
-              if (index === 0) {
-                return null;
-              }
+            {plan?.features
+              ?.filter(
+                (feat) =>
+                  !feat.key.includes("_subscription") &&
+                  feat.key !== "join_online_meeting",
+              )
+              .map((feat) => {
+                return (
+                  <div
+                    key={feat.key}
+                    className="w-full text-xs font-normal h-fit flex items-center gap-2"
+                  >
+                    <div className="w-full h-fit flex flex-col gap-1 flex-1">
+                      <span>{feat.label}</span>
+                    </div>
 
-              return (
-                <div
-                  key={feat.key}
-                  className="w-full text-xs font-normal h-fit flex items-center gap-2"
-                >
-                  <div className="w-full h-fit flex flex-col gap-1 flex-1">
-                    <span>{feat.label}</span>
+                    <div className="min-h-fit font-semibold capitalize">
+                      {typeof feat.value === "boolean" ? (
+                        feat.value ? (
+                          <CircleCheckIcon className="w-4 h-4 text-brand-green" />
+                        ) : (
+                          "N/A"
+                        )
+                      ) : (
+                        feat.value
+                      )}
+                    </div>
                   </div>
-
-                  <p className="min-h-fit font-semibold">{feat.status}</p>
-                </div>
-              );
-            })}
+                );
+              })}
           </CardContent>
         </m.div>
       </Card>
@@ -341,9 +552,9 @@ export function PlanUIOptions<T extends TSubscriptionPlan>({
             <div
               key={plan.id}
               className={cn(
-                "p-2",
+                "p-4",
                 "hover:cursor-pointer",
-                "h-20 w-16 rounded-lg bg-neutral-100",
+                "h-20 w-24 rounded-lg bg-neutral-100",
                 "flex flex-col items-center justify-between",
                 "transition-all scale-100 text-neutral-800",
                 {

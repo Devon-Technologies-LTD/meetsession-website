@@ -15,19 +15,21 @@ import { LogoutButton } from "@/components/ui/logout-button";
 import Link from "next/link";
 import { ProfileImage } from "@/components/ui/profile-image";
 import { ManageAccountIcon } from "@/components/icons/manage-account-icon";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useUserSubscription } from "@/context/use-user-subscription";
 
 type TManagementProps = {
   userImage?: string;
   userName?: string;
   userEmail?: string;
+  subscriptionType?: string;
 };
 export function Management(props: TManagementProps) {
   const { updateSubscription, subscription } = useUserSubscription();
+  const [showAllMeetings, setShowAllMeetings] = useState(false);
   const phoneNumber = "+2348109435439"; // 
   useEffect(() => {
-    fetch(`/api/v1/subscription/current-subscription`, {
+    fetch(`/api/v1/tier`, {
       method: "GET",
     })
       .then((res) => res.json())
@@ -44,7 +46,17 @@ export function Management(props: TManagementProps) {
       });
   }, [updateSubscription]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const { origin, hostname } = window.location;
+    const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
+    const isAllowedProd = origin === "https://meetsession-website.vercel.app";
+    setShowAllMeetings(isLocalHost || isAllowedProd);
+  }, []);
+
   const planName = subscription?.plan_snapshot.name;
+  const isTrialSubscription = props.subscriptionType === "TRIAL_SUBSCRIPTION";
+  const subscriptionBadge = isTrialSubscription ? "Free Trial" : planName;
 
   return (
     <div className="flex flex-col gap-5 items-start w-full h-fit min-h-full">
@@ -54,14 +66,14 @@ export function Management(props: TManagementProps) {
           <p className="font-bold text-lg">{props.userName}</p>
           <p className="font-light text-sm">{props.userEmail}</p>
 
-          {planName && (
+          {subscriptionBadge && (
             <div className="flex items-center gap-2">
               <span className="text-brand-green">
                 <CrownIcon className="w-6 h-6" />
               </span>
 
               <span className="text-xs w-fit h-fit py-1.5 px-2.5 bg-brand-green font-semibold text-white rounded-full">
-                {subscription.plan_snapshot.name}
+                {subscriptionBadge}
               </span>
             </div>
           )}
@@ -69,7 +81,28 @@ export function Management(props: TManagementProps) {
       </Tile>
 
       <div className="flex flex-col md:flex-row gap-5 items-start w-full h-full min-h-full">
+
+
         <div className="w-full h-fit flex flex-col gap-4">
+          {showAllMeetings && (
+            <>
+              <p className="text-sm text-neutral-400 font-medium">
+                All Meetings
+              </p>
+              <Tile className="bg-neutral-100">
+                <Link href="/dashboard/folders">
+                  <Tile.TileItem
+                    prefixIcon={<CircleUserRoundIcon className="h-6 w-6" />}
+                    suffixIcon={<CaretRightIcon className="w-3 h-3" />}
+                  >
+                    <p className="text-sm font-semibold">Meeting</p>
+                    <p className="text-xs text-neutral-500">See all meetings</p>
+                  </Tile.TileItem>
+                </Link>
+              </Tile>
+            </>
+          )}
+
           <p className="text-sm text-neutral-400 font-medium">
             Profile & Personal
           </p>
@@ -93,9 +126,7 @@ export function Management(props: TManagementProps) {
                 <p className="text-xs text-neutral-500">Update your password</p>
               </Tile.TileItem>
             </Link>
-
           </Tile>
-
         </div>
 
         <div className="flex flex-col gap-5 items-start w-full h-full min-h-full">
@@ -117,9 +148,9 @@ export function Management(props: TManagementProps) {
                       </p>
                     </div>
 
-                    {planName && (
+                    {subscriptionBadge && (
                       <span className="whitespace-nowrap bg-yellow-600 text-white px-2 py-1 rounded-full text-[9px] font-semibold">
-                        {planName}
+                        {subscriptionBadge}
                       </span>
                     )}
                   </div>

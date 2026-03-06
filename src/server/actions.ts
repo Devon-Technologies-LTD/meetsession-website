@@ -6,14 +6,11 @@ import {
   loginSchema,
   resendOTPSchema,
   signupSchema,
+  trialStartSchema,
   verifyEmailSchema,
   verifyPaymentSchema,
 } from "@/lib/schemas";
-import { createApiClient } from "@/lib/api-client";
-import { BASE_URL } from "@/lib/constants";
-import { createAuthService } from "@/lib/auth-service";
-import { SECRET_KEY, ALGORITHM } from "@/lib/constants";
-import { setServerCookie } from "./set-cookie";
+import { apiClient, auth } from "@/lib/server-api";
 import {
   TFullUser,
   TLoginResponse,
@@ -25,15 +22,7 @@ import {
   TPaymnetVerifyResponse,
 } from "@/features/dashboard/lib/types";
 
-const apiClient = createApiClient({
-  baseURL: BASE_URL,
-});
 
-const auth = createAuthService({
-  secret: SECRET_KEY,
-  algorithm: ALGORITHM,
-  setCookie: setServerCookie,
-});
 
 // user signin
 export async function signoutAction() {
@@ -74,7 +63,10 @@ export async function loginAction(formdata: FormData) {
     };
   } else {
     await auth.storeTokens({
-      tokens: { accessToken: res.data.token },
+      tokens: {
+        accessToken: res.data.token,
+        refreshToken: res.data.refresh_token,
+      },
       user: res.data.user_details,
     });
     return {
@@ -220,7 +212,7 @@ export async function initializePaymentAction(
     const clientErr: {
       success: false;
       message: string;
-      errors: { plan_id?: string[] };
+      errors: { tier_id?: string[] };
       data: null;
       initialData: {
         [k: string]: FormDataEntryValue;
@@ -228,19 +220,30 @@ export async function initializePaymentAction(
     } = {
       success: false,
       message: result.error.message,
-      errors: { plan_id: errs.plan_id ?? undefined },
+      errors: { tier_id: errs.tier_id ?? undefined },
       data: null,
       initialData: dirty,
     };
     return clientErr;
   }
-
+  console.log("initialize payment action: ", result.data);
+  // tiers/initiate-payment
   const res = await apiClient.authenticated<TPaymentInitResponse>(
-    `/subscriptions/initiate-payment/${result.data.plan_id}`,
+    `/tiers/initiate-payment`,
     {
-      method: "GET",
+      method: "POST",
+      data: {
+        tier_id: result.data.tier_id,
+        subscription_type: result.data.subscription_type,
+        ...(result.data.callback_url
+          ? { callback_url: result.data.callback_url }
+          : {}),
+      },
     },
   );
+
+  console.log("initialize payment response: ", res);
+
   if (!res.ok) {
     return {
       success: res.ok,
@@ -273,11 +276,12 @@ export async function verifyPaymentAction(_prev: unknown, formdata: FormData) {
   }
 
   const res = await apiClient.authenticated<TPaymnetVerifyResponse>(
-    `/subscriptions/verify-payment/${result.data.reference}`,
+    `/tiers/verify-payment/${result.data.reference}`,
     {
       method: "GET",
     },
   );
+  console.log("verify payment response: ", res);
   if (!res.ok) {
     return {
       success: res.ok,
@@ -293,4 +297,49 @@ export async function verifyPaymentAction(_prev: unknown, formdata: FormData) {
       message: "Successful request",
     };
   }
+}
+
+export async function trialStartAction(_prev: unknown, formdata: FormData) {
+  const dirty = Object.fromEntries(formdata);
+  const result = trialStartSchema.safeParse(dirty);
+
+  if (!result.success) {
+    const errs = z.flattenError(result.error).fieldErrors;
+    return {
+      success: false,
+      message: result.error.message,
+      errors: errs,
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  const res = await apiClient.authenticated<{ message: string; data: null }>(
+    "/tiers/trial-start",
+    {
+      method: "POST",
+      data: {
+        tier_id: result.data.tier_id,
+        coupon_code: result.data.coupon_code ?? "",
+      },
+    },
+  );
+
+  if (!res.ok) {
+    return {
+      success: false,
+      errors: res.error,
+      message: "Failed request",
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  return {
+    success: true,
+    data: res.data,
+    errors: null,
+    message: "Successful request",
+    initialData: dirty,
+  };
 }

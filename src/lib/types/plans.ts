@@ -8,15 +8,15 @@ export type TFeature = { id: number; response: string };
 export type TSubscriptionPlanFeature = {
   key: string;
   label: string;
-  status: "YES" | "N/A";
-  available: boolean;
+  value: string | number | boolean;
+  category: string;
 };
 
 export type TSubscriptionPlan = {
   id: string;
   name: string;
-  price: number;
-  meeting_hours: number;
+  price?: number;
+  meeting_hours?: number;
   features?: TSubscriptionPlanFeature[];
 };
 
