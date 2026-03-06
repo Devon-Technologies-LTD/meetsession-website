@@ -2,7 +2,7 @@ import { JSX } from "react";
 
 export type TTierTheme = "black" | "blue" | "green" | "midnight-blue";
 export type TTier = {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   price: string;

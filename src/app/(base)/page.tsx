@@ -6,11 +6,27 @@ import { Pricing } from "@/features/base/components/pricing";
 import { DownloadApps } from "@/features/base/components/download-apps";
 import { CampusProgramAd } from "@/features/base/components/campus-program-ad";
 import { VideoTutorials } from "@/features/base/components/video-tutorials";
+import { apiClient } from "@/lib/server-api";
+import { TSubscriptionPlan } from "@/lib/types";
 // import { JoinWaitlist } from "@/features/base/components/join-waitlist";
 // import { Testimonials } from "@/features/base/components/testimonials";
 // import { FAQs } from "@/features/base/components/faqs";
 
-export default function Page() {
+export default async function Page() {
+  type TResponse = {
+    message: string;
+    data: TSubscriptionPlan[];
+  };
+
+  const tierResponse = await apiClient.unauthenticated<TResponse>(
+    "/all-tiers?with_feature=true",
+    {
+      method: "GET",
+    },
+  );
+
+  const plans = tierResponse.ok ? tierResponse.data.data : null;
+
   return (
     <div className="h-fit w-full">
       <Hero />
@@ -18,7 +34,7 @@ export default function Page() {
       <HowItWorks />
       <CampusProgramAd />
       <MeasureImpact />
-      <Pricing />
+      <Pricing plans={plans} />
       {/*<JoinWaitlist />*/}
       {/*<Testimonials />*/}
       <DownloadApps />

@@ -32,10 +32,12 @@ export function PlanUI<T extends TSubscriptionPlan>({
   plans,
   isTrialEligible,
   isUserOnTrial,
+  userEmail,
 }: {
   plans?: T[];
   isTrialEligible?: boolean;
   isUserOnTrial?: boolean;
+  userEmail?: string;
 }) {
   const [selectedId, setSelectedId] = useState(plans?.[0].id ?? "");
   const [billingCycle, setBillingCycle] = useState<TBillingCycle>("monthly");
@@ -83,6 +85,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
               billingCycle={billingCycle}
               isTrialEligible={isTrialEligible}
               isUserOnTrial={isUserOnTrial}
+              userEmail={userEmail}
             />
           );
         })}
@@ -94,6 +97,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
           billingCycle={billingCycle}
           isTrialEligible={isTrialEligible}
           isUserOnTrial={isUserOnTrial}
+          userEmail={userEmail}
         />
       </div>
     </div>
@@ -106,12 +110,14 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   billingCycle,
   isTrialEligible,
   isUserOnTrial,
+  userEmail,
 }: {
   plans?: T[];
   plan?: T;
   billingCycle: TBillingCycle;
   isTrialEligible?: boolean;
   isUserOnTrial?: boolean;
+  userEmail?: string;
 }) {
   const { updateSelectedPlan, updatePaymentStatus, updateTransactionDetails } =
     usePlanManagementContext();
@@ -124,8 +130,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const { popupPayment, verifyPayment, initializePayment } =
     usePaystackPayment();
   const { initialize, initializeState, isInitializing } = initializePayment;
-  const { verifyState, isVerifying } = verifyPayment;
+  const { verifyState, verify, isVerifying } = verifyPayment;
   const [isStartingTrial, setIsStartingTrial] = useState(false);
+  const hasCheckedCallbackReference = useRef(false);
 
   const featurePrice = plan?.features?.find(
     (f) => f.key === `${billingCycle}_subscription`,
@@ -212,6 +219,8 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     plan?.id,
     initialize,
     canStartTrial,
+    isTrialEligible,
+    isUserOnTrial,
     plans,
     router,
     updatePaymentStatus,
@@ -220,47 +229,104 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     billingCycle,
   ]);
 
+  // verify payment after return from hosted payment page
+  useEffect(() => {
+    if (typeof window === "undefined" || hasCheckedCallbackReference.current) {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const callbackReference =
+      params.get("reference") ?? params.get("trxref") ?? "";
+
+    if (!callbackReference) return;
+
+    hasCheckedCallbackReference.current = true;
+    hasPaid.current = true;
+    updatePaymentStatus("payment_pending");
+    verify({ reference: callbackReference });
+  }, [updatePaymentStatus, verify]);
+
   // verify effect
   useEffect(() => {
-    if (verifyState) {
-      console.log("Transaction verified");
-      // if (typeof window !== "undefined") {
-      //   window.location.href = `/dashboard/accounts/plans/status`;
-      //   // router.push(`/dashboard/accounts/plans/status`);
-      // }
+    if (!verifyState) return;
+
+    const verifyMessage = (
+      verifyState.success ? verifyState.data?.message : verifyState.message
+    ) ?? "";
+    const normalizedVerifyMessage = verifyMessage.toLowerCase();
+    const verifyPayload = verifyState.data?.data as
+      | {
+          status?: string | boolean;
+          reference?: string;
+          id?: string | number;
+          amount?: number;
+          paid_at?: string;
+        }
+      | undefined;
+
+    const nestedStatus = verifyPayload?.status;
+    const normalizedNestedStatus =
+      typeof nestedStatus === "string" ? nestedStatus.toLowerCase() : nestedStatus;
+    const hasExplicitVerifyFailure =
+      normalizedVerifyMessage.includes("failed") ||
+      normalizedVerifyMessage.includes("error") ||
+      normalizedNestedStatus === "failed" ||
+      normalizedNestedStatus === "error" ||
+      normalizedNestedStatus === false;
+
+    if (verifyState.success && !hasExplicitVerifyFailure) {
+      updatePaymentStatus("payment_success");
+      updateTransactionDetails({
+        status: "successful",
+        transactionId:
+          verifyPayload?.reference ??
+          (verifyPayload?.id ? String(verifyPayload.id) : ""),
+        amount: verifyPayload?.amount,
+        date: verifyPayload?.paid_at ? new Date(verifyPayload.paid_at) : new Date(),
+      });
+      toast.success(verifyMessage || "Payment successfully verified");
+      requestAnimationFrame(() => {
+        router.push("/dashboard/accounts/plans/status");
+      });
+      return;
     }
-  }, [verifyState]);
+
+    updatePaymentStatus("payment_failed");
+    toast.error(
+      verifyState.success
+        ? verifyState.data?.message || "Payment verification failed"
+        : verifyState.message || "Payment verification failed",
+    );
+  }, [verifyState, router, updatePaymentStatus, updateTransactionDetails]);
 
   // init and payment effect
   useEffect(() => {
     if (initializeState && !hasPaid.current) {
       if (initializeState.success) {
         toast.success("Payment initialized");
+        const initData = initializeState.data.data;
         popupPayment({
-          access_code: initializeState.data.data.access_code,
+          access_code: initData.access_code,
+          payment_url: initData.payment_url ?? initData.authorization_url,
+          plan_code: initData.plan_code,
+          reference: initData.Reference ?? initData.reference,
+          email: userEmail ?? subscription?.created_by?.email,
           callbacks: {
             onSuccess: (res) => {
               hasPaid.current = true;
-              updatePaymentStatus("payment_success");
+              updatePaymentStatus("payment_pending");
               updateTransactionDetails({
-                status: "successful",
-                transactionId: res?.trans,
+                status: "pending",
+                transactionId: res?.reference ?? res?.trans,
                 date: new Date(),
-                nextAction: () => {
-                  console.log(
-                    "success next action: launch MeetSession mobile app",
-                  );
-                },
-              });
-              requestAnimationFrame(() => {
-                router.push("/dashboard/accounts/plans/status");
               });
             },
             onError: (err) => {
               hasPaid.current = true;
               updatePaymentStatus("payment_failed");
               updateTransactionDetails({
-                status: "successful",
+                status: "failed",
                 transactionId: "",
                 date: new Date(),
                 nextAction: () => {
@@ -270,11 +336,12 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
                 },
               });
               console.log("payment err: ", err);
-              requestAnimationFrame(() => {
-                router.push("/dashboard/accounts/plans/status");
-              });
+              toast.error(err?.message || "Payment setup failed");
             },
-            onCancel: () => { },
+            onCancel: () => {
+              updatePaymentStatus("payment_failed");
+              toast.warning("Payment was cancelled.");
+            },
           },
         });
       }
@@ -282,11 +349,24 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         /*
         updateStatus("idle"); // reset status
         */
+        const initializeErrorDescription =
+          typeof initializeState.errors === "string"
+            ? initializeState.errors
+            : Array.isArray(initializeState.errors?.tier_id)
+              ? initializeState.errors.tier_id.join(", ")
+              : initializeState.errors?.tier_id;
+
+        const normalizedInitError = (
+          initializeErrorDescription || initializeState.message || ""
+        ).toLowerCase();
+
+        if (normalizedInitError.includes("already on this tier")) {
+          toast.error("You already have this plan. Choose another tier.");
+          return;
+        }
+
         toast.error(initializeState.message, {
-          description:
-            typeof initializeState.errors === "string"
-              ? initializeState.errors
-              : initializeState.errors.tier_id,
+          description: initializeErrorDescription,
         });
       }
     }
@@ -294,6 +374,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     initializeState,
     popupPayment,
     initialize,
+    billingCycle,
+    userEmail,
+    subscription?.created_by?.email,
     plan?.id,
     router,
     updatePaymentStatus,
