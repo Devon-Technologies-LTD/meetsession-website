@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { NoiseElement } from "@/components/noise-element";
-import { TTier } from "../lib/types";
+import { TTier, TTierTheme } from "../lib/types";
+import { TSubscriptionPlan, TSubscriptionPlanFeature } from "@/lib/types";
 import {
   Card,
   CardContent,
@@ -13,13 +14,104 @@ import { generateTierColor } from "../lib/utils";
 import { CheckIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FreePlanIcon } from "@/components/icons/free-plan-icon";
-/*
 import { BasicPlanIcon } from "@/components/icons/basic-plan-icon";
 import { EssentialPlanIcon } from "@/components/icons/essential-plan-icon";
 import { ProPlanIcon } from "@/components/icons/pro-plan-icon";
-*/
 
-export function Pricing() {
+type PricingProps = {
+  plans?: TSubscriptionPlan[] | null;
+};
+
+const HIDDEN_FEATURE_KEYS = new Set([
+  "monthly_subscription",
+  "quarterly_subscription",
+  "annual_subscription",
+]);
+
+function formatFeature(feature: TSubscriptionPlanFeature) {
+  if (HIDDEN_FEATURE_KEYS.has(feature.key) || feature.value === false) return null;
+
+  if (feature.value === true) return feature.label;
+  if (typeof feature.value === "number") {
+    if (feature.value === -1) return `${feature.label}: Unlimited`;
+    return `${feature.label}: ${feature.value}`;
+  }
+
+  if (typeof feature.value === "string") {
+    return `${feature.label}: ${feature.value}`;
+  }
+
+  return feature.label;
+}
+
+function getTierTheme(index: number): TTierTheme {
+  const themes: TTierTheme[] = ["black", "blue", "green", "midnight-blue"];
+  return themes[index % themes.length];
+}
+
+function getTierIcon(name: string, index: number) {
+  const lower = name.toLowerCase();
+  if (lower.includes("individual") || lower.includes("free")) return <FreePlanIcon />;
+  if (lower.includes("professional") || lower.includes("pro")) return <ProPlanIcon />;
+  if (lower.includes("essential")) return <EssentialPlanIcon />;
+  if (lower.includes("basic")) return <BasicPlanIcon />;
+  return index % 2 === 0 ? <BasicPlanIcon /> : <EssentialPlanIcon />;
+}
+
+function getTierPrice(plan: TSubscriptionPlan) {
+  const monthlyFeature = plan.features?.find((f) => f.key === "monthly_subscription");
+  const fromFeature = monthlyFeature ? Number(monthlyFeature.value) : NaN;
+  const fallbackPrice = typeof plan.price === "number" ? plan.price : 0;
+  const price = Number.isFinite(fromFeature) ? fromFeature : fallbackPrice;
+  return String(price);
+}
+
+function getTierDescription(name: string) {
+  const lower = name.toLowerCase();
+  if (lower.includes("individual") || lower.includes("free")) {
+    return "Perfect for individuals just getting started with recording and transcription";
+  }
+  if (lower.includes("professional") || lower.includes("pro")) {
+    return "Built for professionals and teams that need advanced AI and collaboration features";
+  }
+  return `Best for ${name.toLowerCase()} users who need reliable meeting productivity tools`;
+}
+
+export function Pricing({ plans }: PricingProps) {
+  const mappedTiers: TTier[] =
+    plans
+      ?.map((plan, index) => {
+        const dynamicFeatures =
+          plan.features
+            ?.map(formatFeature)
+            .filter((item): item is string => Boolean(item)) ?? [];
+
+        return {
+          id: plan.id,
+          title: plan.name,
+          price: getTierPrice(plan),
+          description: getTierDescription(plan.name),
+          features:
+            dynamicFeatures.length > 0
+              ? dynamicFeatures
+              : index === 0
+                ? priceList[0].features
+                : [],
+          link: "",
+          isDefault:
+            plan.name.toLowerCase().includes("individual") ||
+            plan.name.toLowerCase().includes("free"),
+          isRecommended:
+            plan.name.toLowerCase().includes("professional") ||
+            plan.name.toLowerCase().includes("pro"),
+          icon: getTierIcon(plan.name, index),
+          themeColor: getTierTheme(index),
+        };
+      })
+      .filter((tier) => tier.features.length > 0) ?? [];
+
+  const tiers: TTier[] = [...priceList, ...mappedTiers];
+
   return (
     <div
       id="waitlist"
@@ -47,7 +139,7 @@ export function Pricing() {
         </div>
 
         <div className="h-fit w-fit flex gap-5 flex-wrap justify-center">
-          {priceList.map((itr) => (
+          {tiers.map((itr) => (
             <Card
               key={itr.id}
               className={cn(
@@ -117,6 +209,7 @@ export function Pricing() {
 
               <CardFooter className="py-4">
                 <Button
+                  asChild
                   className={cn(
                     generateTierColor(
                       itr.themeColor === "blue" || itr.themeColor === "green"
@@ -126,7 +219,7 @@ export function Pricing() {
                     "w-full py-5 hover:bg-neutral-600 rounded-lg",
                   )}
                 >
-                  Choose plan
+                  <a href="http://localhost:3000/trial">Choose plan</a>
                 </Button>
               </CardFooter>
             </Card>
@@ -181,52 +274,5 @@ const priceList: TTier[] = [
     icon: <FreePlanIcon />,
     themeColor: "black",
   },
-  /*
-  {
-    id: 2,
-    title: "Basic Plan",
-    price: "3999",
-    description:
-      "Ideal for regular users who need reliable transcription and organizational tools",
-    link: "",
-    features: [
-      "30hr+ recording and transcription",
-      "Meeting organization",
-      "Speaker differentiation",
-    ],
-    icon: <BasicPlanIcon />,
-    themeColor: "blue",
-  },
-  {
-    id: 3,
-    title: "Essential",
-    price: "7999",
-    description:
-      "Great for professionals managing multiple meetings with advanced features.",
-    link: "",
-    features: [
-      "50hr+ recording and transcript",
-      "Meeting organization",
-      "Speaker differentiation",
-    ],
-    icon: <EssentialPlanIcon />,
-    isRecommended: true,
-    themeColor: "green",
-  },
-  {
-    id: 4,
-    title: "Pro",
-    price: "9999",
-    description:
-      "Best for teams and power users who need maximum storage and productivity",
-    link: "",
-    features: [
-      "60hr+ recording and transcript",
-      "Meeting organization",
-      "Speaker differentiation",
-    ],
-    icon: <ProPlanIcon />,
-    themeColor: "midnight-blue",
-  },
-  */
+ 
 ];
