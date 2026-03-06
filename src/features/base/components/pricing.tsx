@@ -22,6 +22,8 @@ type PricingProps = {
   plans?: TSubscriptionPlan[] | null;
 };
 
+const NEXT_URL = process.env.NEXT_URL ?? process.env.NEXT_PUBLIC_BASE_URL ?? "";
+
 const HIDDEN_FEATURE_KEYS = new Set([
   "monthly_subscription",
   "quarterly_subscription",
@@ -78,6 +80,7 @@ function getTierDescription(name: string) {
 }
 
 export function Pricing({ plans }: PricingProps) {
+  const trialUrl = 'https://meetsession.devontech.io/trial';
   const mappedTiers: TTier[] =
     plans
       ?.map((plan, index) => {
@@ -219,7 +222,7 @@ export function Pricing({ plans }: PricingProps) {
                     "w-full py-5 hover:bg-neutral-600 rounded-lg",
                   )}
                 >
-                  <a href="http://localhost:3000/trial">Choose plan</a>
+                  <a href={trialUrl}>Choose plan</a>
                 </Button>
               </CardFooter>
             </Card>

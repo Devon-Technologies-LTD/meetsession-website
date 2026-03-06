@@ -6,6 +6,7 @@ import { Pricing } from "@/features/base/components/pricing";
 import { DownloadApps } from "@/features/base/components/download-apps";
 import { CampusProgramAd } from "@/features/base/components/campus-program-ad";
 import { VideoTutorials } from "@/features/base/components/video-tutorials";
+import { BASE_URL } from "@/lib/constants";
 import { apiClient } from "@/lib/server-api";
 import { TSubscriptionPlan } from "@/lib/types";
 // import { JoinWaitlist } from "@/features/base/components/join-waitlist";
@@ -18,12 +19,35 @@ export default async function Page() {
     data: TSubscriptionPlan[];
   };
 
+  const tiersPath = "/all-tiers?with_feature=true";
+  const tiersUrl = `${BASE_URL.replace(/\/$/, "")}${tiersPath}`;
+
+  console.log("[tiers] Requesting public tiers", {
+    url: tiersUrl,
+    method: "GET",
+  });
+
   const tierResponse = await apiClient.unauthenticated<TResponse>(
-    "/all-tiers?with_feature=true",
+    tiersPath,
     {
       method: "GET",
     },
   );
+
+  if (tierResponse.ok) {
+    console.log("[tiers] Public tiers response", {
+      url: tiersUrl,
+      status: tierResponse.status,
+      count: tierResponse.data.data?.length ?? 0,
+      message: tierResponse.data.message,
+    });
+  } else {
+    console.error("[tiers] Public tiers request failed", {
+      url: tiersUrl,
+      status: tierResponse.status,
+      error: tierResponse.error,
+    });
+  }
 
   const plans = tierResponse.ok ? tierResponse.data.data : null;
 
