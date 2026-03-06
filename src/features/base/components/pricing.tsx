@@ -89,6 +89,7 @@ export function Pricing({ plans }: PricingProps) {
             ?.map(formatFeature)
             .filter((item): item is string => Boolean(item)) ?? [];
 
+            
         return {
           id: plan.id,
           title: plan.name,
