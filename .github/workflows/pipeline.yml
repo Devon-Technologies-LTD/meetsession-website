@@ -208,15 +208,22 @@ jobs:
           run: |
             IMAGE_NAME=$(echo "ghcr.io/${{ github.actor }}/meetsession/frontend" | tr '[:upper:]' '[:lower:]')
             IMAGE_TAG=prod-${{ github.sha }}
+            LATEST_TAG=latest
             IMAGE_ENV=production
 
             echo "Building image $IMAGE_NAME:$IMAGE_TAG"
-            docker build -t $IMAGE_NAME:$IMAGE_TAG -f docker/$IMAGE_ENV/Dockerfile .
+            docker build \
+              --build-arg NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }} \
+              --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }} \
+              -t $IMAGE_NAME:$IMAGE_TAG -f docker/$IMAGE_ENV/Dockerfile .
+            docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:$LATEST_TAG
+
             docker push $IMAGE_NAME:$IMAGE_TAG
+            docker push $IMAGE_NAME:$LATEST_TAG
 
             echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
-            echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-            # echo "IMAGE_ENV=$IMAGE_ENV" >> $GITHUB_ENV
+            echo "IMAGE_TAG=$LATEST_TAG" >> $GITHUB_ENV
+            echo "IMAGE_ENV=$IMAGE_ENV" >> $GITHUB_ENV
 
         # 5. Deploy on VPS
         - name: Deploy via SSH and Docker Compose
@@ -228,12 +235,15 @@ jobs:
             port: ${{ secrets.PORT }}
             script: |
               set -e
-              # APP_DIR="/mnt/production_volume/products/MeetSession-frontend"
-              # APP_DIR="/opt/products/meetsession/fe-production"
-              APP_DIR="/opt/products/meetsession/frontend"
+
               IMAGE_NAME=${{ env.IMAGE_NAME }}
               IMAGE_TAG=${{ env.IMAGE_TAG }}
-              GHCR_PAT=${{ env.GHCR_PAT }}
+              IMAGE_ENV=${{ env.IMAGE_ENV }}
+              IMAGE=$IMAGE_NAME:$IMAGE_TAG
+
+              # APP_DIR="/mnt/production_volume/products/MeetSession-frontend"
+              # APP_DIR="/opt/products/meetsession/$IMAGE_ENV/frontend"
+              APP_DIR="/opt/products/meetsession/frontend"
 
               mkdir -p $APP_DIR
               cd $APP_DIR
@@ -247,11 +257,11 @@ jobs:
               cat > compose.yml <<EOF
               services:
                 web:
+                  image: $IMAGE
+                  container_name: meetsession-web-$IMAGE_ENV
                   build:
                     platforms:
                       - linux/amd64
-                      - linux/arm64
-                  image: $IMAGE_NAME:$IMAGE_TAG
                   ports:
                     - "3123:3000"
                   restart: unless-stopped
