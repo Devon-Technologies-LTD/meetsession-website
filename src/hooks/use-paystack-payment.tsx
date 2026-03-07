@@ -188,10 +188,15 @@ export const usePaystackPayment = () => {
             throw new Error("Paystack inline setup is not available");
           }
 
-          const paystackPublicKey =
-            process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ??
-            "pk_test_340db1ce6341a00415168117a7725c5ec252dbe7";
-
+          const paystackPublicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+          if (!paystackPublicKey) {
+            throw new Error("Paystack public key is not configured");
+          }
+          console.log("Initializing Paystack inline payment", {
+            plan_code,
+            reference,
+            email,
+          });
           const handler = paystack.setup({
             key: paystackPublicKey,
             email,
