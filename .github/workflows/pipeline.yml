@@ -258,7 +258,7 @@ jobs:
               services:
                 web:
                   image: $IMAGE
-                  container_name: meetsession-production-web
+                  container_name: meetsession-web-$IMAGE_ENV
                   build:
                     platforms:
                       - linux/amd64
