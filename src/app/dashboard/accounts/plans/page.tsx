@@ -17,9 +17,6 @@ export default async function Page() {
       ),
   );
 
-  console.log(plans.success);
-  console.log(plans?.data?.data);
-
   return (
     <div className="relative font-dm-sans px-2 pb-10 w-full h-full flex flex-col gap-8">
       <BackAction name="Back to Account" />

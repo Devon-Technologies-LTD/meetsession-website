@@ -23,17 +23,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("Using BASE_URL:", BASE_URL);
-    console.log("Forwarding Google ID token to backend:", id_token ? id_token.substring(0, 20) + "..." : "undefined");
-
     // Forward the Google ID token to your backend using Axios directly as requested
     try {
       const axiosRes = await axios.post(`${BASE_URL}/auth/google`, { id_token });
       
-      console.log("Backend response status:", axiosRes.status);
-      console.log("Backend response data (Exact):", JSON.stringify(axiosRes.data, null, 2));
-
-      // Handle the response structure based on the log
       // Assuming response is { message: string, data: { token, refresh_token, user_details } }
       const responseBody = axiosRes.data;
       const responseData = responseBody.data || responseBody; // Fallback if no data wrapper

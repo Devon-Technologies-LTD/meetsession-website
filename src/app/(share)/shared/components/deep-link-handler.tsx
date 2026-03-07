@@ -67,26 +67,12 @@ export function DeepLinkHandler({ meetId }: DeepLinkHandlerProps) {
     const isTestMode = urlParams.get("test") === "true";
 
     // Log for testing purposes
-    console.log("🔗 Deep Link Testing:");
-    console.log("  - Deep Link URL:", deepLinkUrl);
     const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
     const isAndroid = /android/i.test(navigator.userAgent);
-    console.log(
-      "  - Device Type:",
-      isIOS ? "iOS" : isAndroid ? "Android" : "Desktop",
-    );
-    console.log(
-      "  - Will redirect to:",
-      isIOS ? "App Store" : isAndroid ? "Play Store" : "Stay on web",
-    );
-    console.log("  - Test Mode:", isTestMode ? "ON (won't redirect)" : "OFF");
 
     if (isTestMode) {
-      console.log("⚠️ Test mode enabled. Add the deep link to test manually:");
-      console.log("   Copy this URL:", deepLinkUrl);
       return; // Don't redirect in test mode
     }
-    console.log("🚀 Attempting to open app...");
     openMeetSessionApp({ deepLinkUrl });
   }, [meetId]);
 

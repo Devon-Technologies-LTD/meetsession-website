@@ -41,7 +41,6 @@ export function Management(props: TManagementProps) {
         }
       })
       .catch((err) => {
-        console.log({ err });
         updateSubscription(undefined);
       });
   }, [updateSubscription]);

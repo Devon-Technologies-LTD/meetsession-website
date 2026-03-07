@@ -31,9 +31,6 @@ export async function retrievePlansAction(params?: retrievePlansParams) {
     },
   );
 
-  console.log(res);
-  // {{MS_staging}}/tiers?with_feature=true
-
   if (!res.ok) {
     return {
       success: res.ok,

@@ -186,13 +186,6 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       return;
     }
 
-    console.log("plan action: ", {
-      isFreePlan,
-      planId: plan?.id,
-      canStartTrial,
-      isTrialEligible,
-      isUserOnTrial,
-    });
 
     if (isFreePlan) {
       updatePaymentStatus("not_paying");
@@ -331,7 +324,6 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
                   initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
                 },
               });
-              console.log("payment err: ", err);
               toast.error(err?.message || "Payment setup failed");
             },
             onCancel: () => {
