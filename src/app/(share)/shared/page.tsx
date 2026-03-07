@@ -18,9 +18,6 @@ async function getSharedMeeting(meetId: string): Promise<SharedMeetingResponse> 
     cache: "no-store", // Disable caching to get fresh data
   });
 
-  console.log("API URL:", apiUrl);
-  console.log("Response Status:", response.status);
-
   if (!response.ok) {
     throw new Error(`Failed to fetch meeting: ${response.statusText}`);
   }

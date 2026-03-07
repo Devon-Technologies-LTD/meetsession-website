@@ -45,24 +45,16 @@ export function GoogleSignInButton({ onSuccess, onError }: GoogleSignInButtonPro
     if (!scriptLoaded || !window.google) return;
 
     const handleCredentialResponse = async (response: any) => {
-      console.log("Google Sign-In callback triggered", response);
       setIsLoading(true);
       try {
         const idToken = response.credential;
-        console.log("ID Token received:", idToken ? idToken.substring(0, 20) + "..." : "null");
-
-        console.log("Sending request to backend...");
         const res = await fetch("/api/v1/auth/google", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({ id_token: idToken }),
         });
-
-        console.log("Backend response status:", res.status);
         const data = await res.json();
-        console.log("Backend response data:", data);
-
         if (res.ok) {
           console.log("Authentication successful");
           onSuccess?.(data);
@@ -80,9 +72,6 @@ export function GoogleSignInButton({ onSuccess, onError }: GoogleSignInButtonPro
     };
 
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "110195580941-56jd9oiatep3ifhospo4i4jppvdosj1l.apps.googleusercontent.com";
-    console.log("Initializing Google Sign-In with Client ID:", clientId);
-    console.log("Current Origin:", window.location.origin);
-
     window.google.accounts.id.initialize({
       client_id: clientId,
       callback: handleCredentialResponse,

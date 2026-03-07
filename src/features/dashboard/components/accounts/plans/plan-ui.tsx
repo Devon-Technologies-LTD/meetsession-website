@@ -157,8 +157,6 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     ) as TSubscriptionPlan;
     updateSelectedPlan(selectedPlan);
 
-    console.log(canStartTrial, plan?.id, isTrialEligible, isUserOnTrial);
-
     if (canStartTrial && plan?.id) {
       setIsStartingTrial(true);
       const formdata = new FormData();
@@ -188,13 +186,6 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       return;
     }
 
-    console.log("plan action: ", {
-      isFreePlan,
-      planId: plan?.id,
-      canStartTrial,
-      isTrialEligible,
-      isUserOnTrial,
-    });
 
     if (isFreePlan) {
       updatePaymentStatus("not_paying");
@@ -210,8 +201,6 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       updatePaymentStatus("payment_initiated");
       const subType = `${billingCycle}_subscription`;
       const callbackUrl = window.location.origin + window.location.pathname;
-      console.log("subType: " +  subType);
-      console.log(plan?.id);
       initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
     }
   }, [
@@ -335,7 +324,6 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
                   initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
                 },
               });
-              console.log("payment err: ", err);
               toast.error(err?.message || "Payment setup failed");
             },
             onCancel: () => {

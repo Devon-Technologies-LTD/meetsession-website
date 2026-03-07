@@ -164,7 +164,6 @@ export const usePaystackPayment = () => {
           const popup = new PaystackPop();
           popup.resumeTransaction(resolvedAccessCode, {
             onSuccess(tranx) {
-              console.log({ tranx });
               const paidRef = tranx?.reference;
               verify({ reference: paidRef });
               callbacks?.onSuccess(tranx);
@@ -188,10 +187,10 @@ export const usePaystackPayment = () => {
             throw new Error("Paystack inline setup is not available");
           }
 
-          const paystackPublicKey =
-            process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY ??
-            "pk_test_340db1ce6341a00415168117a7725c5ec252dbe7";
-
+          const paystackPublicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+          if (!paystackPublicKey) {
+            throw new Error("Paystack public key is not configured");
+          }
           const handler = paystack.setup({
             key: paystackPublicKey,
             email,
