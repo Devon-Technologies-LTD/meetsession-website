@@ -28,6 +28,8 @@ import { trialStartAction } from "@/server/actions";
 
 export type TBillingCycle = "monthly" | "quarterly" | "annual";
 
+const isPaystackEnabled =
+  process.env.NEXT_PUBLIC_ENABLE_PAYSTACK ? process.env.NEXT_PUBLIC_ENABLE_PAYSTACK.toLowerCase() === "true" : false;
 export function PlanUI<T extends TSubscriptionPlan>({
   plans,
   isTrialEligible,
@@ -150,6 +152,8 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const isFreePlan = Boolean(currentPrice === 0);
   const isCurrentPlan = subscription ? subscription.plan_id === plan?.id : null;
   const shouldDisableAction = Boolean(isCurrentPlan) && !isUserOnTrial;
+  const isPaidCheckoutDisabled =
+    !isPaystackEnabled && !canStartTrial && !isFreePlan;
 
   const planAction = useCallback(async () => {
     const selectedPlan = plans?.find(
@@ -197,6 +201,11 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       });
       router.push("/dashboard/accounts/plans/status");
     } else {
+      if (!isPaystackEnabled) {
+        toast.error("Paid plans are temporarily unavailable.");
+        return;
+      }
+
       hasPaid.current = false;
       updatePaymentStatus("payment_initiated");
       const subType = `${billingCycle}_subscription`;
@@ -208,8 +217,6 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     plan?.id,
     initialize,
     canStartTrial,
-    isTrialEligible,
-    isUserOnTrial,
     plans,
     router,
     updatePaymentStatus,
@@ -385,11 +392,19 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         size="pill"
         variant="default"
         className="h-14 w-full relative overflow-hidden disabled:pointer-events-none"
-        disabled={shouldDisableAction || isInitializing || isVerifying || isStartingTrial}
+        disabled={
+          shouldDisableAction ||
+          isPaidCheckoutDisabled ||
+          isInitializing ||
+          isVerifying ||
+          isStartingTrial
+        }
       >
         {(isInitializing || isVerifying || isStartingTrial) && <Spinner />}
         {isStartingTrial
           ? "Activating Trial..."
+          : isPaidCheckoutDisabled
+            ? "Paid Plans Unavailable"
           : isFreePlan
             ? "Select Plan"
             : isUserOnTrial
