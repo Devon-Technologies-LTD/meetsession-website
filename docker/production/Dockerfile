@@ -2,29 +2,29 @@
 
 FROM node:24-alpine AS base
 
-# 1. Install dependencies only when needed
 FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
 COPY package.json pnpm-lock.yaml* .npmrc* ./
 RUN npm install -g pnpm
 RUN pnpm install
 
-# 2. Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# This will do the trick, use the corresponding env file for each environment.
-# COPY .env .env
+
 RUN npm install -g pnpm
+
+ARG NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+ENV NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=$NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=$NEXT_PUBLIC_GOOGLE_CLIENT_ID
+
 RUN pnpm build
 
-# 3. Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
@@ -36,16 +36,12 @@ RUN adduser -S staff001 -u 1001
 COPY --from=builder /app/public ./public
 COPY ./src/app/favicon.ico ./public
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=staff001:staff001 /app/.next/standalone ./
 COPY --from=builder --chown=staff001:staff001 /app/.next/static ./.next/static
-
 
 USER staff001
 
 EXPOSE 3000
-
 ENV PORT=3000
 
 CMD HOSTNAME="0.0.0.0" node server.js
