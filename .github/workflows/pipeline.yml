@@ -214,7 +214,8 @@ jobs:
             echo "Building image $IMAGE_NAME:$IMAGE_TAG"
             docker build \
               --build-arg NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }} \
-              --build-arg NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }} \
+              --build-arg NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }} \
+              --build-arg NEXT_PUBLIC_ENABLE_PAYSTACK=false \
               -t $IMAGE_NAME:$IMAGE_TAG -f docker/$IMAGE_ENV/Dockerfile .
             docker tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_NAME:$LATEST_TAG
 
