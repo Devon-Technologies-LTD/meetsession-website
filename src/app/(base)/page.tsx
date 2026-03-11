@@ -19,16 +19,22 @@ export default async function Page() {
     data: TSubscriptionPlan[];
   };
 
-  const tiersPath = "/all-tiers?with_feature=true";
-  const tiersUrl = `${BASE_URL.replace(/\/$/, "")}${tiersPath}`;
+  function generateTiersPath() {
+    const tiersPath = "/all-tiers?with_feature=true";
+    return tiersPath;
+  }
+  function generateTiersUrl() {
+    const tiersUrl = `${BASE_URL.replace(/\/$/, "")}${generateTiersPath()}`;
+    return tiersUrl;
+  }
 
   console.log("[tiers] Requesting public tiers", {
-    url: tiersUrl,
+    url: generateTiersUrl(),
     method: "GET",
   });
 
   const tierResponse = await apiClient.unauthenticated<TResponse>(
-    tiersPath,
+    generateTiersPath(),
     {
       method: "GET",
     },
@@ -36,14 +42,14 @@ export default async function Page() {
 
   if (tierResponse.ok) {
     console.log("[tiers] Public tiers response", {
-      url: tiersUrl,
+      url: generateTiersUrl(),
       status: tierResponse.status,
       count: tierResponse.data.data?.length ?? 0,
       message: tierResponse.data.message,
     });
   } else {
     console.error("[tiers] Public tiers request failed", {
-      url: tiersUrl,
+      url: generateTiersUrl(),
       status: tierResponse.status,
       error: tierResponse.error,
     });
