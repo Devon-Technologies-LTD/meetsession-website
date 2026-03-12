@@ -118,12 +118,25 @@ export const usePaystackPayment = () => {
   );
 
   const initialize = useCallback(
-    ({ tierId, subscriptionType, callbackUrl }: { tierId: string; subscriptionType: string; callbackUrl?: string }) => {
+    ({
+      tierId,
+      subscriptionType,
+      callbackUrl,
+      couponCode,
+    }: {
+      tierId: string;
+      subscriptionType: string;
+      callbackUrl?: string;
+      couponCode?: string;
+    }) => {
       const formdata = new FormData();
       formdata.append("tier_id", tierId);
       formdata.append("subscription_type", subscriptionType);
       if (callbackUrl) {
         formdata.append("callback_url", callbackUrl);
+      }
+      if (couponCode) {
+        formdata.append("coupon_code", couponCode);
       }
       startTransition(() => {
         initAction(formdata);
