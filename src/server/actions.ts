@@ -7,6 +7,7 @@ import {
   resendOTPSchema,
   signupSchema,
   trialStartSchema,
+  validateCouponCodeSchema,
   verifyEmailSchema,
   verifyPaymentSchema,
 } from "@/lib/schemas";
@@ -233,6 +234,9 @@ export async function initializePaymentAction(
       data: {
         tier_id: result.data.tier_id,
         subscription_type: result.data.subscription_type,
+        ...(result.data.coupon_code
+          ? { coupon_code: result.data.coupon_code }
+          : {}),
         ...(result.data.callback_url
           ? { callback_url: result.data.callback_url }
           : {}),
@@ -293,6 +297,47 @@ export async function verifyPaymentAction(_prev: unknown, formdata: FormData) {
       message: "Successful request",
     };
   }
+}
+
+export async function validateCouponCodeAction(formdata: FormData) {
+  const dirty = Object.fromEntries(formdata);
+  const result = validateCouponCodeSchema.safeParse(dirty);
+
+  if (!result.success) {
+    const errs = z.flattenError(result.error).fieldErrors;
+    return {
+      success: false,
+      message: result.error.message,
+      errors: { code: errs.code ?? undefined },
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  const res = await apiClient.authenticated<{ message?: string; data?: unknown }>(
+    `/transactions/coupon-code/${encodeURIComponent(result.data.code)}`,
+    {
+      method: "GET",
+    },
+  );
+
+  if (!res.ok) {
+    return {
+      success: false,
+      errors: { code: [res.error] },
+      message: res.error || "Coupon code validation failed",
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  return {
+    success: true,
+    data: res.data,
+    errors: null,
+    message: res.data?.message || "Coupon code is valid",
+    initialData: dirty,
+  };
 }
 
 export async function trialStartAction(_prev: unknown, formdata: FormData) {
