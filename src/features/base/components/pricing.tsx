@@ -22,8 +22,6 @@ type PricingProps = {
   plans?: TSubscriptionPlan[] | null;
 };
 
-const NEXT_URL = process.env.NEXT_URL ?? process.env.NEXT_PUBLIC_BASE_URL ?? "";
-
 const HIDDEN_FEATURE_KEYS = new Set([
   "monthly_subscription",
   "quarterly_subscription",
@@ -88,8 +86,6 @@ export function Pricing({ plans }: PricingProps) {
           plan.features
             ?.map(formatFeature)
             .filter((item): item is string => Boolean(item)) ?? [];
-
-            
         return {
           id: plan.id,
           title: plan.name,
@@ -126,7 +122,7 @@ export function Pricing({ plans }: PricingProps) {
         "relative overflow-hidden",
       )}
     >
-      <div className="flex flex-col gap-6 sm:gap-10 md:gap-16 lg:gap-24 items-center justify-center w-max h-fit z-10">
+      <div className="z-10 flex h-fit w-full max-w-7xl flex-col items-center justify-center gap-6 sm:gap-10 md:gap-16 lg:gap-24">
         <div
           className={cn(
             "mx-auto max-w-full md:max-w-120 text-center",
@@ -142,15 +138,14 @@ export function Pricing({ plans }: PricingProps) {
           </p>
         </div>
 
-        <div className="h-fit w-fit flex gap-5 flex-wrap justify-center">
+        <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {tiers.map((itr) => (
             <Card
               key={itr.id}
               className={cn(
                 generateTierColor(itr.themeColor),
-                "py-2 px-2 rounded-3xl",
+                "flex h-full min-h-[38rem] flex-col rounded-3xl px-2 py-2",
                 "shadow-none border-none text-white",
-                "min-h-120 h-fit w-fit min-w-full max-w-full sm:min-w-64 sm:max-w-68 md:min-w-72 md:max-w-76 lg:min-w-90 lg:max-w-90",
               )}
             >
               <CardHeader className="rounded-2xl p-4 bg-neutral-700/20 font-dm-sans relative">
@@ -174,7 +169,7 @@ export function Pricing({ plans }: PricingProps) {
                     </CardTitle>
                   </div>
                   <div className="w-fit flex items-center gap-2.5">
-                    {itr.isDefault && (
+                    {/* {itr.isDefault && (
                       <span
                         className={cn(
                           generateTierColor("green"),
@@ -183,7 +178,7 @@ export function Pricing({ plans }: PricingProps) {
                       >
                         Default plan
                       </span>
-                    )}
+                    )} */}
                     <CardDescription className="text-2xl font-bold text-white">
                       ₦{itr.price}
                     </CardDescription>
@@ -194,12 +189,14 @@ export function Pricing({ plans }: PricingProps) {
               <CardContent
                 className={cn(
                   "font-poppins text-xs md:text-sm",
-                  "flex flex-col gap-8 flex-1",
+                  "flex flex-1 flex-col gap-8 px-6 pb-2 pt-6",
                 )}
               >
-                <div className="w-full h-fit">{itr.description}</div>
+                <div className="min-h-16 w-full text-sm leading-6 md:text-base">
+                  {itr.description}
+                </div>
 
-                <ul className="w-full h-fit flex flex-col gap-3">
+                <ul className="flex w-full flex-1 flex-col gap-3">
                   {itr.features.map((feat, idx) => (
                     <li key={idx} className="flex gap-2.5 items-center">
                       <span className="rounded-full bg-white/10 p-1">
@@ -211,7 +208,7 @@ export function Pricing({ plans }: PricingProps) {
                 </ul>
               </CardContent>
 
-              <CardFooter className="py-4">
+              <CardFooter className="mt-auto px-6 py-4">
                 <Button
                   asChild
                   className={cn(

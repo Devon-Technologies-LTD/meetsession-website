@@ -1,53 +1,133 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "./button";
+import { useEffect, useRef, useState } from "react";
 import { Loader2Icon } from "lucide-react";
+import { TLoginResponse } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 declare global {
   interface Window {
     google: {
       accounts: {
         id: {
-          initialize: (config: any) => void;
-          renderButton: (element: HTMLElement, config: any) => void;
-          prompt: () => void;
+          initialize: (config: GoogleInitializeConfig) => void;
+          renderButton: (element: HTMLElement, config: GoogleRenderButtonConfig) => void;
         };
       };
     };
   }
 }
 
+type GoogleCredentialResponse = {
+  credential?: string;
+};
+
+type GoogleInitializeConfig = {
+  client_id: string;
+  callback: (response: GoogleCredentialResponse) => void | Promise<void>;
+  auto_select?: boolean;
+  cancel_on_tap_outside?: boolean;
+  ux_mode?: "popup" | "redirect";
+  context?: string;
+  use_fedcm_for_prompt?: boolean;
+};
+
+type GoogleRenderButtonConfig = {
+  type?: "standard" | "icon";
+  theme?: "outline" | "filled_blue" | "filled_black";
+  size?: "large" | "medium" | "small";
+  text?: "signin_with" | "signup_with" | "continue_with" | "signin";
+  shape?: "rectangular" | "pill" | "circle" | "square";
+  logo_alignment?: "left" | "center";
+  width?: number;
+};
+
+type GoogleSignInSuccessResponse = {
+  success: true;
+  message?: string;
+  data?: TLoginResponse;
+};
+
+type GoogleSignInErrorResponse = {
+  success?: false;
+  error?: string;
+  message?: string;
+};
+
 interface GoogleSignInButtonProps {
-  onSuccess?: (response: any) => void;
-  onError?: (error: any) => void;
+  onSuccess?: (response: GoogleSignInSuccessResponse) => void;
+  onError?: (error: GoogleSignInErrorResponse) => void;
 }
 
 export function GoogleSignInButton({ onSuccess, onError }: GoogleSignInButtonProps) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [buttonWidth, setButtonWidth] = useState(0);
+  const buttonWrapperRef = useRef<HTMLDivElement | null>(null);
+  const renderedButtonRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // Load Google Sign-In script
+    const existingScript = document.querySelector<HTMLScriptElement>(
+      'script[src="https://accounts.google.com/gsi/client"]',
+    );
+
+    if (existingScript) {
+      if (window.google?.accounts?.id) {
+        setScriptLoaded(true);
+        return;
+      }
+
+      const handleLoad = () => setScriptLoaded(true);
+      existingScript.addEventListener("load", handleLoad, { once: true });
+      return () => {
+        existingScript.removeEventListener("load", handleLoad);
+      };
+    }
+
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
     script.defer = true;
     script.onload = () => setScriptLoaded(true);
     document.body.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    const wrapper = buttonWrapperRef.current;
+
+    if (!wrapper) return;
+
+    const updateWidth = () => {
+      setButtonWidth(Math.max(240, Math.floor(wrapper.clientWidth)));
+    };
+
+    updateWidth();
+
+    const observer = new ResizeObserver(() => {
+      updateWidth();
+    });
+    observer.observe(wrapper);
 
     return () => {
-      document.body.removeChild(script);
+      observer.disconnect();
     };
   }, []);
 
   useEffect(() => {
     if (!scriptLoaded || !window.google) return;
 
-    const handleCredentialResponse = async (response: any) => {
-      setIsLoading(true);
+    const handleCredentialResponse = async (
+      response: GoogleCredentialResponse,
+    ) => {
+      setIsAuthenticating(true);
       try {
         const idToken = response.credential;
+        if (!idToken) {
+          onError?.({ error: "Google did not return a credential." });
+          return;
+        }
+
         const res = await fetch("/api/v1/auth/google", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -65,9 +145,14 @@ export function GoogleSignInButton({ onSuccess, onError }: GoogleSignInButtonPro
 
       } catch (error) {
         console.error("Error during authentication:", error);
-        onError?.(error);
+          onError?.({
+            error:
+              error instanceof Error
+                ? error.message
+                : "Error during Google authentication.",
+          });
       } finally {
-        setIsLoading(false);
+        setIsAuthenticating(false);
       }
     };
 
@@ -81,49 +166,65 @@ export function GoogleSignInButton({ onSuccess, onError }: GoogleSignInButtonPro
       context: "signin",
       use_fedcm_for_prompt: false,
     });
+    setIsInitialized(true);
   }, [scriptLoaded, onSuccess, onError]);
 
-  const handleGoogleSignIn = () => {
-    if (window.google) {
-      window.google.accounts.id.prompt();
+  useEffect(() => {
+    if (
+      !scriptLoaded ||
+      !isInitialized ||
+      !window.google ||
+      !renderedButtonRef.current ||
+      buttonWidth <= 0
+    ) {
+      return;
     }
-  };
+
+    renderedButtonRef.current.innerHTML = "";
+    window.google.accounts.id.renderButton(renderedButtonRef.current, {
+      type: "standard",
+      theme: "outline",
+      size: "large",
+      text: "continue_with",
+      shape: "pill",
+      logo_alignment: "left",
+      width: buttonWidth,
+    });
+  }, [buttonWidth, isInitialized, scriptLoaded]);
+
+  const statusLabel = isAuthenticating
+    ? "Signing in with Google..."
+    : !scriptLoaded
+      ? "Loading Google..."
+      : null;
 
   return (
-    <Button
-      variant="outline"
-      type="button"
-      size="pill"
-      className="w-full font-medium py-6 cursor-pointer relative overflow-hidden border-gray-300 hover:bg-gray-50"
-      onClick={handleGoogleSignIn}
-      disabled={isLoading || !scriptLoaded}
-    >
-      {isLoading && (
-        <span className="w-full h-full bg-inherit pointer-events-none cursor-not-allowed absolute top-0 right-0 flex items-center justify-center">
-          <Loader2Icon className="animate-spin" />
-        </span>
-      )}
-      <div className="flex items-center justify-center gap-2">
-        <svg className="w-5 h-5" viewBox="0 0 24 24">
-          <path
-            fill="#4285F4"
-            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-          />
-          <path
-            fill="#34A853"
-            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-          />
-          <path
-            fill="#EA4335"
-            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-          />
-        </svg>
-        <span>Continue with Google</span>
+    <div className="w-full space-y-2">
+      <div
+        ref={buttonWrapperRef}
+        className="relative flex min-h-12 w-full justify-center overflow-hidden rounded-[20px]"
+      >
+        <div
+          ref={renderedButtonRef}
+          className={cn(
+            "flex justify-center transition-opacity",
+            !scriptLoaded && "pointer-events-none opacity-60",
+            isAuthenticating && "pointer-events-none opacity-60",
+          )}
+        />
+
+        {(isAuthenticating || !scriptLoaded) && (
+          <div className="absolute inset-0 flex items-center justify-center rounded-[20px] border border-gray-300 bg-white/80">
+            <Loader2Icon className="size-5 animate-spin text-gray-500" />
+          </div>
+        )}
       </div>
-    </Button>
+
+      {statusLabel && (
+        <p className="text-center text-sm text-muted-foreground">
+          {statusLabel}
+        </p>
+      )}
+    </div>
   );
 }

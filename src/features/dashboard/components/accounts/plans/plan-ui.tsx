@@ -25,6 +25,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { usePlanManagementContext } from "@/features/dashboard/hooks/use-plan-management";
 import { trialStartAction } from "@/server/actions";
+import { DiscountCodeModal } from "./discount-code-modal";
 
 export type TBillingCycle = "monthly" | "quarterly" | "annual";
 
@@ -135,6 +136,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const { verifyState, verify, isVerifying } = verifyPayment;
   const [isStartingTrial, setIsStartingTrial] = useState(false);
   const hasCheckedCallbackReference = useRef(false);
+  const [isDiscountPromptOpen, setIsDiscountPromptOpen] = useState(false);
 
   const featurePrice = plan?.features?.find(
     (f) => f.key === `${billingCycle}_subscription`,
@@ -155,7 +157,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const isPaidCheckoutDisabled =
     !isPaystackEnabled && !canStartTrial && !isFreePlan;
 
-  const planAction = useCallback(async () => {
+  const startPlanCheckout = useCallback(async (discountCode?: string) => {
     const selectedPlan = plans?.find(
       (p) => p.id === plan?.id,
     ) as TSubscriptionPlan;
@@ -210,7 +212,12 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       updatePaymentStatus("payment_initiated");
       const subType = `${billingCycle}_subscription`;
       const callbackUrl = window.location.origin + window.location.pathname;
-      initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
+      initialize({
+        tierId: plan?.id ?? "",
+        subscriptionType: subType,
+        callbackUrl,
+        couponCode: discountCode?.trim() || undefined,
+      });
     }
   }, [
     isFreePlan,
@@ -224,6 +231,15 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     updateTransactionDetails, /*updateStatus*/
     billingCycle,
   ]);
+
+  const planAction = useCallback(async () => {
+    if (!canStartTrial && !isFreePlan && isPaystackEnabled) {
+      setIsDiscountPromptOpen(true);
+      return;
+    }
+
+    await startPlanCheckout();
+  }, [canStartTrial, isFreePlan, startPlanCheckout]);
 
   // verify payment after return from hosted payment page
   useEffect(() => {
@@ -415,123 +431,131 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   }
 
   return (
-    <m.div layout className="min-w-full md:min-w-xs w-xs flex flex-col gap-3">
-      <Card
-        className={cn(
-          "border-black shadow-none bg-neutral-100",
-          "transition-all duration-200",
-          isCollapsed ? "gap-0" : "",
-        )}
-      >
-        <CardHeader
+    <>
+      <m.div layout className="min-w-full md:min-w-xs w-xs flex flex-col gap-3">
+        <Card
           className={cn(
-            "w-full flex flex-row items-center justify-between hover:cursor-pointer",
+            "border-black shadow-none bg-neutral-100",
+            "transition-all duration-200",
+            isCollapsed ? "gap-0" : "",
           )}
-          onClick={() => setIsCollapsed((prev) => !prev)}
         >
-          <div className="w-full h-fit flex flex-col gap-2">
-            <CardTitle className="font-normal">{plan?.name}</CardTitle>
-            <CardDescription className="flex items-center w-fit justify-center gap-2">
-              <span className="font-bold text-neutral-800 text-xl tracking-tighter">
-                ₦{currentPrice?.toLocaleString()}
-              </span>
-
-              {isCurrentPlan && (
-                <span
-                  className={cn(
-                    "font-medium text-white text-xs py-0.5 px-1.5",
-                    "bg-brand-green rounded-full whitespace-nowrap",
-                  )}
-                >
-                  Current plan
+          <CardHeader
+            className={cn(
+              "w-full flex flex-row items-center justify-between hover:cursor-pointer",
+            )}
+            onClick={() => setIsCollapsed((prev) => !prev)}
+          >
+            <div className="w-full h-fit flex flex-col gap-2">
+              <CardTitle className="font-normal">{plan?.name}</CardTitle>
+              <CardDescription className="flex items-center w-fit justify-center gap-2">
+                <span className="font-bold text-neutral-800 text-xl tracking-tighter">
+                  ₦{currentPrice?.toLocaleString()}
                 </span>
-              )}
-            </CardDescription>
-          </div>
 
-          {isCollapsed ? <CircleChevronDownIcon /> : <CircleChevronUpIcon />}
-        </CardHeader>
-
-        <div className="px-6 hidden md:block">{renderActionButton()}</div>
-
-        <AnimatePresence>
-          {!isCollapsed && (
-            <m.div exit={{ opacity: 0 }} className="w-full px-6">
-              <Separator className="bg-black" />
-            </m.div>
-          )}
-        </AnimatePresence>
-
-        <m.div
-          key="collapsible"
-          layout
-          initial={{
-            height: "auto",
-            opacity: 1,
-            transition: { duration: 1.5 },
-          }}
-          animate={
-            isCollapsed
-              ? {
-                height: 0,
-                opacity: 0,
-                display: "none",
-                transition: { duration: 0.2 },
-              }
-              : {
-                display: "block",
-                height: "auto",
-                opacity: 1,
-                transition: { duration: 0.4 },
-              }
-          }
-        >
-          <CardContent className="flex flex-col w-full gap-4 h-full">
-            <div className="w-full text-xs font-normal h-fit flex items-center gap-2">
-              <div className="w-full h-fit flex flex-col gap-1 flex-1">
-                <span>Recording & Transcribe</span>
-              </div>
-
-              <p className="min-h-fit font-semibold">
-                {meetingHours === -1 ? "Unlimited" : `${meetingHours}hrs`}
-              </p>
+                {isCurrentPlan && (
+                  <span
+                    className={cn(
+                      "font-medium text-white text-xs py-0.5 px-1.5",
+                      "bg-brand-green rounded-full whitespace-nowrap",
+                    )}
+                  >
+                    Current plan
+                  </span>
+                )}
+              </CardDescription>
             </div>
 
-            {plan?.features
-              ?.filter(
-                (feat) =>
-                  !feat.key.includes("_subscription") &&
-                  feat.key !== "join_online_meeting",
-              )
-              .map((feat) => {
-                return (
-                  <div
-                    key={feat.key}
-                    className="w-full text-xs font-normal h-fit flex items-center gap-2"
-                  >
-                    <div className="w-full h-fit flex flex-col gap-1 flex-1">
-                      <span>{feat.label}</span>
-                    </div>
+            {isCollapsed ? <CircleChevronDownIcon /> : <CircleChevronUpIcon />}
+          </CardHeader>
 
-                    <div className="min-h-fit font-semibold capitalize">
-                      {typeof feat.value === "boolean" ? (
-                        feat.value ? (
-                          <CircleCheckIcon className="w-4 h-4 text-brand-green" />
+          <div className="px-6 hidden md:block">{renderActionButton()}</div>
+
+          <AnimatePresence>
+            {!isCollapsed && (
+              <m.div exit={{ opacity: 0 }} className="w-full px-6">
+                <Separator className="bg-black" />
+              </m.div>
+            )}
+          </AnimatePresence>
+
+          <m.div
+            key="collapsible"
+            layout
+            initial={{
+              height: "auto",
+              opacity: 1,
+              transition: { duration: 1.5 },
+            }}
+            animate={
+              isCollapsed
+                ? {
+                  height: 0,
+                  opacity: 0,
+                  display: "none",
+                  transition: { duration: 0.2 },
+                }
+                : {
+                  display: "block",
+                  height: "auto",
+                  opacity: 1,
+                  transition: { duration: 0.4 },
+                }
+            }
+          >
+            <CardContent className="flex flex-col w-full gap-4 h-full">
+              <div className="w-full text-xs font-normal h-fit flex items-center gap-2">
+                <div className="w-full h-fit flex flex-col gap-1 flex-1">
+                  <span>Recording & Transcribe</span>
+                </div>
+
+                <p className="min-h-fit font-semibold">
+                  {meetingHours === -1 ? "Unlimited" : `${meetingHours}hrs`}
+                </p>
+              </div>
+
+              {plan?.features
+                ?.filter(
+                  (feat) =>
+                    !feat.key.includes("_subscription") &&
+                    feat.key !== "join_online_meeting",
+                )
+                .map((feat) => {
+                  return (
+                    <div
+                      key={feat.key}
+                      className="w-full text-xs font-normal h-fit flex items-center gap-2"
+                    >
+                      <div className="w-full h-fit flex flex-col gap-1 flex-1">
+                        <span>{feat.label}</span>
+                      </div>
+
+                      <div className="min-h-fit font-semibold capitalize">
+                        {typeof feat.value === "boolean" ? (
+                          feat.value ? (
+                            <CircleCheckIcon className="w-4 h-4 text-brand-green" />
+                          ) : (
+                            "N/A"
+                          )
                         ) : (
-                          "N/A"
-                        )
-                      ) : (
-                        feat.value
-                      )}
+                          feat.value
+                        )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-          </CardContent>
-        </m.div>
-      </Card>
-      <div className="md:hidden">{renderActionButton()}</div>
-    </m.div>
+                  );
+                })}
+            </CardContent>
+          </m.div>
+        </Card>
+        <div className="md:hidden">{renderActionButton()}</div>
+      </m.div>
+      <DiscountCodeModal
+        open={isDiscountPromptOpen}
+        inputId={`discount-code-${plan.id}`}
+        onOpenChange={setIsDiscountPromptOpen}
+        onProceed={startPlanCheckout}
+      />
+    </>
   );
 }
 
