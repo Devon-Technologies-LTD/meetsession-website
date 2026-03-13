@@ -116,8 +116,7 @@ export function DiscountCodeModal({
               onClick={async () => {
                 onOpenChange(false);
                 await onProceed();
-              }}
-            >
+              }}>
               No
             </Button>
           </div>
