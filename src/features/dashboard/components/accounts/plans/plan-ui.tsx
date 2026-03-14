@@ -58,6 +58,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
             (cycle) => (
               <button
                 key={cycle}
+                type="button"
                 onClick={() => setBillingCycle(cycle)}
                 className={cn(
                   "px-6 py-2 rounded-full text-xs font-semibold transition-all capitalize",
@@ -136,6 +137,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const { verifyState, verify, isVerifying } = verifyPayment;
   const [isStartingTrial, setIsStartingTrial] = useState(false);
   const hasCheckedCallbackReference = useRef(false);
+  const handledInitializeState = useRef(initializeState);
   const [isDiscountPromptOpen, setIsDiscountPromptOpen] = useState(false);
 
   const featurePrice = plan?.features?.find(
@@ -314,73 +316,76 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
 
   // init and payment effect
   useEffect(() => {
-    if (initializeState && !hasPaid.current) {
-      if (initializeState.success) {
-        toast.success("Payment initialized");
-        const initData = initializeState.data.data;
-        popupPayment({
-          access_code: initData.access_code,
-          payment_url: initData.payment_url ?? initData.authorization_url,
-          plan_code: initData.plan_code,
-          reference: initData.Reference ?? initData.reference,
-          email: userEmail ?? subscription?.created_by?.email,
-          callbacks: {
-            onSuccess: (res) => {
-              hasPaid.current = true;
-              updatePaymentStatus("payment_pending");
-              updateTransactionDetails({
-                status: "pending",
-                transactionId: res?.reference ?? res?.trans,
-                date: new Date(),
-              });
-            },
-            onError: (err) => {
-              hasPaid.current = true;
-              updatePaymentStatus("payment_failed");
-              updateTransactionDetails({
-                status: "failed",
-                transactionId: "",
-                date: new Date(),
-                nextAction: () => {
-                  const subType = `${billingCycle}_subscription`;
-                  const callbackUrl = window.location.origin + window.location.pathname;
-                  initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
-                },
-              });
-              toast.error(err?.message || "Payment setup failed");
-            },
-            onCancel: () => {
-              updatePaymentStatus("payment_failed");
-              toast.warning("Payment was cancelled.");
-            },
+    if (!initializeState || hasPaid.current) return;
+    if (handledInitializeState.current === initializeState) return;
+
+    handledInitializeState.current = initializeState;
+
+    if (initializeState.success) {
+      toast.success("Payment initialized");
+      const initData = initializeState.data.data;
+      popupPayment({
+        access_code: initData.access_code,
+        payment_url: initData.payment_url ?? initData.authorization_url,
+        plan_code: initData.plan_code,
+        reference: initData.Reference ?? initData.reference,
+        email: userEmail ?? subscription?.created_by?.email,
+        callbacks: {
+          onSuccess: (res) => {
+            hasPaid.current = true;
+            updatePaymentStatus("payment_pending");
+            updateTransactionDetails({
+              status: "pending",
+              transactionId: res?.reference ?? res?.trans,
+              date: new Date(),
+            });
           },
-        });
-      }
-      if (!initializeState.success) {
-        /*
-        updateStatus("idle"); // reset status
-        */
-        const initializeErrorDescription =
-          typeof initializeState.errors === "string"
-            ? initializeState.errors
-            : Array.isArray(initializeState.errors?.tier_id)
-              ? initializeState.errors.tier_id.join(", ")
-              : initializeState.errors?.tier_id;
-
-        const normalizedInitError = (
-          initializeErrorDescription || initializeState.message || ""
-        ).toLowerCase();
-
-        if (normalizedInitError.includes("already on this tier")) {
-          toast.error("You already have this plan. Choose another tier.");
-          return;
-        }
-
-        toast.error(initializeState.message, {
-          description: initializeErrorDescription,
-        });
-      }
+          onError: (err) => {
+            hasPaid.current = true;
+            updatePaymentStatus("payment_failed");
+            updateTransactionDetails({
+              status: "failed",
+              transactionId: "",
+              date: new Date(),
+              nextAction: () => {
+                const subType = `${billingCycle}_subscription`;
+                const callbackUrl = window.location.origin + window.location.pathname;
+                initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
+              },
+            });
+            toast.error(err?.message || "Payment setup failed");
+          },
+          onCancel: () => {
+            updatePaymentStatus("payment_failed");
+            toast.warning("Payment was cancelled.");
+          },
+        },
+      });
+      return;
     }
+
+    /*
+    updateStatus("idle"); // reset status
+    */
+    const initializeErrorDescription =
+      typeof initializeState.errors === "string"
+        ? initializeState.errors
+        : Array.isArray(initializeState.errors?.tier_id)
+          ? initializeState.errors.tier_id.join(", ")
+          : initializeState.errors?.tier_id;
+
+    const normalizedInitError = (
+      initializeErrorDescription || initializeState.message || ""
+    ).toLowerCase();
+
+    if (normalizedInitError.includes("already on this tier")) {
+      toast.error("You already have this plan. Choose another tier.");
+      return;
+    }
+
+    toast.error(initializeState.message, {
+      description: initializeErrorDescription,
+    });
   }, [
     initializeState,
     popupPayment,
@@ -404,6 +409,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   function renderActionButton() {
     return (
       <Button
+        type="button"
         onClick={planAction}
         size="pill"
         variant="default"
