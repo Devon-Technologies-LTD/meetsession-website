@@ -12,6 +12,7 @@ export const auth = createAuthService({
 
 export const apiClient = createApiClient({
     baseURL: BASE_URL,
+    timeout: 30000,
     enableRefresh: true,
     skipTokenStorage: true,
     getAccessToken: async () => {
