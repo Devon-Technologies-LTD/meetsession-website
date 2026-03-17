@@ -17,6 +17,7 @@ import { FreePlanIcon } from "@/components/icons/free-plan-icon";
 import { BasicPlanIcon } from "@/components/icons/basic-plan-icon";
 import { EssentialPlanIcon } from "@/components/icons/essential-plan-icon";
 import { ProPlanIcon } from "@/components/icons/pro-plan-icon";
+import Link from "next/link";
 
 type PricingProps = {
   plans?: TSubscriptionPlan[] | null;
@@ -78,7 +79,8 @@ function getTierDescription(name: string) {
 }
 
 export function Pricing({ plans }: PricingProps) {
-  const trialUrl = 'https://meetsession.devontech.io/trial';
+  const trialUrl = "https://meetsession.devontech.io/trial";
+  const isUsingFallbackPlans = !plans || plans.length === 0;
   const mappedTiers: TTier[] =
     plans
       ?.map((plan, index) => {
@@ -136,6 +138,12 @@ export function Pricing({ plans }: PricingProps) {
             Every tier includes our core features. Choose the one that fits your
             needs.
           </p>
+          {isUsingFallbackPlans && (
+            <p className="max-w-xl rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-neutral-300">
+              Live plan data is temporarily unavailable. Showing fallback
+              pricing while we reconnect.
+            </p>
+          )}
         </div>
 
         <div className="grid w-full grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
@@ -220,7 +228,7 @@ export function Pricing({ plans }: PricingProps) {
                     "w-full py-5 hover:bg-neutral-600 rounded-lg",
                   )}
                 >
-                  <a href={trialUrl}>Choose plan</a>
+                  <Link href={trialUrl}>Choose plan</Link>
                 </Button>
               </CardFooter>
             </Card>

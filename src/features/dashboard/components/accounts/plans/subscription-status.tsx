@@ -26,6 +26,14 @@ export function SubscriptionStatus() {
 const PaymentStatusReportWrapper = () => {
   const router = useRouter();
   const { transactionDetails, selectedPlan } = usePlanManagementContext();
+  const resolvedTransactionDate = transactionDetails?.date
+    ? new Date(transactionDetails.date)
+    : new Date();
+  const displayTransactionDate = Number.isNaN(
+    resolvedTransactionDate.getTime(),
+  )
+    ? new Date().toLocaleString()
+    : resolvedTransactionDate.toLocaleString();
 
   function handleProceedWithApp() {
     openMeetSessionApp({
@@ -48,7 +56,7 @@ const PaymentStatusReportWrapper = () => {
 
           <div className="w-full flex items-center justify-between">
             <p>Date</p>
-            <p>{transactionDetails?.date?.toLocaleString()}</p>
+            <p>{displayTransactionDate}</p>
           </div>
 
           <div className="w-full flex items-center justify-between">
