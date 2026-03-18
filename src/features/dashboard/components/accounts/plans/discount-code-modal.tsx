@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,6 +33,8 @@ export function DiscountCodeModal({
   const [isDiscountSheetOpen, setIsDiscountSheetOpen] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+  const [keyboardInset, setKeyboardInset] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handlePromptOpenChange = useCallback(
     (nextOpen: boolean) => {
@@ -81,6 +83,51 @@ export function DiscountCodeModal({
     await onProceed(normalizedCouponCode);
   }, [couponCode, handleSheetOpenChange, onProceed]);
 
+  useEffect(() => {
+    if (!isDiscountSheetOpen || typeof window === "undefined") {
+      setKeyboardInset(0);
+      return;
+    }
+
+    const viewport = window.visualViewport;
+
+    if (!viewport) {
+      return;
+    }
+
+    const updateKeyboardInset = () => {
+      const nextInset = Math.max(
+        0,
+        window.innerHeight - viewport.height - viewport.offsetTop,
+      );
+
+      setKeyboardInset(nextInset);
+
+      if (
+        nextInset > 0 &&
+        inputRef.current &&
+        document.activeElement === inputRef.current
+      ) {
+        requestAnimationFrame(() => {
+          inputRef.current?.scrollIntoView({
+            block: "center",
+            behavior: "smooth",
+          });
+        });
+      }
+    };
+
+    updateKeyboardInset();
+    viewport.addEventListener("resize", updateKeyboardInset);
+    viewport.addEventListener("scroll", updateKeyboardInset);
+
+    return () => {
+      viewport.removeEventListener("resize", updateKeyboardInset);
+      viewport.removeEventListener("scroll", updateKeyboardInset);
+      setKeyboardInset(0);
+    };
+  }, [isDiscountSheetOpen]);
+
   return (
     <>
       <Dialog open={open} onOpenChange={handlePromptOpenChange}>
@@ -126,7 +173,10 @@ export function DiscountCodeModal({
       <Sheet open={isDiscountSheetOpen} onOpenChange={handleSheetOpenChange}>
         <SheetContent
           side="bottom"
-          className="rounded-t-[2rem] border-0 bg-white px-6 pb-10 pt-6 sm:px-8"
+          className="max-h-[100dvh] overflow-y-auto rounded-t-[2rem] border-0 bg-white px-6 pt-6 sm:px-8"
+          style={{
+            paddingBottom: `calc(${keyboardInset}px + env(safe-area-inset-bottom) + 2.5rem)`,
+          }}
         >
           <div className="mx-auto mb-8 h-2 w-24 rounded-full bg-black" />
           <div className="mx-auto max-w-3xl">
@@ -145,11 +195,20 @@ export function DiscountCodeModal({
                 Enter Discount Code
               </label>
               <input
+                ref={inputRef}
                 id={inputId}
                 value={couponCode}
                 onChange={(event) =>
                   setCouponCode(event.target.value.toUpperCase())
                 }
+                onFocus={() => {
+                  requestAnimationFrame(() => {
+                    inputRef.current?.scrollIntoView({
+                      block: "center",
+                      behavior: "smooth",
+                    });
+                  });
+                }}
                 placeholder="Enter discount code"
                 className="h-15 w-full rounded-[1rem] border-2 border-[#062634] px-8 text-md font-semibold uppercase tracking-wide text-[#062634] outline-none placeholder:text-neutral-300"
               />
