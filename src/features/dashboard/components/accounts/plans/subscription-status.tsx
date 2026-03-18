@@ -8,6 +8,8 @@ import { usePlanManagementContext } from "@/features/dashboard/hooks/use-plan-ma
 import { cn } from "@/lib/utils";
 import { ArrowLeftIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { TUser } from "@/lib/schemas";
 
 export function SubscriptionStatus() {
   // const router = useRouter();
@@ -26,6 +28,7 @@ export function SubscriptionStatus() {
 const PaymentStatusReportWrapper = () => {
   const router = useRouter();
   const { transactionDetails, selectedPlan } = usePlanManagementContext();
+  const [profile, setProfile] = useState<Pick<TUser, "tier"> | null>(null);
   const resolvedTransactionDate = transactionDetails?.date
     ? new Date(transactionDetails.date)
     : new Date();
@@ -34,6 +37,27 @@ const PaymentStatusReportWrapper = () => {
   )
     ? new Date().toLocaleString()
     : resolvedTransactionDate.toLocaleString();
+  const planName = selectedPlan?.name ?? profile?.tier;
+
+  useEffect(() => {
+    if (transactionDetails?.status !== "successful") return;
+
+    fetch(`/api/v1/profile`, {
+      method: "GET",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data === "string") {
+          setProfile(null);
+          return;
+        }
+
+        setProfile(data);
+      })
+      .catch(() => {
+        setProfile(null);
+      });
+  }, [transactionDetails?.status]);
 
   function handleProceedWithApp() {
     openMeetSessionApp({
@@ -61,7 +85,7 @@ const PaymentStatusReportWrapper = () => {
 
           <div className="w-full flex items-center justify-between">
             <p>Plan</p>
-            <p>{selectedPlan?.name}</p>
+            <p>{planName}</p>
           </div>
 
           {selectedPlan?.price !== undefined && (

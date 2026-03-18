@@ -252,7 +252,6 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     const params = new URLSearchParams(window.location.search);
     const callbackReference =
       params.get("reference") ?? params.get("trxref") ?? "";
-
     if (!callbackReference) return;
 
     hasCheckedCallbackReference.current = true;

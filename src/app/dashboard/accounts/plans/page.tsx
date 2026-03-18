@@ -1,11 +1,32 @@
+import { cookies, headers } from "next/headers";
 import { BackAction } from "@/components/back-button";
 import { PlanUI } from "@/features/dashboard/components/accounts/plans/plan-ui";
-import { getUser } from "@/features/dashboard/server/actions";
 import { retrievePlansAction } from "@/features/dashboard/lib/server/actions";
+import { TUser } from "@/lib/schemas";
 
 export default async function Page() {
   const plans = await retrievePlansAction({ withFeature: true });
-  const user = await getUser();
+  const requestHeaders = await headers();
+  const cookieStore = await cookies();
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
+  const host =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  let user: TUser | null = null;
+
+  if (host) {
+    const profileResponse = await fetch(`${protocol}://${host}/api/v1/profile`, {
+      method: "GET",
+      headers: {
+        cookie: cookieStore.toString(),
+      },
+      cache: "no-store",
+    });
+
+    if (profileResponse.ok) {
+      user = (await profileResponse.json()) as TUser;
+    }
+  }
+
   const DEFAULT_TIER_ID = "00000000-0000-0000-0000-000000000000";
   const isUserOnTrial = user?.subscription_type === "TRIAL_SUBSCRIPTION";
   const isTrialEligible = Boolean(
