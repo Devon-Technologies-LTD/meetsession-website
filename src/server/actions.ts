@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies, headers } from "next/headers";
 import z from "zod";
 import {
   initiatePaymentSchema,
@@ -22,7 +23,55 @@ import {
   TPaymentInitResponse,
   TPaymnetVerifyResponse,
 } from "@/features/dashboard/lib/types";
+import { TUser } from "@/lib/schemas";
 
+async function syncStoredSubscriptionDetailsFromProfile() {
+  const currentUser = await auth.getUserDetails();
+  if (!currentUser) {
+    return null;
+  }
+
+  const requestHeaders = await headers();
+  const cookieStore = await cookies();
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? "http";
+  const host =
+    requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+
+  if (!host) {
+    return null;
+  }
+
+  const response = await fetch(`${protocol}://${host}/api/v1/profile`, {
+    method: "GET",
+    headers: {
+      cookie: cookieStore.toString(),
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const profile = (await response.json()) as Partial<TUser>;
+  const updatedUser: TUser = {
+    ...currentUser,
+    subscription_type: profile.subscription_type ?? currentUser.subscription_type,
+    subscription_status:
+      profile.subscription_status ?? currentUser.subscription_status,
+    tier: profile.tier ?? currentUser.tier,
+    tier_id: profile.tier_id ?? currentUser.tier_id,
+    subscription_id: profile.subscription_id ?? currentUser.subscription_id,
+    subscription_start_date:
+      profile.subscription_start_date ?? currentUser.subscription_start_date,
+    subscription_end_date:
+      profile.subscription_end_date ?? currentUser.subscription_end_date,
+    organization_id: profile.organization_id ?? currentUser.organization_id,
+  };
+
+  await auth.storeUserDetails(updatedUser);
+  return updatedUser;
+}
 
 
 // user signin
@@ -253,6 +302,7 @@ export async function initializePaymentAction(
       data: null,
     };
   } else {
+    await syncStoredSubscriptionDetailsFromProfile();
     return {
       success: res.ok,
       data: res.data,
@@ -375,6 +425,8 @@ export async function trialStartAction(_prev: unknown, formdata: FormData) {
       initialData: dirty,
     };
   }
+
+  await syncStoredSubscriptionDetailsFromProfile();
 
   return {
     success: true,
