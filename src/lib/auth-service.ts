@@ -95,6 +95,26 @@ export function createAuthService(options: AuthServiceOptions) {
     }
   }
 
+  async function storeUserDetails(user: TUser) {
+    if (!options.setCookie) {
+      throw new Error(
+        "setCookie callback not provided. You must call storeUserDetails from a Server Action or Route Handler with setCookie configured.",
+      );
+    }
+
+    const duration = 24 * 60 * 60 * 1000;
+    const accessToken = await getAccessToken();
+    const decryptedToken = accessToken ? decodeToken(accessToken) : null;
+    const expires = decryptedToken?.exp
+      ? decryptedToken.exp * 1000
+      : new Date(Date.now() + duration);
+
+    const encryptedUserDetails = await encryptToken(JSON.stringify(user));
+    await options.setCookie(cookieNames.user, encryptedUserDetails, {
+      expires,
+    });
+  }
+
   async function getAccessToken(): Promise<TTokens | null | undefined> {
     const cookieStore = await cookies();
     const encrypted = cookieStore.get(cookieNames.access)?.value;
@@ -192,6 +212,7 @@ export function createAuthService(options: AuthServiceOptions) {
 
   return {
     storeTokens,
+    storeUserDetails,
     getUserDetails,
     getAccessToken,
     getRefreshToken,

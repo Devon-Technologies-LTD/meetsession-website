@@ -1,6 +1,5 @@
 import { BackAction } from "@/components/back-button";
 import { ChangePassword } from "@/features/dashboard/components/accounts/ChangePassword/change_password";
-// import { retrieveProfileAction } from "@/features/dashboard/server/actions";
 
 export default async function Page() {
   return (
