@@ -17,16 +17,19 @@ import { ProfileImage } from "@/components/ui/profile-image";
 import { ManageAccountIcon } from "@/components/icons/manage-account-icon";
 import { useEffect, useState } from "react";
 import { useUserSubscription } from "@/context/use-user-subscription";
+import { TUser } from "@/lib/schemas";
 
 type TManagementProps = {
   userImage?: string;
   userName?: string;
   userEmail?: string;
   subscriptionType?: string;
+  tier?: string;
 };
 export function Management(props: TManagementProps) {
   const { updateSubscription, subscription } = useUserSubscription();
   const [showAllMeetings, setShowAllMeetings] = useState(false);
+  const [profile, setProfile] = useState<Pick<TUser, "tier"> | null>(null);
   const phoneNumber = "+2348109435439"; // 
   useEffect(() => {
     fetch(`/api/v1/tier`, {
@@ -46,6 +49,24 @@ export function Management(props: TManagementProps) {
   }, [updateSubscription]);
 
   useEffect(() => {
+    fetch(`/api/v1/profile`, {
+      method: "GET",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data === "string") {
+          setProfile(null);
+          return;
+        }
+
+        setProfile(data);
+      })
+      .catch(() => {
+        setProfile(null);
+      });
+  }, []);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     const { origin, hostname } = window.location;
     const isLocalHost = hostname === "localhost" || hostname === "127.0.0.1";
@@ -53,7 +74,8 @@ export function Management(props: TManagementProps) {
     setShowAllMeetings(isLocalHost || isAllowedProd);
   }, []);
 
-  const planName = subscription?.plan_snapshot.name;
+  const planName =
+    subscription?.plan_snapshot.name ?? profile?.tier ?? props.tier;
   const isTrialSubscription = props.subscriptionType === "TRIAL_SUBSCRIPTION";
   const subscriptionBadge = isTrialSubscription ? "Free Trial" : planName;
 
