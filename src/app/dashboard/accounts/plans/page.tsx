@@ -21,7 +21,6 @@ export default async function Page() {
       },
       cache: "no-store",
     });
-
     if (profileResponse.ok) {
       user = (await profileResponse.json()) as TUser;
     }

@@ -45,6 +45,7 @@ export type TPaymentInitResponse = {
     reference?: string;
     Reference?: string;
     payment_url?: string;
+    payment_link?: string;
     amount?: number;
     plan_code?: string;
     subscription_type?: string;

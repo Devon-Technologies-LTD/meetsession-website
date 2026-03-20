@@ -16,7 +16,7 @@ export const verifyPaymentSchema = z.object({
 export type TVerifyPayment = z.infer<typeof verifyPaymentSchema>;
 
 export const validateCouponCodeSchema = z.object({
-  code: z.string({ error: "Coupon code is required" }).trim().min(1, {
+  coupon_code: z.string({ error: "Coupon code is required" }).trim().min(1, {
     error: "Coupon code is required",
   }),
 });

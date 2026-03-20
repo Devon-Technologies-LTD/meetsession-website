@@ -139,6 +139,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const hasCheckedCallbackReference = useRef(false);
   const handledInitializeState = useRef(initializeState);
   const [isDiscountPromptOpen, setIsDiscountPromptOpen] = useState(false);
+  const activeDiscountCode = useRef<string | undefined>(undefined);
 
   const featurePrice = plan?.features?.find(
     (f) => f.key === `${billingCycle}_subscription`,
@@ -164,6 +165,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       (p) => p.id === plan?.id,
     ) as TSubscriptionPlan;
     updateSelectedPlan(selectedPlan);
+    activeDiscountCode.current = discountCode?.trim() || undefined;
 
     if (canStartTrial && plan?.id) {
       setIsStartingTrial(true);
@@ -218,7 +220,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         tierId: plan?.id ?? "",
         subscriptionType: subType,
         callbackUrl,
-        couponCode: discountCode?.trim() || undefined,
+        couponCode: activeDiscountCode.current,
       });
     }
   }, [
@@ -321,11 +323,31 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     handledInitializeState.current = initializeState;
 
     if (initializeState.success) {
-      toast.success("Payment initialized");
       const initData = initializeState.data.data;
+      const isDiscountCheckout = Boolean(activeDiscountCode.current);
+      const paymentLink =
+        initData.payment_link ?? initData.payment_url ?? initData.authorization_url;
+
+      if (isDiscountCheckout && !paymentLink) {
+        hasPaid.current = true;
+        updatePaymentStatus("payment_success");
+        updateTransactionDetails({
+          status: "successful",
+          transactionId: initData.Reference ?? initData.reference,
+          amount: initData.amount ?? currentPrice,
+          date: new Date(),
+        });
+        toast.success(initializeState.data.message || "Discount code applied");
+        requestAnimationFrame(() => {
+          router.push("/dashboard/accounts/plans/status");
+        });
+        return;
+      }
+
+      toast.success("Payment initialized");
       popupPayment({
         access_code: initData.access_code,
-        payment_url: initData.payment_url ?? initData.authorization_url,
+        payment_url: paymentLink,
         plan_code: initData.plan_code,
         reference: initData.Reference ?? initData.reference,
         email: userEmail ?? subscription?.created_by?.email,
@@ -349,7 +371,12 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
               nextAction: () => {
                 const subType = `${billingCycle}_subscription`;
                 const callbackUrl = window.location.origin + window.location.pathname;
-                initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
+                initialize({
+                  tierId: plan?.id ?? "",
+                  subscriptionType: subType,
+                  callbackUrl,
+                  couponCode: activeDiscountCode.current,
+                });
               },
             });
             toast.error(err?.message || "Payment setup failed");
@@ -393,6 +420,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     userEmail,
     subscription?.created_by?.email,
     plan?.id,
+    currentPrice,
     router,
     updatePaymentStatus,
     updateTransactionDetails,
