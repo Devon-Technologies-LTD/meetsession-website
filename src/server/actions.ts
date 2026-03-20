@@ -340,6 +340,7 @@ export async function verifyPaymentAction(_prev: unknown, formdata: FormData) {
       data: null,
     };
   } else {
+    await syncStoredSubscriptionDetailsFromProfile();
     return {
       success: res.ok,
       data: res.data,
@@ -358,18 +359,21 @@ export async function validateCouponCodeAction(formdata: FormData) {
     return {
       success: false,
       message: result.error.message,
-      errors: { code: errs.code ?? undefined },
+      errors: { coupon_code: errs.coupon_code ?? undefined },
       data: null,
       initialData: dirty,
     };
   }
 
   const res = await apiClient.authenticated<{ message?: string; data?: unknown }>(
-    `/transactions/coupon-code/${encodeURIComponent(result.data.code)}`,
+    `/tiers/initiate-payment-with-coupon`,
     {
-      method: "GET",
+      method: "POST",
+      data: { coupon_code: result.data.coupon_code },
     },
   );
+
+  console.log("Coupon code validation response:", res);
 
   if (!res.ok) {
     return {
