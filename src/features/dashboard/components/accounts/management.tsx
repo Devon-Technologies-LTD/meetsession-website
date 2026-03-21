@@ -32,23 +32,6 @@ export function Management(props: TManagementProps) {
   const [profile, setProfile] = useState<Pick<TUser, "tier"> | null>(null);
   const phoneNumber = "+2348109435439"; // 
   useEffect(() => {
-    fetch(`/api/v1/tier`, {
-      method: "GET",
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (typeof data === "string") {
-          updateSubscription(undefined);
-        } else {
-          updateSubscription(data);
-        }
-      })
-      .catch((err) => {
-        updateSubscription(undefined);
-      });
-  }, [updateSubscription]);
-
-  useEffect(() => {
     fetch(`/api/v1/profile`, {
       method: "GET",
     })
@@ -56,15 +39,17 @@ export function Management(props: TManagementProps) {
       .then((data) => {
         if (typeof data === "string") {
           setProfile(null);
+          updateSubscription(undefined);
           return;
         }
-
+        updateSubscription(data);
         setProfile(data);
       })
       .catch(() => {
         setProfile(null);
+        updateSubscription(undefined);
       });
-  }, []);
+  }, [updateSubscription]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -75,7 +60,7 @@ export function Management(props: TManagementProps) {
   }, []);
 
   const planName =
-    subscription?.plan_snapshot.name ?? profile?.tier ?? props.tier;
+    subscription?.tier ?? profile?.tier ?? props.tier;
   const isTrialSubscription = props.subscriptionType === "TRIAL_SUBSCRIPTION";
   const subscriptionBadge = isTrialSubscription ? "Free Trial" : planName;
 
