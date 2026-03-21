@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { NoiseElement } from "@/components/noise-element";
 import { TTier, TTierTheme } from "../lib/types";
@@ -18,6 +20,7 @@ import { BasicPlanIcon } from "@/components/icons/basic-plan-icon";
 import { EssentialPlanIcon } from "@/components/icons/essential-plan-icon";
 import { ProPlanIcon } from "@/components/icons/pro-plan-icon";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type PricingProps = {
   plans?: TSubscriptionPlan[] | null;
@@ -79,10 +82,36 @@ function getTierDescription(name: string) {
 }
 
 export function Pricing({ plans }: PricingProps) {
+  const [status, setStatus] = useState<
+    "success" | "error" | "loading" | "idle"
+  >("idle");
+  const [livePlans, setLivePlans] = useState<TSubscriptionPlan[] | null>(
+    plans ?? null,
+  );
   const trialUrl = "https://meetsession.devontech.io/trial";
-  const isUsingFallbackPlans = !plans || plans.length === 0;
+  const isUsingFallbackPlans = !livePlans || livePlans.length === 0;
+
+  useEffect(() => {
+    setStatus("loading");
+    fetch("/api/v1/public/get-tiers")
+      .then((res) => res.json())
+      .then((data: { data?: TSubscriptionPlan[] }) => {
+        if (!Array.isArray(data?.data)) {
+          setStatus("error");
+          return;
+        }
+        setLivePlans(data.data);
+        setStatus("success");
+      })
+      .catch((err) => {
+        console.log({ tiers: err });
+        setLivePlans((current) => current ?? null);
+        setStatus("error");
+      });
+  }, [setLivePlans]);
+
   const mappedTiers: TTier[] =
-    plans
+    livePlans
       ?.map((plan, index) => {
         const dynamicFeatures =
           plan.features
@@ -138,6 +167,14 @@ export function Pricing({ plans }: PricingProps) {
             Every tier includes our core features. Choose the one that fits your
             needs.
           </p>
+          {status === "loading" && (
+            <p className="text-xs text-neutral-300">Loading plans...</p>
+          )}
+          {status === "error" && (
+            <p className="text-xs text-neutral-300">
+              Failed to retrieve live plans.
+            </p>
+          )}
           {isUsingFallbackPlans && (
             <p className="max-w-xl rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-neutral-300">
               Live plan data is temporarily unavailable. Showing fallback
