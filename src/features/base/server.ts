@@ -2,6 +2,7 @@
 
 import { apiClient } from "@/lib/server-api";
 import { TImpact } from "./lib/schemas";
+import { TSubscriptionPlan } from "@/lib/types";
 
 
 
@@ -11,6 +12,33 @@ export async function getMetrics() {
     data: TImpact;
     status: string;
   }>("/platform-analytics", {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    return {
+      success: res.ok,
+      errors: res.error,
+      message: "Failed request",
+      status: res.status,
+      data: null,
+    };
+  } else {
+    return {
+      success: res.ok,
+      data: res.data.data,
+      status: res.status,
+      errors: null,
+      message: res.data.message,
+    };
+  }
+}
+
+export async function getPublicTiers() {
+  const res = await apiClient.unauthenticated<{
+    message: string;
+    data: TSubscriptionPlan[];
+  }>("/all-tiers?with_feature=true", {
     method: "GET",
   });
 
