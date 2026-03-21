@@ -4,6 +4,7 @@ import { getUser } from "@/features/dashboard/server/actions";
 
 export default async function Page() {
   const user = await getUser(); 
+  console.log("User data in page component:", user);  
   return (
     <div className="px-2 flex flex-col gap-6 w-full h-full">
       <BackAction name="Account management" />

@@ -36,14 +36,37 @@ export function PlanUI<T extends TSubscriptionPlan>({
   isTrialEligible,
   isUserOnTrial,
   userEmail,
+  currentTierId,
 }: {
   plans?: T[];
   isTrialEligible?: boolean;
   isUserOnTrial?: boolean;
   userEmail?: string;
+  currentTierId?: string;
 }) {
-  const [selectedId, setSelectedId] = useState(plans?.[0].id ?? "");
+  const [selectedId, setSelectedId] = useState(() => {
+    if (!plans?.length) return "";
+    return plans.some((plan) => plan.id === currentTierId)
+      ? currentTierId ?? ""
+      : plans[0].id;
+  });
   const [billingCycle, setBillingCycle] = useState<TBillingCycle>("monthly");
+
+  useEffect(() => {
+    if (!plans?.length) {
+      setSelectedId("");
+      return;
+    }
+
+    if (currentTierId && plans.some((plan) => plan.id === currentTierId)) {
+      setSelectedId(currentTierId);
+      return;
+    }
+
+    setSelectedId((prev) =>
+      plans.some((plan) => plan.id === prev) ? prev : plans[0].id,
+    );
+  }, [currentTierId, plans]);
 
   function updateSelectedId(id: string) {
     setSelectedId(id);
@@ -90,6 +113,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
               isTrialEligible={isTrialEligible}
               isUserOnTrial={isUserOnTrial}
               userEmail={userEmail}
+              currentTierId={currentTierId}
             />
           );
         })}
@@ -102,6 +126,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
           isTrialEligible={isTrialEligible}
           isUserOnTrial={isUserOnTrial}
           userEmail={userEmail}
+          currentTierId={currentTierId}
         />
       </div>
     </div>
@@ -115,6 +140,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   isTrialEligible,
   isUserOnTrial,
   userEmail,
+  currentTierId,
 }: {
   plans?: T[];
   plan?: T;
@@ -122,6 +148,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   isTrialEligible?: boolean;
   isUserOnTrial?: boolean;
   userEmail?: string;
+  currentTierId?: string;
 }) {
   const { updateSelectedPlan, updatePaymentStatus, updateTransactionDetails } =
     usePlanManagementContext();
@@ -155,7 +182,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
 
   const canStartTrial = Boolean(isTrialEligible && !isUserOnTrial);
   const isFreePlan = Boolean(currentPrice === 0);
-  const isCurrentPlan = subscription ? subscription.plan_id === plan?.id : null;
+  const activePlanId =
+    currentTierId ?? subscription?.tier_id ?? subscription?.plan_id;
+  const isCurrentPlan = activePlanId ? activePlanId === plan?.id : false;
   const shouldDisableAction = Boolean(isCurrentPlan) && !isUserOnTrial;
   const isPaidCheckoutDisabled =
     !isPaystackEnabled && !canStartTrial && !isFreePlan;
@@ -350,7 +379,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         payment_url: paymentLink,
         plan_code: initData.plan_code,
         reference: initData.Reference ?? initData.reference,
-        email: userEmail ?? subscription?.created_by?.email,
+        email: userEmail ?? subscription?.email,
         callbacks: {
           onSuccess: (res) => {
             hasPaid.current = true;
@@ -418,7 +447,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     initialize,
     billingCycle,
     userEmail,
-    subscription?.created_by?.email,
+    subscription?.email,
     plan?.id,
     currentPrice,
     router,
