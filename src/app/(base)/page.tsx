@@ -2,18 +2,22 @@ import { Hero } from "@/features/base/components/hero";
 import { WhyMeetSession } from "@/features/base/components/why-meet-session";
 import { HowItWorks } from "@/features/base/components/how-it-works";
 import { MeasureImpact } from "@/features/base/components/measure-impact";
-import { Pricing } from "@/features/base/components/pricing";
 import { DownloadApps } from "@/features/base/components/download-apps";
 import { CampusProgramAd } from "@/features/base/components/campus-program-ad";
 import { VideoTutorials } from "@/features/base/components/video-tutorials";
+import { PricingPlans } from "@/features/base/components/pricing-plans";
+/*
+import { Pricing } from "@/features/base/components/pricing";
 import { BASE_URL } from "@/lib/constants";
 import { apiClient } from "@/lib/server-api";
 import { TSubscriptionPlan } from "@/lib/types";
-// import { JoinWaitlist } from "@/features/base/components/join-waitlist";
-// import { Testimonials } from "@/features/base/components/testimonials";
-// import { FAQs } from "@/features/base/components/faqs";
+import { JoinWaitlist } from "@/features/base/components/join-waitlist";
+import { Testimonials } from "@/features/base/components/testimonials";
+import { FAQs } from "@/features/base/components/faqs";
+*/
 
 export default async function Page() {
+  /*
   type TResponse = {
     message: string;
     data: TSubscriptionPlan[];
@@ -55,7 +59,9 @@ export default async function Page() {
     });
   }
 
+
   const plans = tierResponse.ok ? tierResponse.data.data : null;
+  */
 
   return (
     <div className="h-fit w-full">
@@ -64,7 +70,8 @@ export default async function Page() {
       <HowItWorks />
       <CampusProgramAd />
       <MeasureImpact />
-      <Pricing plans={plans} />
+      <PricingPlans />
+      {/*<Pricing plans={plans} />*/}
       {/*<JoinWaitlist />*/}
       {/*<Testimonials />*/}
       <DownloadApps />
