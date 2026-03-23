@@ -6,6 +6,7 @@ import { TProfile, TProfileResponse } from "../lib/types";
 import { revalidatePath } from "next/cache";
 import z from "zod";
 import { TUserCurrentPlan } from "@/lib/types";
+import { BASE_URL } from "@/lib/constants";
 
 export async function getUser() {
   return await auth.getUserDetails();
@@ -233,6 +234,46 @@ export async function retrieveTierAction() {
       data: res.data,
       errors: null,
       message: "Successfully retrieved subscription",
+      status: res.status,
+    };
+  }
+}
+
+type TAllTiersOptions = {
+  with_feature?: boolean;
+  with_subscription?: boolean;
+}
+export async function retrieveAllTiersAction(opts?: TAllTiersOptions) {
+  const params = new URLSearchParams();
+  if (opts?.with_feature) {
+    params.append("with_feature", "true");
+  }
+  if (opts?.with_subscription) {
+    params.append("with_subscription", "true");
+  }
+  const paramsString = params.toString();
+
+  const res = await apiClient.unauthenticated<{
+    message: string;
+    data: TUserCurrentPlan;
+  }>(`${BASE_URL}/all-tiers${paramsString ? `?${paramsString}` : ""}`, {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    return {
+      success: res.ok,
+      data: null,
+      errors: res.error,
+      message: "Failed to retrieve all tiers",
+      status: res.status,
+    };
+  } else {
+    return {
+      success: res.ok,
+      data: res.data,
+      errors: null,
+      message: "Successfully retrieved all tiers",
       status: res.status,
     };
   }

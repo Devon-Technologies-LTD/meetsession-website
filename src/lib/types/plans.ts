@@ -7,6 +7,15 @@ export type TSubscriptionPlanFeature = {
   category: string;
 };
 
+export type TAllSubscriptionPlan = {
+  annual_code: string;
+  features: TSubscriptionPlanFeature[];
+  id: string;
+  monthly_code: string;
+  name: string;
+  quarterly_code: string;
+}
+
 export type TSubscriptionPlan = {
   id: string;
   name: string;
