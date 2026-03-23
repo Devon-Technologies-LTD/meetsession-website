@@ -36,14 +36,37 @@ export function PlanUI<T extends TSubscriptionPlan>({
   isTrialEligible,
   isUserOnTrial,
   userEmail,
+  currentTierId,
 }: {
   plans?: T[];
   isTrialEligible?: boolean;
   isUserOnTrial?: boolean;
   userEmail?: string;
+  currentTierId?: string;
 }) {
-  const [selectedId, setSelectedId] = useState(plans?.[0].id ?? "");
+  const [selectedId, setSelectedId] = useState(() => {
+    if (!plans?.length) return "";
+    return plans.some((plan) => plan.id === currentTierId)
+      ? currentTierId ?? ""
+      : plans[0].id;
+  });
   const [billingCycle, setBillingCycle] = useState<TBillingCycle>("monthly");
+
+  useEffect(() => {
+    if (!plans?.length) {
+      setSelectedId("");
+      return;
+    }
+
+    if (currentTierId && plans.some((plan) => plan.id === currentTierId)) {
+      setSelectedId(currentTierId);
+      return;
+    }
+
+    setSelectedId((prev) =>
+      plans.some((plan) => plan.id === prev) ? prev : plans[0].id,
+    );
+  }, [currentTierId, plans]);
 
   function updateSelectedId(id: string) {
     setSelectedId(id);
@@ -90,6 +113,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
               isTrialEligible={isTrialEligible}
               isUserOnTrial={isUserOnTrial}
               userEmail={userEmail}
+              currentTierId={currentTierId}
             />
           );
         })}
@@ -102,6 +126,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
           isTrialEligible={isTrialEligible}
           isUserOnTrial={isUserOnTrial}
           userEmail={userEmail}
+          currentTierId={currentTierId}
         />
       </div>
     </div>
@@ -115,6 +140,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   isTrialEligible,
   isUserOnTrial,
   userEmail,
+  currentTierId,
 }: {
   plans?: T[];
   plan?: T;
@@ -122,6 +148,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   isTrialEligible?: boolean;
   isUserOnTrial?: boolean;
   userEmail?: string;
+  currentTierId?: string;
 }) {
   const { updateSelectedPlan, updatePaymentStatus, updateTransactionDetails } =
     usePlanManagementContext();
@@ -139,6 +166,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const hasCheckedCallbackReference = useRef(false);
   const handledInitializeState = useRef(initializeState);
   const [isDiscountPromptOpen, setIsDiscountPromptOpen] = useState(false);
+  const activeDiscountCode = useRef<string | undefined>(undefined);
 
   const featurePrice = plan?.features?.find(
     (f) => f.key === `${billingCycle}_subscription`,
@@ -154,7 +182,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
 
   const canStartTrial = Boolean(isTrialEligible && !isUserOnTrial);
   const isFreePlan = Boolean(currentPrice === 0);
-  const isCurrentPlan = subscription ? subscription.plan_id === plan?.id : null;
+  const activePlanId =
+    currentTierId ?? subscription?.tier_id ?? subscription?.plan_id;
+  const isCurrentPlan = activePlanId ? activePlanId === plan?.id : false;
   const shouldDisableAction = Boolean(isCurrentPlan) && !isUserOnTrial;
   const isPaidCheckoutDisabled =
     !isPaystackEnabled && !canStartTrial && !isFreePlan;
@@ -164,6 +194,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       (p) => p.id === plan?.id,
     ) as TSubscriptionPlan;
     updateSelectedPlan(selectedPlan);
+    activeDiscountCode.current = discountCode?.trim() || undefined;
 
     if (canStartTrial && plan?.id) {
       setIsStartingTrial(true);
@@ -218,7 +249,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         tierId: plan?.id ?? "",
         subscriptionType: subType,
         callbackUrl,
-        couponCode: discountCode?.trim() || undefined,
+        couponCode: activeDiscountCode.current,
       });
     }
   }, [
@@ -321,14 +352,34 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     handledInitializeState.current = initializeState;
 
     if (initializeState.success) {
-      toast.success("Payment initialized");
       const initData = initializeState.data.data;
+      const isDiscountCheckout = Boolean(activeDiscountCode.current);
+      const paymentLink =
+        initData.payment_link ?? initData.payment_url ?? initData.authorization_url;
+
+      if (isDiscountCheckout && !paymentLink) {
+        hasPaid.current = true;
+        updatePaymentStatus("payment_success");
+        updateTransactionDetails({
+          status: "successful",
+          transactionId: initData.Reference ?? initData.reference,
+          amount: initData.amount ?? currentPrice,
+          date: new Date(),
+        });
+        toast.success(initializeState.data.message || "Discount code applied");
+        requestAnimationFrame(() => {
+          router.push("/dashboard/accounts/plans/status");
+        });
+        return;
+      }
+
+      toast.success("Payment initialized");
       popupPayment({
         access_code: initData.access_code,
-        payment_url: initData.payment_url ?? initData.authorization_url,
+        payment_url: paymentLink,
         plan_code: initData.plan_code,
         reference: initData.Reference ?? initData.reference,
-        email: userEmail ?? subscription?.created_by?.email,
+        email: userEmail ?? subscription?.email,
         callbacks: {
           onSuccess: (res) => {
             hasPaid.current = true;
@@ -349,7 +400,12 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
               nextAction: () => {
                 const subType = `${billingCycle}_subscription`;
                 const callbackUrl = window.location.origin + window.location.pathname;
-                initialize({ tierId: plan?.id ?? "", subscriptionType: subType, callbackUrl });
+                initialize({
+                  tierId: plan?.id ?? "",
+                  subscriptionType: subType,
+                  callbackUrl,
+                  couponCode: activeDiscountCode.current,
+                });
               },
             });
             toast.error(err?.message || "Payment setup failed");
@@ -391,8 +447,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     initialize,
     billingCycle,
     userEmail,
-    subscription?.created_by?.email,
+    subscription?.email,
     plan?.id,
+    currentPrice,
     router,
     updatePaymentStatus,
     updateTransactionDetails,

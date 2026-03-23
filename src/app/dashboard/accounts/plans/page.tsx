@@ -4,6 +4,10 @@ import { PlanUI } from "@/features/dashboard/components/accounts/plans/plan-ui";
 import { retrievePlansAction } from "@/features/dashboard/lib/server/actions";
 import { TUser } from "@/lib/schemas";
 
+function isTUser(value: unknown): value is TUser {
+  return typeof value === "object" && value !== null && "id" in value;
+}
+
 export default async function Page() {
   const plans = await retrievePlansAction({ withFeature: true });
   const requestHeaders = await headers();
@@ -21,9 +25,19 @@ export default async function Page() {
       },
       cache: "no-store",
     });
-
     if (profileResponse.ok) {
-      user = (await profileResponse.json()) as TUser;
+      const profilePayload = (await profileResponse.json()) as unknown;
+
+      if (isTUser(profilePayload)) {
+        user = profilePayload;
+      } else if (
+        typeof profilePayload === "object" &&
+        profilePayload !== null &&
+        "data" in profilePayload &&
+        isTUser(profilePayload.data)
+      ) {
+        user = profilePayload.data;
+      }
     }
   }
 
@@ -59,6 +73,7 @@ export default async function Page() {
             isTrialEligible={isTrialEligible}
             isUserOnTrial={isUserOnTrial}
             userEmail={user?.email}
+            currentTierId={user?.tier_id}
           />
         )}
 

@@ -68,8 +68,8 @@ export function DiscountCodeModal({
 
     setIsValidatingCoupon(true);
     const formdata = new FormData();
-    formdata.append("code", normalizedCouponCode);
-
+    formdata.append("coupon_code", normalizedCouponCode);
+    console.log("Validating coupon code:", normalizedCouponCode);
     const validationRes = await validateCouponCodeAction(formdata);
     setIsValidatingCoupon(false);
 
