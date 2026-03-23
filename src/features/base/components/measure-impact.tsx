@@ -88,7 +88,7 @@ export function MeasureImpact() {
             "before:w-120 md:before:w-182 before:h-120 md:before:h-182",
             "before:bg-brand-blue before:opacity-30 before:rounded-full before:blur-3xl",
             "before:absolute before:-bottom-64 md:before:bottom-1/2 before:right-1/2 md:before:-right-12",
-            "before:-translate-x-1/2 md:before:translate-x-0 before:-translate-y-0 md:before:translate-y-1/2",
+            "before:-translate-x-1/2 md:before:translate-x-0 before:translate-y-0 md:before:translate-y-1/2",
           )}
         ></div>
       </NoiseElement>
@@ -99,7 +99,7 @@ export function MeasureImpact() {
             "before:bg-brand-blue before:opacity-30 before:rounded-full before:blur-3xl",
             "before:w-120 md:before:w-182 before:h-120 md:before:h-182",
             "before:absolute before:-bottom-64 md:before:bottom-1/2 before:right-1/2 md:before:-right-12",
-            "before:-translate-x-1/2 md:before:translate-x-0 before:-translate-y-0 md:before:translate-y-1/2",
+            "before:-translate-x-1/2 md:before:translate-x-0 before:translate-y-0 md:before:translate-y-1/2",
           )}
         ></div>
       </NoiseElement>
