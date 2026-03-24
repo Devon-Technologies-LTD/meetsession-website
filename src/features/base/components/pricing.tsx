@@ -96,6 +96,8 @@ export function Pricing({ plans }: PricingProps) {
     fetch("/api/v1/public/get-tiers")
       .then((res) => res.json())
       .then((data: { data?: TSubscriptionPlan[] }) => {
+        console.log("fetching tiers global");
+        console.log({ data });
         if (!Array.isArray(data?.data)) {
           setStatus("error");
           return;
@@ -104,6 +106,7 @@ export function Pricing({ plans }: PricingProps) {
         setStatus("success");
       })
       .catch((err) => {
+        console.log("failed to fetching tiers global");
         console.log({ tiers: err });
         setLivePlans((current) => current ?? null);
         setStatus("error");
@@ -304,7 +307,7 @@ export function Pricing({ plans }: PricingProps) {
 }
 
 const priceList: TTier[] = [
-  /*
+  
   {
     id: 1,
     title: "Free",
@@ -321,6 +324,5 @@ const priceList: TTier[] = [
     icon: <FreePlanIcon />,
     themeColor: "black",
   },
-  */
 
 ];

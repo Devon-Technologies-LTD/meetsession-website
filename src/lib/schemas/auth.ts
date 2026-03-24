@@ -48,6 +48,7 @@ export const userSchema = z.object({
   organization_id: z.string().optional(),
   subscription_start_date: z.string().optional(),
   subscription_end_date: z.string().optional(),
+  referred_by: z.string().optional(),
 });
 export type TUser = z.infer<typeof userSchema>;
 

@@ -74,6 +74,16 @@ export default async function Page() {
             isUserOnTrial={isUserOnTrial}
             userEmail={user?.email}
             currentTierId={user?.tier_id}
+            subscriptionEndDate={user?.subscription_end_date}
+            hasUsedDiscountCode={Boolean(user?.referred_by?.trim())}
+            hasPreviousPayment={Boolean(
+              user?.subscription_id?.trim() ||
+                (user?.subscription_status &&
+                  user.subscription_status !== "") ||
+                (user?.tier_id &&
+                  user.tier_id !== DEFAULT_TIER_ID &&
+                  user.subscription_type !== "TRIAL_SUBSCRIPTION"),
+            )}
           />
         )}
 
