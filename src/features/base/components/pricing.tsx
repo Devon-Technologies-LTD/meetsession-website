@@ -189,7 +189,7 @@ export function Pricing({ plans }: PricingProps) {
               key={itr.id}
               className={cn(
                 generateTierColor(itr.themeColor),
-                "flex h-full min-h-[38rem] flex-col rounded-3xl px-2 py-2",
+                "flex h-full min-h-152 flex-col rounded-3xl px-2 py-2",
                 "shadow-none border-none text-white",
               )}
             >
@@ -295,7 +295,7 @@ export function Pricing({ plans }: PricingProps) {
             "before:bg-brand-blue before:opacity-40 before:rounded-full before:blur-3xl",
             "before:w-120 md:before:w-204 before:h-120 md:before:h-204",
             "before:absolute before:-bottom-64 md:before:bottom-1/2 before:right-1/2 md:before:-right-12",
-            "before:-translate-x-1/2 md:before:translate-x-0 before:-translate-y-0 md:before:translate-y-1/2",
+            "before:-translate-x-1/2 md:before:translate-x-0 before:translate-y-0 md:before:translate-y-1/2",
           )}
         ></div>
       </NoiseElement>
@@ -304,6 +304,7 @@ export function Pricing({ plans }: PricingProps) {
 }
 
 const priceList: TTier[] = [
+  /*
   {
     id: 1,
     title: "Free",
@@ -320,5 +321,6 @@ const priceList: TTier[] = [
     icon: <FreePlanIcon />,
     themeColor: "black",
   },
- 
+  */
+
 ];
