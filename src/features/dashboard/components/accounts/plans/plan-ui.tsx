@@ -37,12 +37,18 @@ export function PlanUI<T extends TSubscriptionPlan>({
   isUserOnTrial,
   userEmail,
   currentTierId,
+  subscriptionEndDate,
+  hasUsedDiscountCode,
+  hasPreviousPayment,
 }: {
   plans?: T[];
   isTrialEligible?: boolean;
   isUserOnTrial?: boolean;
   userEmail?: string;
   currentTierId?: string;
+  subscriptionEndDate?: string;
+  hasUsedDiscountCode?: boolean;
+  hasPreviousPayment?: boolean;
 }) {
   const [selectedId, setSelectedId] = useState(() => {
     if (!plans?.length) return "";
@@ -114,6 +120,9 @@ export function PlanUI<T extends TSubscriptionPlan>({
               isUserOnTrial={isUserOnTrial}
               userEmail={userEmail}
               currentTierId={currentTierId}
+              subscriptionEndDate={subscriptionEndDate}
+              hasUsedDiscountCode={hasUsedDiscountCode}
+              hasPreviousPayment={hasPreviousPayment}
             />
           );
         })}
@@ -127,6 +136,9 @@ export function PlanUI<T extends TSubscriptionPlan>({
           isUserOnTrial={isUserOnTrial}
           userEmail={userEmail}
           currentTierId={currentTierId}
+          subscriptionEndDate={subscriptionEndDate}
+          hasUsedDiscountCode={hasUsedDiscountCode}
+          hasPreviousPayment={hasPreviousPayment}
         />
       </div>
     </div>
@@ -141,6 +153,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   isUserOnTrial,
   userEmail,
   currentTierId,
+  subscriptionEndDate,
+  hasUsedDiscountCode,
+  hasPreviousPayment,
 }: {
   plans?: T[];
   plan?: T;
@@ -149,6 +164,9 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   isUserOnTrial?: boolean;
   userEmail?: string;
   currentTierId?: string;
+  subscriptionEndDate?: string;
+  hasUsedDiscountCode?: boolean;
+  hasPreviousPayment?: boolean;
 }) {
   const { updateSelectedPlan, updatePaymentStatus, updateTransactionDetails } =
     usePlanManagementContext();
@@ -185,9 +203,24 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   const activePlanId =
     currentTierId ?? subscription?.tier_id ?? subscription?.plan_id;
   const isCurrentPlan = activePlanId ? activePlanId === plan?.id : false;
-  const shouldDisableAction = Boolean(isCurrentPlan) && !isUserOnTrial;
+  const parsedSubscriptionEndDate = subscriptionEndDate
+    ? new Date(subscriptionEndDate)
+    : null;
+  const hasSubscriptionExpired = Boolean(
+    parsedSubscriptionEndDate &&
+      !Number.isNaN(parsedSubscriptionEndDate.getTime()) &&
+      parsedSubscriptionEndDate.getTime() < Date.now(),
+  );
+  const canResubscribeCurrentPlan = Boolean(
+    isCurrentPlan && hasSubscriptionExpired && !isFreePlan,
+  );
+  const shouldDisableAction =
+    Boolean(isCurrentPlan) && !isUserOnTrial && !canResubscribeCurrentPlan;
   const isPaidCheckoutDisabled =
     !isPaystackEnabled && !canStartTrial && !isFreePlan;
+  const shouldShowDiscountPrompt = Boolean(
+    !hasUsedDiscountCode && !hasPreviousPayment,
+  );
 
   const startPlanCheckout = useCallback(async (discountCode?: string) => {
     const selectedPlan = plans?.find(
@@ -266,13 +299,18 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   ]);
 
   const planAction = useCallback(async () => {
-    if (!canStartTrial && !isFreePlan && isPaystackEnabled) {
+    if (
+      !canStartTrial &&
+      !isFreePlan &&
+      isPaystackEnabled &&
+      shouldShowDiscountPrompt
+    ) {
       setIsDiscountPromptOpen(true);
       return;
     }
 
     await startPlanCheckout();
-  }, [canStartTrial, isFreePlan, startPlanCheckout]);
+  }, [canStartTrial, isFreePlan, shouldShowDiscountPrompt, startPlanCheckout]);
 
   // verify payment after return from hosted payment page
   useEffect(() => {
@@ -433,10 +471,10 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       initializeErrorDescription || initializeState.message || ""
     ).toLowerCase();
 
-    if (normalizedInitError.includes("already on this tier")) {
-      toast.error("You already have this plan. Choose another tier.");
-      return;
-    }
+    // if (normalizedInitError.includes("already on this tier")) {
+    //   toast.error("You already have this plan. Choose another tier.");
+    //   return;
+    // }
 
     toast.error(initializeState.message, {
       description: initializeErrorDescription,
@@ -479,15 +517,19 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         }
       >
         {(isInitializing || isVerifying || isStartingTrial) && <Spinner />}
+        
         {isStartingTrial
           ? "Activating Trial..."
           : isPaidCheckoutDisabled
             ? "Paid Plans Unavailable"
           : isFreePlan
             ? "Select Plan"
+            : canResubscribeCurrentPlan
+              ? "Resubscribe"
             : isUserOnTrial
               ? "Upgrade to Paid Plan"
               : "Proceed to Payment"}
+
       </Button>
     );
   }
@@ -611,12 +653,15 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
         </Card>
         <div className="md:hidden">{renderActionButton()}</div>
       </m.div>
+
       <DiscountCodeModal
         open={isDiscountPromptOpen}
+        tierId={plan.id}
         inputId={`discount-code-${plan.id}`}
         onOpenChange={setIsDiscountPromptOpen}
         onProceed={startPlanCheckout}
       />
+
     </>
   );
 }

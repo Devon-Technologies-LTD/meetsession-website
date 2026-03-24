@@ -359,7 +359,10 @@ export async function validateCouponCodeAction(formdata: FormData) {
     return {
       success: false,
       message: result.error.message,
-      errors: { coupon_code: errs.coupon_code ?? undefined },
+      errors: {
+        coupon_code: errs.coupon_code ?? undefined,
+        tier_id: errs.tier_id ?? undefined,
+      },
       data: null,
       initialData: dirty,
     };
@@ -369,7 +372,10 @@ export async function validateCouponCodeAction(formdata: FormData) {
     `/tiers/initiate-payment-with-coupon`,
     {
       method: "POST",
-      data: { coupon_code: result.data.coupon_code },
+      data: {
+        coupon_code: result.data.coupon_code,
+        tier_id: result.data.tier_id,
+      },
     },
   );
 
