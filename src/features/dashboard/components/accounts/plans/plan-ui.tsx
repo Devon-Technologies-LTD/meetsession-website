@@ -218,9 +218,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     Boolean(isCurrentPlan) && !isUserOnTrial && !canResubscribeCurrentPlan;
   const isPaidCheckoutDisabled =
     !isPaystackEnabled && !canStartTrial && !isFreePlan;
-  const shouldShowDiscountPrompt = Boolean(
-    !hasUsedDiscountCode && !hasPreviousPayment,
-  );
+  const shouldShowDiscountPrompt = Boolean(!hasUsedDiscountCode);
 
   const startPlanCheckout = useCallback(async (discountCode?: string) => {
     const selectedPlan = plans?.find(
