@@ -176,8 +176,10 @@ export const usePaystackPayment = () => {
           const PaystackPop = (await import("@paystack/inline-js")).default;
           const popup = new PaystackPop();
           popup.resumeTransaction(resolvedAccessCode, {
+
             onSuccess(tranx) {
               const paidRef = tranx?.reference;
+              console.log("Payment successful, verifying transaction...", tranx); 
               verify({ reference: paidRef });
               callbacks?.onSuccess(tranx);
             },

@@ -41,7 +41,7 @@ function VerifyEmailForm({
   onFailedAction: onError,
   email,
 }: VerifyEmailFormProps) {
-  const { formattedTime, start, timeLeft } = useCountdown(120);
+  const { formattedTime, start, timeLeft } = useCountdown(60);
   const form = useForm<TVerifyEmail>({
     resolver: zodResolver(verifyEmailSchema),
     defaultValues: {
@@ -52,7 +52,6 @@ function VerifyEmailForm({
 
   async function onResendOtp(_prev: unknown, formdata: FormData) {
     const response = await resentOTPAction(formdata);
-
     if (response.success) {
       toast.success("Successfully", { description: response.message });
       start();
