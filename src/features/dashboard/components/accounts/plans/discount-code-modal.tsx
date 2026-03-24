@@ -19,6 +19,7 @@ import { validateCouponCodeAction } from "@/server/actions";
 
 type DiscountCodeModalProps = {
   open: boolean;
+  tierId: string;
   inputId: string;
   onOpenChange: (open: boolean) => void;
   onProceed: (discountCode?: string) => Promise<void> | void;
@@ -26,6 +27,7 @@ type DiscountCodeModalProps = {
 
 export function DiscountCodeModal({
   open,
+  tierId,
   inputId,
   onOpenChange,
   onProceed,
@@ -68,6 +70,7 @@ export function DiscountCodeModal({
 
     setIsValidatingCoupon(true);
     const formdata = new FormData();
+    formdata.append("tier_id", tierId);
     formdata.append("coupon_code", normalizedCouponCode);
     console.log("Validating coupon code:", normalizedCouponCode);
     const validationRes = await validateCouponCodeAction(formdata);
@@ -81,7 +84,7 @@ export function DiscountCodeModal({
     toast.success(validationRes.message || "Coupon code applied.");
     handleSheetOpenChange(false);
     await onProceed(normalizedCouponCode);
-  }, [couponCode, handleSheetOpenChange, onProceed]);
+  }, [couponCode, handleSheetOpenChange, onProceed, tierId]);
 
   useEffect(() => {
     if (!isDiscountSheetOpen || typeof window === "undefined") {

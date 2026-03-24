@@ -196,7 +196,7 @@ const PaymentStatusReportWrapper = () => {
               onClick={handleProceedWithApp}
               className="h-14 w-full bg-black text-white"
             >
-              Proceed with App
+              Proceed to App
             </Button>
           )}
         </div>
