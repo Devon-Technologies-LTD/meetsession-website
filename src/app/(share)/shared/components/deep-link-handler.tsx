@@ -14,6 +14,21 @@ interface OpenMeetSessionAppOptions {
   onDesktop?: () => void;
 }
 
+function detectMobileOs() {
+  if (typeof window === "undefined") {
+    return { isIOS: false, isAndroid: false };
+  }
+
+  const userAgent = window.navigator.userAgent;
+  const platform = window.navigator.platform;
+  const maxTouchPoints = window.navigator.maxTouchPoints ?? 0;
+  const isIPadOS = platform === "MacIntel" && maxTouchPoints > 1;
+  const isIOS = /iPad|iPhone|iPod/i.test(userAgent) || isIPadOS;
+  const isAndroid = /android/i.test(userAgent);
+
+  return { isIOS, isAndroid };
+}
+
 export function openMeetSessionApp({
   deepLinkUrl,
   fallbackDelayMs = 2500,
@@ -23,8 +38,7 @@ export function openMeetSessionApp({
 }: OpenMeetSessionAppOptions) {
   if (typeof window === "undefined") return;
 
-  const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
-  const isAndroid = /android/i.test(navigator.userAgent);
+  const { isIOS, isAndroid } = detectMobileOs();
 
   if (!isIOS && !isAndroid) {
     onDesktop?.();
@@ -67,8 +81,7 @@ export function DeepLinkHandler({ meetId }: DeepLinkHandlerProps) {
     const isTestMode = urlParams.get("test") === "true";
 
     // Log for testing purposes
-    const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent);
-    const isAndroid = /android/i.test(navigator.userAgent);
+    const { isIOS, isAndroid } = detectMobileOs();
 
     if (isTestMode) {
       return; // Don't redirect in test mode
