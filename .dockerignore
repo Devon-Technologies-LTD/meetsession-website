@@ -1,10 +1,12 @@
 docker
-**/node_modules
-**/.git
-**/.next
 Dockerfile
 .dockerignore
-.env*.local
-.env
+.git
+.next
+node_modules
+.env*
+*.md
+.github
 npm-debug.log*
 README.md
+coverage
