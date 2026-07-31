@@ -10,7 +10,11 @@ import {
   CircleChevronUpIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { usePaystackPayment } from "@/hooks/use-paystack-payment";
+import {
+  usePaystackPayment,
+  hasAlreadyRequestedVerification,
+  markVerificationRequested,
+} from "@/hooks/use-paystack-payment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -439,7 +443,13 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     if (!callbackReference) return;
 
     hasCheckedCallbackReference.current = true;
+
+    if (hasAlreadyRequestedVerification(callbackReference)) {
+      return;
+    }
+
     hasPaid.current = true;
+    markVerificationRequested(callbackReference);
     updatePaymentStatus("payment_pending");
     verify({ reference: callbackReference });
   }, [updatePaymentStatus, verify]);

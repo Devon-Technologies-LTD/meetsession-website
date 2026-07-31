@@ -50,9 +50,22 @@ export function PartnerActivateWizard({ token }: { token?: string }) {
   const [billingCycle, setBillingCycle] = useState<TBillingCycle>("monthly");
   const [isStartingTrial, setIsStartingTrial] = useState(false);
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  // Cached from the first successful coupon validation — the coupon is
+  // single-use, so a retry (e.g. after the Paystack popup errors/cancels)
+  // must resume this same access_code rather than re-validate the coupon,
+  // which would fail with "already used" the second time.
+  const [couponAccessCode, setCouponAccessCode] = useState<string | null>(
+    null,
+  );
 
   const { popupPayment, verifyPayment } = usePaystackPayment();
   const { verify, verifyState } = verifyPayment;
+
+  // a cached access_code is only valid for the tier/cycle it was validated
+  // against — invalidate it if either changes.
+  useEffect(() => {
+    setCouponAccessCode(null);
+  }, [selectedTierId, billingCycle]);
 
   // exchange the one-time token for a session + onboarding context
   useEffect(() => {
@@ -155,8 +168,41 @@ export function PartnerActivateWizard({ token }: { token?: string }) {
     setStep("trial-success");
   }, [onboarding, selectedTierId]);
 
+  const launchPaystackPopup = useCallback(
+    (accessCode: string) => {
+      if (!onboarding) return;
+      setStep("paying");
+      popupPayment({
+        access_code: accessCode,
+        email: onboarding.user_details.email,
+        callbacks: {
+          onSuccess: (tranx) => {
+            verify({ reference: tranx?.reference });
+          },
+          onError: (err) => {
+            toast.error(err?.message || "Payment setup failed");
+            setStep("choose");
+          },
+          onCancel: () => {
+            toast.warning("Payment was cancelled.");
+            setStep("choose");
+          },
+        },
+      });
+    },
+    [onboarding, popupPayment, verify],
+  );
+
   const handleUseCouponNow = useCallback(async () => {
     if (!onboarding || !selectedTierId) return;
+
+    // Retrying (popup errored/was cancelled) — the coupon is single-use, so
+    // resume the transaction we already validated instead of asking again.
+    if (couponAccessCode) {
+      launchPaystackPopup(couponAccessCode);
+      return;
+    }
+
     setIsApplyingCoupon(true);
     const formdata = new FormData();
     formdata.append("tier_id", selectedTierId);
@@ -176,25 +222,15 @@ export function PartnerActivateWizard({ token }: { token?: string }) {
       return;
     }
 
-    setStep("paying");
-    popupPayment({
-      access_code: accessCode,
-      email: onboarding.user_details.email,
-      callbacks: {
-        onSuccess: (tranx) => {
-          verify({ reference: tranx?.reference });
-        },
-        onError: (err) => {
-          toast.error(err?.message || "Payment setup failed");
-          setStep("choose");
-        },
-        onCancel: () => {
-          toast.warning("Payment was cancelled.");
-          setStep("choose");
-        },
-      },
-    });
-  }, [onboarding, selectedTierId, billingCycle, popupPayment, verify]);
+    setCouponAccessCode(accessCode);
+    launchPaystackPopup(accessCode);
+  }, [
+    onboarding,
+    selectedTierId,
+    billingCycle,
+    couponAccessCode,
+    launchPaystackPopup,
+  ]);
 
   if (step === "exchanging") {
     return (
@@ -310,6 +346,16 @@ export function PartnerActivateWizard({ token }: { token?: string }) {
 
     return (
       <div className="w-full flex flex-col gap-8">
+        {step === "choose" && (
+          <button
+            type="button"
+            onClick={() => setStep("select-plan")}
+            className="self-start text-sm font-medium text-muted-foreground hover:text-brand-blue-dark transition-colors"
+          >
+            ← Change plan
+          </button>
+        )}
+
         <div className="rounded-xl bg-neutral-100 p-5">
           <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold">
             {selectedPlan?.name} — {billingCycle}
