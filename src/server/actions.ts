@@ -5,6 +5,7 @@ import z from "zod";
 import {
   initiatePaymentSchema,
   loginSchema,
+  partnerActivateSchema,
   resendOTPSchema,
   signupSchema,
   trialStartSchema,
@@ -12,6 +13,7 @@ import {
   verifyEmailSchema,
   verifyPaymentSchema,
 } from "@/lib/schemas";
+import { TPartnerActivationResponse } from "@/features/partner-activate/lib/types";
 import { apiClient, auth } from "@/lib/server-api";
 import {
   TFullUser,
@@ -127,6 +129,55 @@ export async function loginAction(formdata: FormData) {
       initialData: dirty,
     };
   }
+}
+
+// partner activation — exchanges a one-time token from the onboarding email
+// for a real login session, plus the plan/coupon/trial context needed by
+// the guided plan → trial-or-coupon flow.
+export async function exchangeActivationTokenAction(formdata: FormData) {
+  const dirty = Object.fromEntries(formdata);
+  const result = partnerActivateSchema.safeParse(dirty);
+  if (!result.success) {
+    const errs = z.flattenError(result.error).fieldErrors;
+    return {
+      success: false,
+      message: result.error.message,
+      errors: { token: errs.token ?? undefined },
+      data: null,
+    };
+  }
+
+  const res = await apiClient.unauthenticated<{
+    message?: string;
+    data: TPartnerActivationResponse;
+  }>("/partners/activate", {
+    method: "POST",
+    data: result.data,
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      errors: { token: [res.error] },
+      message: res.error || "This activation link is invalid or has expired.",
+      data: null,
+    };
+  }
+
+  await auth.storeTokens({
+    tokens: {
+      accessToken: res.data.data.token,
+      refreshToken: res.data.data.refresh_token,
+    },
+    user: res.data.data.user_details,
+  });
+
+  return {
+    success: true,
+    data: res.data.data,
+    errors: null,
+    message: "Activated",
+  };
 }
 
 // user signup
@@ -362,19 +413,24 @@ export async function validateCouponCodeAction(formdata: FormData) {
       errors: {
         coupon_code: errs.coupon_code ?? undefined,
         tier_id: errs.tier_id ?? undefined,
+        subscription_type: errs.subscription_type ?? undefined,
       },
       data: null,
       initialData: dirty,
     };
   }
 
-  const res = await apiClient.authenticated<{ message?: string; data?: unknown }>(
+  const res = await apiClient.authenticated<{
+    message?: string;
+    data?: { access_code?: string; payment_link?: string };
+  }>(
     `/tiers/initiate-payment-with-coupon`,
     {
       method: "POST",
       data: {
         coupon_code: result.data.coupon_code,
         tier_id: result.data.tier_id,
+        subscription_type: result.data.subscription_type,
       },
     },
   );

@@ -20,6 +20,7 @@ export const validateCouponCodeSchema = z.object({
   coupon_code: z.string({ error: "Coupon code is required" }).trim().min(1, {
     error: "Coupon code is required",
   }),
+  subscription_type: z.string({ error: "Subscription type is required" }),
 });
 
 export type TValidateCouponCode = z.infer<typeof validateCouponCodeSchema>;
