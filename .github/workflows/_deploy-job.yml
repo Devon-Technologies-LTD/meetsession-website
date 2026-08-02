@@ -1,0 +1,136 @@
+name: Reusable deploy Job
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      image_env:
+        required: true
+        type: string # "staging" | "preprod" | "production"
+      stack_env:
+        required: true
+        type: string # "frontend" | "backend"
+      latest_tag:
+        required: true
+        type: string # "staging-latest" | "preprod-latest" | "prod-latest"
+      host_port:
+        required: true
+        type: string
+      app_dir:
+        required: false
+        default: ""
+        type: string # overrides /opt/products/{app_name}/{image_env}/{stack_env} when set
+      ssh_host_secret:
+        required: true
+        type: string # name of the secret, e.g. "DC_STAGING_1_HOST"
+      ssh_user_secret:
+        required: true
+        type: string
+      ssh_pass_secret:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    name: Build and deploy (${{ inputs.image_env }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set image variables
+        id: vars
+        run: |
+          APP_NAME=${{ inputs.app_name }}
+          STACK_ENV=${{ inputs.stack_env }}
+          IMAGE_NAME=$(echo "ghcr.io/devonsre/$APP_NAME/$STACK_ENV" | tr '[:upper:]' '[:lower:]')
+          echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
+          echo "stack_env=$STACK_ENV" >> $GITHUB_OUTPUT
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+          echo "image_tag=${{ inputs.image_env }}-${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "latest_tag=${{ inputs.latest_tag }}" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: devonsre
+          password: ${{ secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/${{ inputs.image_env }}/Dockerfile
+          push: true
+          provenance: false
+          tags: |
+            ${{ steps.vars.outputs.image_name }}:${{ steps.vars.outputs.image_tag }}
+            ${{ steps.vars.outputs.image_name }}:${{ steps.vars.outputs.latest_tag }}
+          build-args: |
+            NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}
+            NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=${{ secrets.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY }}
+            NEXT_PUBLIC_ENABLE_PAYSTACK=true
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy via SSH and Docker Compose
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+          ACTOR: devonsre
+          IMAGE_NAME: ${{ steps.vars.outputs.image_name }}
+          LATEST_TAG: ${{ steps.vars.outputs.latest_tag }}
+          IMAGE_ENV: ${{ inputs.image_env }}
+          STACK_ENV: ${{ steps.vars.outputs.stack_env }}
+          APP_NAME: ${{ steps.vars.outputs.app_name }}
+          APP_DIR_OVERRIDE: ${{ inputs.app_dir }}
+        with:
+          host: ${{ secrets[inputs.ssh_host_secret] }}
+          username: ${{ secrets[inputs.ssh_user_secret] }}
+          password: ${{ secrets[inputs.ssh_pass_secret] }}
+          port: ${{ secrets.PORT }}
+          envs: GHCR_PAT,ACTOR,IMAGE_NAME,LATEST_TAG,IMAGE_ENV,STACK_ENV,APP_NAME,APP_DIR_OVERRIDE
+          script: |
+            set -euo pipefail
+
+            IMAGE="$IMAGE_NAME:$LATEST_TAG"
+
+            if [ -n "$APP_DIR_OVERRIDE" ]; then
+              APP_DIR="$APP_DIR_OVERRIDE"
+            else
+              APP_DIR="/opt/products/$APP_NAME/$IMAGE_ENV/$STACK_ENV"
+            fi
+
+            mkdir -p "$APP_DIR"
+            cd "$APP_DIR"
+
+            if [ ! -f compose.yml ]; then
+            cat > compose.yml <<EOF
+            name: $APP_NAME-$IMAGE_ENV-$STACK_ENV
+
+            services:
+              web:
+                image: $IMAGE
+                container_name: $APP_NAME-$IMAGE_ENV-$STACK_ENV
+                ports:
+                  - "${{ inputs.host_port }}:3000"
+                restart: unless-stopped
+                env_file:
+                  - .env
+            EOF
+            fi
+
+            echo "$GHCR_PAT" | docker login ghcr.io -u "$ACTOR" --password-stdin
+            docker compose -f compose.yml pull
+            docker compose -f compose.yml up -d --remove-orphans
+            docker image prune -f
+
+            echo "✅ $IMAGE_ENV deploy complete"

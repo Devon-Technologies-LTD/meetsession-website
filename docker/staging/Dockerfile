@@ -1,51 +1,52 @@
-# syntax=docker.io/docker/dockerfile:1
+# syntax=docker/dockerfile:1
 
+# ----------- Base Stage -------------
 FROM node:24-alpine AS base
-
-# 1. Install dependencies only when needed
-FROM base AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
-
 WORKDIR /app
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+
+RUN corepack enable
+# ----------- Dependencies Stage -------------
+FROM base AS deps
 
 # Install dependencies based on the preferred package manager
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* .npmrc* ./
 RUN npm install -g pnpm
 RUN pnpm install
 
-# 2. Rebuild the source code only when needed
+
+RUN --mount=type=cache,target=/pnpm/store \
+  pnpm install --frozen-lockfile
+# ----------- Builder Stage -------------
 FROM base AS builder
-WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# This will do the trick, use the corresponding env file for each environment.
-# COPY .env .env
-RUN npm install -g pnpm
-RUN pnpm build
 
-# 3. Production image, copy all the files and run next
-FROM base AS runner
+RUN --mount=type=cache,target=/pnpm/store \
+  --mount=type=cache,target=/app/.next/cache \
+  pnpm build
+# ----------- Runner Stage -------------
+FROM node:24-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
 
-RUN addgroup -g 1001 -S staff001
-RUN adduser -S staff001 -u 1001
+RUN addgroup -S staff001 && adduser -S staff001 -G staff001
 
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY ./src/app/favicon.ico ./public
 
-# Automatically leverage output traces to reduce image size
-# https://nextjs.org/docs/advanced-features/output-file-tracing
-COPY --from=builder --chown=staff001:staff001 /app/.next/standalone ./
-COPY --from=builder --chown=staff001:staff001 /app/.next/static ./.next/static
-
+RUN chown -R staff001:staff001 /app
 
 USER staff001
 
 EXPOSE 3000
 
-ENV PORT=3000
+CMD ["node", "server.js"]
 
-CMD HOSTNAME="0.0.0.0" node server.js
