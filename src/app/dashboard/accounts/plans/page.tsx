@@ -8,7 +8,19 @@ function isTUser(value: unknown): value is TUser {
   return typeof value === "object" && value !== null && "id" in value;
 }
 
-export default async function Page() {
+export default async function Page(
+  props: PageProps<"/dashboard/accounts/plans">,
+) {
+  const query = await props.searchParams;
+  const pendingCouponCode =
+    typeof query.code === "string" ? query.code : undefined;
+  const pendingCouponTierId =
+    typeof query.tier_id === "string" ? query.tier_id : undefined;
+  const pendingCoupon =
+    pendingCouponCode && pendingCouponTierId
+      ? { code: pendingCouponCode, tierId: pendingCouponTierId }
+      : undefined;
+
   const plans = await retrievePlansAction({ withFeature: true });
   const requestHeaders = await headers();
   const cookieStore = await cookies();
@@ -84,6 +96,7 @@ export default async function Page() {
                   user.tier_id !== DEFAULT_TIER_ID &&
                   user.subscription_type !== "TRIAL_SUBSCRIPTION"),
             )}
+            pendingCoupon={pendingCoupon}
           />
         )}
 

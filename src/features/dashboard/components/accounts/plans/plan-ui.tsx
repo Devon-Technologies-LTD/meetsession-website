@@ -10,7 +10,11 @@ import {
   CircleChevronUpIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { usePaystackPayment } from "@/hooks/use-paystack-payment";
+import {
+  usePaystackPayment,
+  hasAlreadyRequestedVerification,
+  markVerificationRequested,
+} from "@/hooks/use-paystack-payment";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -24,8 +28,10 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { usePlanManagementContext } from "@/features/dashboard/hooks/use-plan-management";
-import { trialStartAction } from "@/server/actions";
+import { trialStartAction, validateCouponCodeAction } from "@/server/actions";
 import { DiscountCodeModal } from "./discount-code-modal";
+
+export type TPendingCoupon = { code: string; tierId: string };
 
 export type TBillingCycle = "monthly" | "quarterly" | "annual";
 
@@ -40,6 +46,7 @@ export function PlanUI<T extends TSubscriptionPlan>({
   subscriptionEndDate,
   hasUsedDiscountCode,
   hasPreviousPayment,
+  pendingCoupon,
 }: {
   plans?: T[];
   isTrialEligible?: boolean;
@@ -49,18 +56,34 @@ export function PlanUI<T extends TSubscriptionPlan>({
   subscriptionEndDate?: string;
   hasUsedDiscountCode?: boolean;
   hasPreviousPayment?: boolean;
+  pendingCoupon?: TPendingCoupon;
 }) {
   const [selectedId, setSelectedId] = useState(() => {
     if (!plans?.length) return "";
+    if (plans.some((plan) => plan.id === pendingCoupon?.tierId)) {
+      return pendingCoupon?.tierId ?? "";
+    }
     return plans.some((plan) => plan.id === currentTierId)
       ? currentTierId ?? ""
       : plans[0].id;
   });
   const [billingCycle, setBillingCycle] = useState<TBillingCycle>("monthly");
+  const [appliedCoupon, setAppliedCoupon] = useState<
+    { code: string; accessCode: string } | undefined
+  >(undefined);
+  const hasAttemptedPendingCoupon = useRef(false);
 
   useEffect(() => {
     if (!plans?.length) {
       setSelectedId("");
+      return;
+    }
+
+    if (
+      pendingCoupon?.tierId &&
+      plans.some((plan) => plan.id === pendingCoupon.tierId)
+    ) {
+      setSelectedId(pendingCoupon.tierId);
       return;
     }
 
@@ -72,7 +95,40 @@ export function PlanUI<T extends TSubscriptionPlan>({
     setSelectedId((prev) =>
       plans.some((plan) => plan.id === prev) ? prev : plans[0].id,
     );
-  }, [currentTierId, plans]);
+  }, [currentTierId, plans, pendingCoupon?.tierId]);
+
+  // auto-validate a coupon carried forward from the /activate landing page.
+  // Runs once here (PlanUI has a single instance) rather than inside
+  // PlanUIItem, which mounts twice at once (desktop + mobile, CSS-hidden
+  // but not unmounted) and would race a single-use coupon endpoint.
+  useEffect(() => {
+    if (!pendingCoupon || hasAttemptedPendingCoupon.current) {
+      return;
+    }
+    hasAttemptedPendingCoupon.current = true;
+
+    (async () => {
+      const formdata = new FormData();
+      formdata.append("tier_id", pendingCoupon.tierId);
+      formdata.append("coupon_code", pendingCoupon.code);
+      formdata.append("subscription_type", `${billingCycle}_subscription`);
+      const validationRes = await validateCouponCodeAction(formdata);
+
+      if (!validationRes.success) {
+        toast.error(validationRes.message || "This discount code could not be applied.");
+        return;
+      }
+
+      const accessCode = validationRes.data?.data?.access_code;
+      if (!accessCode) {
+        toast.error("Coupon validated but no payment access code was returned.");
+        return;
+      }
+
+      toast.success(validationRes.message || "Discount code applied.");
+      setAppliedCoupon({ code: pendingCoupon.code, accessCode });
+    })();
+  }, [pendingCoupon, billingCycle]);
 
   function updateSelectedId(id: string) {
     setSelectedId(id);
@@ -123,6 +179,9 @@ export function PlanUI<T extends TSubscriptionPlan>({
               subscriptionEndDate={subscriptionEndDate}
               hasUsedDiscountCode={hasUsedDiscountCode}
               hasPreviousPayment={hasPreviousPayment}
+              appliedCoupon={
+                pendingCoupon?.tierId === plan.id ? appliedCoupon : undefined
+              }
             />
           );
         })}
@@ -139,6 +198,11 @@ export function PlanUI<T extends TSubscriptionPlan>({
           subscriptionEndDate={subscriptionEndDate}
           hasUsedDiscountCode={hasUsedDiscountCode}
           hasPreviousPayment={hasPreviousPayment}
+          appliedCoupon={
+            pendingCoupon?.tierId === (selectedPlan ?? plans?.[0])?.id
+              ? appliedCoupon
+              : undefined
+          }
         />
       </div>
     </div>
@@ -156,6 +220,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   subscriptionEndDate,
   hasUsedDiscountCode,
   hasPreviousPayment,
+  appliedCoupon,
 }: {
   plans?: T[];
   plan?: T;
@@ -167,6 +232,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
   subscriptionEndDate?: string;
   hasUsedDiscountCode?: boolean;
   hasPreviousPayment?: boolean;
+  appliedCoupon?: { code: string; accessCode: string };
 }) {
   const { updateSelectedPlan, updatePaymentStatus, updateTransactionDetails } =
     usePlanManagementContext();
@@ -220,14 +286,17 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     !isPaystackEnabled && !canStartTrial && !isFreePlan;
   const shouldShowDiscountPrompt = Boolean(!hasUsedDiscountCode);
 
-  const startPlanCheckout = useCallback(async (discountCode?: string) => {
+  const startPlanCheckout = useCallback(async (discount?: {
+    code: string;
+    accessCode?: string;
+  }) => {
     const selectedPlan = plans?.find(
       (p) => p.id === plan?.id,
     ) as TSubscriptionPlan;
     updateSelectedPlan(selectedPlan);
-    activeDiscountCode.current = discountCode?.trim() || undefined;
+    activeDiscountCode.current = discount?.code?.trim() || undefined;
 
-    if (canStartTrial && plan?.id) {
+    if (canStartTrial && plan?.id && !discount?.accessCode) {
       setIsStartingTrial(true);
       const formdata = new FormData();
       formdata.append("tier_id", plan.id);
@@ -274,6 +343,44 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
 
       hasPaid.current = false;
       updatePaymentStatus("payment_initiated");
+
+      if (discount?.accessCode) {
+        // Coupon already validated a real, discounted Paystack transaction
+        // (`/tiers/initiate-payment-with-coupon`) — resume that transaction
+        // directly instead of re-initiating via `/tiers/initiate-payment`,
+        // which doesn't accept a coupon code and would charge full price.
+        popupPayment({
+          access_code: discount.accessCode,
+          email: userEmail ?? subscription?.email,
+          callbacks: {
+            onSuccess: (res) => {
+              hasPaid.current = true;
+              updatePaymentStatus("payment_pending");
+              updateTransactionDetails({
+                status: "pending",
+                transactionId: res?.reference ?? res?.trans,
+                date: new Date(),
+              });
+            },
+            onError: (err) => {
+              hasPaid.current = true;
+              updatePaymentStatus("payment_failed");
+              updateTransactionDetails({
+                status: "failed",
+                transactionId: "",
+                date: new Date(),
+              });
+              toast.error(err?.message || "Payment setup failed");
+            },
+            onCancel: () => {
+              updatePaymentStatus("payment_failed");
+              toast.warning("Payment was cancelled.");
+            },
+          },
+        });
+        return;
+      }
+
       const subType = `${billingCycle}_subscription`;
       const callbackUrl = window.location.origin + window.location.pathname;
       initialize({
@@ -294,9 +401,17 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     updateSelectedPlan,
     updateTransactionDetails, /*updateStatus*/
     billingCycle,
+    popupPayment,
+    userEmail,
+    subscription?.email,
   ]);
 
   const planAction = useCallback(async () => {
+    if (appliedCoupon) {
+      await startPlanCheckout(appliedCoupon);
+      return;
+    }
+
     if (
       !canStartTrial &&
       !isFreePlan &&
@@ -308,7 +423,13 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     }
 
     await startPlanCheckout();
-  }, [canStartTrial, isFreePlan, shouldShowDiscountPrompt, startPlanCheckout]);
+  }, [
+    appliedCoupon,
+    canStartTrial,
+    isFreePlan,
+    shouldShowDiscountPrompt,
+    startPlanCheckout,
+  ]);
 
   // verify payment after return from hosted payment page
   useEffect(() => {
@@ -322,7 +443,13 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     if (!callbackReference) return;
 
     hasCheckedCallbackReference.current = true;
+
+    if (hasAlreadyRequestedVerification(callbackReference)) {
+      return;
+    }
+
     hasPaid.current = true;
+    markVerificationRequested(callbackReference);
     updatePaymentStatus("payment_pending");
     verify({ reference: callbackReference });
   }, [updatePaymentStatus, verify]);
@@ -655,6 +782,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       <DiscountCodeModal
         open={isDiscountPromptOpen}
         tierId={plan.id}
+        subscriptionType={`${billingCycle}_subscription`}
         inputId={`discount-code-${plan.id}`}
         onOpenChange={setIsDiscountPromptOpen}
         onProceed={startPlanCheckout}

@@ -20,14 +20,19 @@ import { validateCouponCodeAction } from "@/server/actions";
 type DiscountCodeModalProps = {
   open: boolean;
   tierId: string;
+  subscriptionType: string;
   inputId: string;
   onOpenChange: (open: boolean) => void;
-  onProceed: (discountCode?: string) => Promise<void> | void;
+  onProceed: (discount?: {
+    code: string;
+    accessCode?: string;
+  }) => Promise<void> | void;
 };
 
 export function DiscountCodeModal({
   open,
   tierId,
+  subscriptionType,
   inputId,
   onOpenChange,
   onProceed,
@@ -72,6 +77,7 @@ export function DiscountCodeModal({
     const formdata = new FormData();
     formdata.append("tier_id", tierId);
     formdata.append("coupon_code", normalizedCouponCode);
+    formdata.append("subscription_type", subscriptionType);
     console.log("Validating coupon code:", normalizedCouponCode);
     const validationRes = await validateCouponCodeAction(formdata);
     setIsValidatingCoupon(false);
@@ -81,10 +87,16 @@ export function DiscountCodeModal({
       return;
     }
 
+    const accessCode = validationRes.data?.data?.access_code;
+    if (!accessCode) {
+      toast.error("Coupon validated but no payment access code was returned.");
+      return;
+    }
+
     toast.success(validationRes.message || "Coupon code applied.");
     handleSheetOpenChange(false);
-    await onProceed(normalizedCouponCode);
-  }, [couponCode, handleSheetOpenChange, onProceed, tierId]);
+    await onProceed({ code: normalizedCouponCode, accessCode });
+  }, [couponCode, handleSheetOpenChange, onProceed, subscriptionType, tierId]);
 
   useEffect(() => {
     if (!isDiscountSheetOpen || typeof window === "undefined") {
