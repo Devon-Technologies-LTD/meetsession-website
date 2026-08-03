@@ -13,9 +13,6 @@ FROM base AS deps
 
 # Install dependencies based on the preferred package manager
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* .npmrc* ./
-RUN npm install -g pnpm
-RUN pnpm install
-
 
 RUN --mount=type=cache,target=/pnpm/store \
   pnpm install --frozen-lockfile
