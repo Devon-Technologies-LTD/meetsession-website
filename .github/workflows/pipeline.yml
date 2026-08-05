@@ -22,7 +22,8 @@ jobs:
       image_env: staging
       stack_env: frontend
       latest_tag: staging-latest
-      host_port: "3012"
+      compose_file: compose.staging.yaml
+      app_dir: "/opt/products/meetsession/staging/frontend"
       ssh_host_secret: AWS_STAGING2_HOST
       ssh_user_secret: AWS_STAGING2_USER
       ssh_pass_secret: AWS_STAGING2_PASS
@@ -37,7 +38,7 @@ jobs:
       image_env: production
       stack_env: frontend
       latest_tag: latest
-      host_port: "3123"
+      compose_file: compose.prod.yaml
       app_dir: "/opt/products/meetsession/frontend"
       ssh_host_secret: MS_PROD_HOST
       ssh_user_secret: MS_PROD_USER
