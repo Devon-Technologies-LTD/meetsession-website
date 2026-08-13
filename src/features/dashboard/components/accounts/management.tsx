@@ -1,10 +1,12 @@
 "use client";
 
 import {
+  ArrowUpRightIcon,
   BellRingIcon,
   CircleAlertIcon,
   CircleUserRoundIcon,
   CrownIcon,
+  GlobeIcon,
   HeadsetIcon,
   LockKeyholeIcon,
   ToggleRightIcon,
@@ -160,6 +162,27 @@ export function Management(props: TManagementProps) {
                       </span>
                     )}
                   </div>
+                </Tile.TileItem>
+              </Link>
+            </Tile>
+          </div>
+
+          <div className="w-full h-fit flex flex-col gap-4">
+            <p className="text-sm text-neutral-400 font-medium">
+              Get the App
+            </p>
+            <Tile className="bg-brand-blue-extralight">
+              <Link href="https://meetsession.devontech.io" target="_blank" rel="noopener noreferrer">
+                <Tile.TileItem
+                  prefixIcon={<GlobeIcon className="h-6 w-6 text-brand-blue" />}
+                  suffixIcon={<ArrowUpRightIcon className="w-4 h-4 text-brand-blue" />}
+                >
+                  <p className="text-sm font-bold text-brand-blue-dark">
+                    Get MeetSession App
+                  </p>
+                  <p className="text-xs text-neutral-500">
+                    Visit our website to download the app
+                  </p>
                 </Tile.TileItem>
               </Link>
             </Tile>

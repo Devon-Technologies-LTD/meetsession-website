@@ -36,6 +36,21 @@ function daysUntil(isoDate: string) {
   return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
 }
 
+function applyDiscount(
+  price: number,
+  onboarding: Pick<
+    TPartnerActivationResponse,
+    "discount_percentage" | "discount_amount"
+  >,
+) {
+  return Math.max(
+    0,
+    onboarding.discount_percentage > 0
+      ? price - (price * onboarding.discount_percentage) / 100
+      : price - onboarding.discount_amount,
+  );
+}
+
 export function PartnerActivateWizard({ token }: { token?: string }) {
   const router = useRouter();
   const hasExchanged = useRef(false);
@@ -139,14 +154,7 @@ export function PartnerActivateWizard({ token }: { token?: string }) {
   const price =
     featurePrice !== undefined ? Number(featurePrice) : (selectedPlan?.price ?? 0);
 
-  const discountedPrice = onboarding
-    ? Math.max(
-        0,
-        onboarding.discount_percentage > 0
-          ? price - (price * onboarding.discount_percentage) / 100
-          : price - onboarding.discount_amount,
-      )
-    : price;
+  const discountedPrice = onboarding ? applyDiscount(price, onboarding) : price;
 
   const handleContinueWithTrial = useCallback(async () => {
     if (!onboarding || !selectedTierId) return;
@@ -295,6 +303,7 @@ export function PartnerActivateWizard({ token }: { token?: string }) {
               planFeaturePrice !== undefined
                 ? Number(planFeaturePrice)
                 : (plan.price ?? 0);
+            const planDiscountedPrice = applyDiscount(planPrice, onboarding);
             const isSelected = plan.id === selectedTierId;
             const isRecommended = plan.id === onboarding.tier_id;
 
@@ -316,9 +325,16 @@ export function PartnerActivateWizard({ token }: { token?: string }) {
                   </span>
                 )}
                 <p className="font-semibold text-brand-blue-dark">{plan.name}</p>
-                <p className="text-xl font-bold tracking-tight">
-                  {formatNaira(planPrice)}
-                </p>
+                <div className="flex items-baseline gap-2">
+                  <p className="text-xl font-bold tracking-tight">
+                    {formatNaira(planDiscountedPrice)}
+                  </p>
+                  {planDiscountedPrice < planPrice && (
+                    <p className="text-sm text-neutral-400 line-through">
+                      {formatNaira(planPrice)}
+                    </p>
+                  )}
+                </div>
               </button>
             );
           })}
@@ -360,9 +376,16 @@ export function PartnerActivateWizard({ token }: { token?: string }) {
           <p className="text-xs text-muted-foreground uppercase tracking-wide font-semibold">
             {selectedPlan?.name} — {billingCycle}
           </p>
-          <p className="text-2xl font-bold tracking-tight mt-1">
-            {formatNaira(price)}
-          </p>
+          <div className="flex items-baseline gap-2 mt-1">
+            <p className="text-2xl font-bold tracking-tight">
+              {formatNaira(discountedPrice)}
+            </p>
+            {discountedPrice < price && (
+              <p className="text-base text-neutral-400 line-through">
+                {formatNaira(price)}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -375,9 +398,16 @@ export function PartnerActivateWizard({ token }: { token?: string }) {
                 {discountLabel}, code expires in {expiresInDays}{" "}
                 {expiresInDays === 1 ? "day" : "days"}.
               </p>
-              <p className="text-lg font-bold mt-2">
-                {formatNaira(discountedPrice)}
-              </p>
+              <div className="flex items-baseline gap-2 mt-2">
+                <p className="text-lg font-bold">
+                  {formatNaira(discountedPrice)}
+                </p>
+                {discountedPrice < price && (
+                  <p className="text-sm text-neutral-400 line-through">
+                    {formatNaira(price)}
+                  </p>
+                )}
+              </div>
             </div>
             <Button
               variant="brand-green"
