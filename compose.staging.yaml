@@ -1,6 +1,6 @@
 services:
   frontend-staging:
-    image: ghcr.io/devonsre/aforlink/frontend:staging-latest
+    image: ghcr.io/devonsre/meetsession/frontend:staging-latest
     ports:
       - "3012:3000"
     restart: unless-stopped
