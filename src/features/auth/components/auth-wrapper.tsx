@@ -27,7 +27,7 @@ export function AuthWrapper({ children }: { children: React.ReactNode }) {
         {children}
 
         <p className="text-muted-foreground text-center text-xs">
-          &copy; 2025 MeetSession by Devon <br /> Technologies Ltd.
+          &copy; 2026 MeetSession by Devon <br /> Technologies Ltd.
         </p>
       </div>
     </div>

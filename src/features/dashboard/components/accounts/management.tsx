@@ -254,7 +254,7 @@ export function Management(props: TManagementProps) {
       </div>
 
       <p className="text-muted-foreground text-xs text-center w-full">
-        &copy; 2025 MeetSession by Devon Technologies LTD.
+        &copy; 2026 MeetSession by Devon Technologies LTD.
       </p>
 
       <div className="w-full">

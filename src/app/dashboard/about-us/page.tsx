@@ -135,7 +135,7 @@ export default function AboutMeetSession() {
 
         {/* Footer */}
         <div className="text-center text-slate-400 text-sm">
-          © 2025 MeetSession by Devon Technologies Ltd.
+          © 2026 MeetSession by Devon Technologies Ltd.
         </div>
       </div>
     </div>
