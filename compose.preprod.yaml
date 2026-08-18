@@ -1,6 +1,9 @@
+name: meetsession-preprod
+
 services:
   frontend-preprod:
     image: ghcr.io/devonsre/meetsession/frontend:preprod-latest
+    container_name: meetsession-frontend-preprod
     ports:
       - "3001:3000"
     restart: unless-stopped
