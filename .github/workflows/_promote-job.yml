@@ -1,0 +1,121 @@
+name: Reusable promote Job
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        required: true
+        type: string
+      stack_env:
+        required: true
+        type: string # "frontend" | "backend"
+      image_env:
+        required: true
+        type: string # "preprod" | "production" — used for the default app_dir
+      source_tag:
+        required: true
+        type: string # tag to promote from, e.g. "staging-latest"
+      target_tag:
+        required: true
+        type: string # tag to promote to, e.g. "preprod-latest"
+      compose_file:
+        required: true
+        type: string # path (relative to repo root) to this environment's compose file
+      app_dir:
+        required: false
+        default: ""
+        type: string # overrides /opt/products/{app_name}/{image_env}/{stack_env} when set
+      ssh_host_secret:
+        required: true
+        type: string
+      ssh_user_secret:
+        required: true
+        type: string
+      ssh_pass_secret:
+        required: true
+        type: string
+
+jobs:
+  promote:
+    name: Promote and deploy (${{ inputs.image_env }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set image variables
+        id: vars
+        run: |
+          APP_NAME=${{ inputs.app_name }}
+          STACK_ENV=${{ inputs.stack_env }}
+          IMAGE_NAME=$(echo "ghcr.io/devonsre/$APP_NAME/$STACK_ENV" | tr '[:upper:]' '[:lower:]')
+          echo "image_name=$IMAGE_NAME" >> $GITHUB_OUTPUT
+
+          APP_DIR_OVERRIDE="${{ inputs.app_dir }}"
+          if [ -n "$APP_DIR_OVERRIDE" ]; then
+            APP_DIR="$APP_DIR_OVERRIDE"
+          else
+            APP_DIR="/opt/products/$APP_NAME/${{ inputs.image_env }}/$STACK_ENV"
+          fi
+          echo "app_dir=$APP_DIR" >> $GITHUB_OUTPUT
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: devonsre
+          password: ${{ secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Pull, retag, and push promoted image
+        run: |
+          IMAGE="${{ steps.vars.outputs.image_name }}"
+          docker pull "$IMAGE:${{ inputs.source_tag }}"
+          docker tag "$IMAGE:${{ inputs.source_tag }}" "$IMAGE:${{ inputs.target_tag }}"
+          docker push "$IMAGE:${{ inputs.target_tag }}"
+
+      - name: Ensure app directory exists
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets[inputs.ssh_host_secret] }}
+          username: ${{ secrets[inputs.ssh_user_secret] }}
+          password: ${{ secrets[inputs.ssh_pass_secret] }}
+          port: ${{ secrets.PORT }}
+          script: mkdir -p "${{ steps.vars.outputs.app_dir }}"
+
+      - name: Copy environment compose file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets[inputs.ssh_host_secret] }}
+          username: ${{ secrets[inputs.ssh_user_secret] }}
+          password: ${{ secrets[inputs.ssh_pass_secret] }}
+          port: ${{ secrets.PORT }}
+          source: ${{ inputs.compose_file }}
+          target: ${{ steps.vars.outputs.app_dir }}
+          strip_components: 0
+
+      - name: Deploy via SSH and Docker Compose
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          GHCR_PAT: ${{ secrets.GHCR_PAT || secrets.GITHUB_TOKEN }}
+          ACTOR: devonsre
+          IMAGE_ENV: ${{ inputs.image_env }}
+          APP_DIR: ${{ steps.vars.outputs.app_dir }}
+          COMPOSE_FILE: ${{ inputs.compose_file }}
+        with:
+          host: ${{ secrets[inputs.ssh_host_secret] }}
+          username: ${{ secrets[inputs.ssh_user_secret] }}
+          password: ${{ secrets[inputs.ssh_pass_secret] }}
+          port: ${{ secrets.PORT }}
+          envs: GHCR_PAT,ACTOR,IMAGE_ENV,APP_DIR,COMPOSE_FILE
+          script: |
+            set -euo pipefail
+
+            cd "$APP_DIR"
+
+            echo "$GHCR_PAT" | docker login ghcr.io -u "$ACTOR" --password-stdin
+            docker compose -f "$COMPOSE_FILE" pull
+            docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
+            docker image prune -f
+
+            echo "✅ $IMAGE_ENV deploy complete"

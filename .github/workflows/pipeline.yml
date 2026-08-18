@@ -3,22 +3,54 @@ name: Deployment Pipeline
 on:
   push:
     branches:
-      - "preprod" # Preproduction
-      - "staging" # Staging
+      - "staging"
 
   pull_request:
     types:
       - closed
     branches:
-      - "main"
+      - "preprod"
+      - "production"
 
 jobs:
+  checks:
+    name: Lint & typecheck
+    if: ${{ github.ref == 'refs/heads/staging' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Generate route types
+        run: pnpm exec next typegen
+
+      - name: Typecheck
+        run: pnpm exec tsc --noEmit
+
   staging-deploy:
-    name: Deploy changes to staging server
+    name: Build, push, and deploy to staging
+    needs: checks
     if: ${{ github.ref == 'refs/heads/staging' }}
     uses: ./.github/workflows/_deploy-job.yml
     with:
-      app_name: aforlink
+      app_name: meetsession
       image_env: staging
       stack_env: frontend
       latest_tag: staging-latest
@@ -29,15 +61,33 @@ jobs:
       ssh_pass_secret: AWS_STAGING2_PASS
     secrets: inherit
 
-  production-deploy:
-    name: Deploy changes to production server
-    if: ${{ github.event.pull_request.merged == true }}
-    uses: ./.github/workflows/_deploy-job.yml
+  preprod-deploy:
+    name: Promote staging image to preprod
+    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'preprod' }}
+    uses: ./.github/workflows/_promote-job.yml
     with:
-      app_name: aforlink
-      image_env: production
+      app_name: meetsession
       stack_env: frontend
-      latest_tag: latest
+      image_env: preprod
+      source_tag: staging-latest
+      target_tag: preprod-latest
+      compose_file: compose.preprod.yaml
+      app_dir: "/opt/products/meetsession/preprod/frontend"
+      ssh_host_secret: AWS_STAGING2_HOST
+      ssh_user_secret: AWS_STAGING2_USER
+      ssh_pass_secret: AWS_STAGING2_PASS
+    secrets: inherit
+
+  production-deploy:
+    name: Promote preprod image to production
+    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'production' }}
+    uses: ./.github/workflows/_promote-job.yml
+    with:
+      app_name: meetsession
+      stack_env: frontend
+      image_env: production
+      source_tag: preprod-latest
+      target_tag: latest
       compose_file: compose.prod.yaml
       app_dir: "/opt/products/meetsession/frontend"
       ssh_host_secret: MS_PROD_HOST

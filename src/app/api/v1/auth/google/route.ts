@@ -63,9 +63,12 @@ export async function POST(req: NextRequest) {
 
       return response;
 
-    } catch (axiosError: any) {
-      console.error("Axios request failed:", axiosError.message);
-      if (axiosError.response) {
+    } catch (axiosError) {
+      const axiosMessage = axios.isAxiosError(axiosError)
+        ? axiosError.message
+        : "Unknown error";
+      console.error("Axios request failed:", axiosMessage);
+      if (axios.isAxiosError(axiosError) && axiosError.response) {
         console.error("Axios error response data:", JSON.stringify(axiosError.response.data, null, 2));
         return NextResponse.json(
           { success: false, error: axiosError.response.data.message || "Backend error" },
@@ -75,10 +78,11 @@ export async function POST(req: NextRequest) {
       throw axiosError;
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error authenticating with Google:", error);
+    const message = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
-      { success: false, error: error.message || "Internal server error" },
+      { success: false, error: message },
       { status: 500 },
     );
   }

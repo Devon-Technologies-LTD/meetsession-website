@@ -1,6 +1,9 @@
+name: meetsession-production
+
 services:
   frontend-prod:
-    image: ghcr.io/devonsre/aforlink/frontend:latest
+    image: ghcr.io/devonsre/meetsession/frontend:latest
+    container_name: meetsession-frontend-prod
     ports:
       - "3123:3000"
     restart: unless-stopped
