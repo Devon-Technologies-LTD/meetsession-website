@@ -86,8 +86,8 @@ jobs:
             NEXT_PUBLIC_GOOGLE_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_CLIENT_ID }}
             NEXT_PUBLIC_ENABLE_PAYSTACK=true
           platforms: linux/amd64
-          cache-from: type=gha,scope=${{ inputs.image_env }}
-          cache-to: type=gha,mode=min,scope=${{ inputs.image_env }}
+          cache-from: type=registry,ref=${{ steps.vars.outputs.image_name }}:buildcache-${{ inputs.image_env }}
+          cache-to: type=registry,mode=min,ref=${{ steps.vars.outputs.image_name }}:buildcache-${{ inputs.image_env }}
 
       - name: Ensure app directory exists
         uses: appleboy/ssh-action@v1.2.0
