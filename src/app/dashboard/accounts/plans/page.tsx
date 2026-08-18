@@ -101,7 +101,7 @@ export default async function Page(
         )}
 
         <p className="max-w-48 md:max-w-full mx-auto text-center text-xs text-neutral-500">
-          &copy; 2025 MeetSession by Devon Technologies Ltd.
+          &copy; 2026 MeetSession by Devon Technologies Ltd.
         </p>
       </div>
     </div>

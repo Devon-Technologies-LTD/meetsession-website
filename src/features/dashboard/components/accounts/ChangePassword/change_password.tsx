@@ -158,7 +158,7 @@ export function EditProfileForm() {
       </form>
 
       <p className="text-neutral-400 text-xs text-center">
-        &copy; 2025 MeetSession by Devon Technologies LTD
+        &copy; 2026 MeetSession by Devon Technologies LTD
       </p>
     </div>
   );

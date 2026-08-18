@@ -200,7 +200,6 @@ export const usePaystackPayment = () => {
               const paidRef = tranx?.reference;
               console.log("Payment successful, verifying transaction...", tranx);
               if (!hasAlreadyRequestedVerification(paidRef)) {
-                markVerificationRequested(paidRef);
                 verify({ reference: paidRef });
               }
               callbacks?.onSuccess(tranx);
@@ -236,7 +235,6 @@ export const usePaystackPayment = () => {
             callback(response) {
               const paidRef = response?.reference ?? reference;
               if (!hasAlreadyRequestedVerification(paidRef)) {
-                markVerificationRequested(paidRef);
                 verify({ reference: paidRef });
               }
               callbacks?.onSuccess({

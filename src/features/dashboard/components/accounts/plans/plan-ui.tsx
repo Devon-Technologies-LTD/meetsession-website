@@ -449,7 +449,6 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
     }
 
     hasPaid.current = true;
-    markVerificationRequested(callbackReference);
     updatePaymentStatus("payment_pending");
     verify({ reference: callbackReference });
   }, [updatePaymentStatus, verify]);
@@ -483,6 +482,7 @@ export function PlanUIItem<T extends TSubscriptionPlan>({
       normalizedNestedStatus === false;
 
     if (verifyState.success && !hasExplicitVerifyFailure) {
+      markVerificationRequested(verifyPayload?.reference);
       updatePaymentStatus("payment_success");
       updateTransactionDetails({
         status: "successful",
