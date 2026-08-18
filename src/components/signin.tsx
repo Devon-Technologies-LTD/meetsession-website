@@ -22,15 +22,19 @@ import { PasswordField } from "./ui/password-field";
 import { GoogleSignInButton } from "./ui/google-signin-button";
 
 type LoginFormProps = {
+  defaultEmail?: string;
   onSuccessAction?: (response?: TLoginResponse | null) => void;
   onFailedAction?: (error?: Record<string, string>) => void;
 };
 
-export function SigninForm({ onSuccessAction: onSuccess }: LoginFormProps) {
+export function SigninForm({
+  defaultEmail,
+  onSuccessAction: onSuccess,
+}: LoginFormProps) {
   const form = useForm<TLogin>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
+      email: defaultEmail ?? "",
       password: "",
     },
   });
@@ -148,11 +152,26 @@ export function SigninForm({ onSuccessAction: onSuccess }: LoginFormProps) {
   );
 }
 
-export function Signin() {
+export function Signin({
+  defaultEmail,
+  carryForward,
+}: {
+  defaultEmail?: string;
+  carryForward?: { code: string; tierId: string };
+} = {}) {
   const router = useRouter();
   const DEFAULT_TIER_ID = "00000000-0000-0000-0000-000000000000";
   // success handler
   function onSuccess(response?: TLoginResponse | null) {
+    if (carryForward) {
+      const params = new URLSearchParams({
+        code: carryForward.code,
+        tier_id: carryForward.tierId,
+      });
+      router.push(`/dashboard/accounts/plans?${params.toString()}`);
+      return;
+    }
+
     const tierId = response?.user_details?.tier_id;
     if (tierId === DEFAULT_TIER_ID) {
       router.push("/dashboard/accounts/plans");
@@ -170,7 +189,11 @@ export function Signin() {
 
   return (
     <div className="w-full h-full">
-      <SigninForm onSuccessAction={onSuccess} onFailedAction={onError} />
+      <SigninForm
+        defaultEmail={defaultEmail}
+        onSuccessAction={onSuccess}
+        onFailedAction={onError}
+      />
     </div>
   );
 }

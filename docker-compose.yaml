@@ -7,8 +7,10 @@ services:
       dockerfile: ./docker/development/Dockerfile
     ports:
       - "3001:3000"
-    # env_file:
-    #   - .env
+    env_file:
+      - .env
+    environment:
+      - CI=true
     restart: on-failure:3
     volumes:
       - .:/app

@@ -1,10 +1,8 @@
 services:
   frontend-prod:
-    image: ghcr.io/devonsre/meetsession/frontend:latest
-    build:
-      context: .
-      dockerfile: docker/production/Dockerfile
-    # image: frontend-prod
+    image: ghcr.io/devonsre/aforlink/frontend:latest
     ports:
       - "3123:3000"
-    restart: on-failure:3
+    restart: unless-stopped
+    env_file:
+      - .env

@@ -11,6 +11,14 @@ export type TLogin = z.infer<typeof loginSchema>;
 export const tokensSchema = z.string();
 export type TTokens = z.infer<typeof tokensSchema>;
 
+// partner activation token exchange
+export const partnerActivateSchema = z.object({
+  token: z.string({ error: "Activation token is required" }).trim().min(1, {
+    error: "Activation token is required",
+  }),
+});
+export type TPartnerActivate = z.infer<typeof partnerActivateSchema>;
+
 // signup
 export const signupSchema = z
   .object({

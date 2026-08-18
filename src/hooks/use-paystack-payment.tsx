@@ -87,6 +87,25 @@ async function loadPaystackScript() {
   await paystackScriptLoaderPromise;
 }
 
+// A payment reference can end up handed to verify() from two independent
+// triggers: Paystack's own onSuccess callback (fires in-app), and a page
+// reload that notices a leftover ?reference=/&trxref= param in the URL
+// (Paystack redirects through callback_url for some payment methods, e.g.
+// bank transfer/3DS). Both can fire for the same reference. sessionStorage
+// (not a React ref) is required here specifically because it survives that
+// reload — a ref would just reset on the fresh mount.
+const VERIFIED_REFERENCE_STORAGE_KEY = "meetsession:requested-verify-reference";
+
+export function hasAlreadyRequestedVerification(reference?: string) {
+  if (typeof window === "undefined" || !reference) return false;
+  return sessionStorage.getItem(VERIFIED_REFERENCE_STORAGE_KEY) === reference;
+}
+
+export function markVerificationRequested(reference?: string) {
+  if (typeof window === "undefined" || !reference) return;
+  sessionStorage.setItem(VERIFIED_REFERENCE_STORAGE_KEY, reference);
+}
+
 function getAccessCodeFromHostedUrl(url?: string) {
   if (!url) return "";
   try {
@@ -179,8 +198,11 @@ export const usePaystackPayment = () => {
 
             onSuccess(tranx) {
               const paidRef = tranx?.reference;
-              console.log("Payment successful, verifying transaction...", tranx); 
-              verify({ reference: paidRef });
+              console.log("Payment successful, verifying transaction...", tranx);
+              if (!hasAlreadyRequestedVerification(paidRef)) {
+                markVerificationRequested(paidRef);
+                verify({ reference: paidRef });
+              }
               callbacks?.onSuccess(tranx);
             },
             onError(error) {
@@ -213,7 +235,10 @@ export const usePaystackPayment = () => {
             ref: reference,
             callback(response) {
               const paidRef = response?.reference ?? reference;
-              verify({ reference: paidRef });
+              if (!hasAlreadyRequestedVerification(paidRef)) {
+                markVerificationRequested(paidRef);
+                verify({ reference: paidRef });
+              }
               callbacks?.onSuccess({
                 id: "",
                 reference: paidRef,
