@@ -79,14 +79,14 @@ jobs:
     secrets: inherit
 
   production-deploy:
-    name: Promote preprod image to production
+    name: Promote staging image to production
     if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'production' }}
     uses: ./.github/workflows/_promote-job.yml
     with:
       app_name: meetsession
       stack_env: frontend
       image_env: production
-      source_tag: preprod-latest
+      source_tag: staging-latest
       target_tag: latest
       compose_file: compose.prod.yaml
       app_dir: "/opt/products/meetsession/frontend"
