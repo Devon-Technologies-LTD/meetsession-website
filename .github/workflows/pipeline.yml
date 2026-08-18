@@ -10,7 +10,7 @@ on:
       - closed
     branches:
       - "preprod"
-      - "production"
+      - "main"
 
 jobs:
   checks:
@@ -80,7 +80,7 @@ jobs:
 
   production-deploy:
     name: Promote staging image to production
-    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'production' }}
+    if: ${{ github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'main' }}
     uses: ./.github/workflows/_promote-job.yml
     with:
       app_name: meetsession
