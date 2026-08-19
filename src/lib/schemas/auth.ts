@@ -72,3 +72,29 @@ export const resendOTPSchema = z.object({
   email: z.email({ error: "Email address is required" }),
 });
 export type TResendOTP = z.infer<typeof resendOTPSchema>;
+
+// forgot password — request a reset code
+export const sendResetPasswordCodeSchema = z.object({
+  email: z.email({ error: "Email address is required" }),
+});
+export type TSendResetPasswordCode = z.infer<
+  typeof sendResetPasswordCodeSchema
+>;
+
+// forgot password — submit code + new password
+export const resetPasswordSchema = z
+  .object({
+    email: z.email({ error: "Email address is required" }),
+    otp: z.string().min(6, { error: "OTP must be 6 digits" }),
+    password: z
+      .string({ error: "Password is required" })
+      .min(4, { error: "At least 4 characters are required" }),
+    password_confirm: z
+      .string({ error: "Confirm password is required" })
+      .min(4, { error: "At least 4 characters are required" }),
+  })
+  .refine((values) => values.password === values.password_confirm, {
+    error: "Confirm password does not match",
+    path: ["password_confirm"],
+  });
+export type TResetPassword = z.infer<typeof resetPasswordSchema>;
