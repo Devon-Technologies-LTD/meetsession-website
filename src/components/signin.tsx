@@ -1,8 +1,5 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema, TLogin } from "@/lib/schemas";
 import {
   Form,
   FormControl,
@@ -12,7 +9,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { loginAction } from "@/server/actions";
 import { toast } from "sonner";
 import { Loader2Icon } from "lucide-react";
 import { TLoginResponse } from "@/lib/types";
@@ -20,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { Label } from "./ui/label";
 import { PasswordField } from "./ui/password-field";
 import { GoogleSignInButton } from "./ui/google-signin-button";
+import { useSigninForm } from "@/features/auth/hook/use-signin-form";
 
 type LoginFormProps = {
   defaultEmail?: string;
@@ -31,35 +28,7 @@ export function SigninForm({
   defaultEmail,
   onSuccessAction: onSuccess,
 }: LoginFormProps) {
-  const form = useForm<TLogin>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: defaultEmail ?? "",
-      password: "",
-    },
-  });
-
-  async function onSubmit(values: TLogin) {
-    const formdata = new FormData();
-    Object.keys(values).forEach((value) => {
-      formdata.append(value, values[value as keyof typeof values] ?? "");
-    });
-
-    const response = await loginAction(formdata);
-
-    if (response.success) {
-      toast.success("Successfully");
-      form.reset();
-      onSuccess?.(response?.data);
-      // router.push("/");
-    } else {
-      toast.error(
-        typeof response.errors === "string"
-          ? response.errors
-          : response.message,
-      );
-    }
-  }
+  const { form, onSubmit } = useSigninForm({ defaultEmail, onSuccess });
 
   return (
     <div className="z-10 flex flex-col justify-center items-center gap-6 w-full h-full text-center">
@@ -152,16 +121,14 @@ export function SigninForm({
   );
 }
 
-export function Signin({
-  defaultEmail,
+export function useSigninRedirect({
   carryForward,
 }: {
-  defaultEmail?: string;
   carryForward?: { code: string; tierId: string };
 } = {}) {
   const router = useRouter();
   const DEFAULT_TIER_ID = "00000000-0000-0000-0000-000000000000";
-  // success handler
+
   function onSuccess(response?: TLoginResponse | null) {
     if (carryForward) {
       const params = new URLSearchParams({
@@ -180,12 +147,23 @@ export function Signin({
     router.push(`/dashboard/accounts`);
   }
 
-  // error handler
   function onError(
     data?: Record<string, string | string[] | undefined> | string,
   ) {
     console.log(data);
   }
+
+  return { onSuccess, onError };
+}
+
+export function Signin({
+  defaultEmail,
+  carryForward,
+}: {
+  defaultEmail?: string;
+  carryForward?: { code: string; tierId: string };
+} = {}) {
+  const { onSuccess, onError } = useSigninRedirect({ carryForward });
 
   return (
     <div className="w-full h-full">

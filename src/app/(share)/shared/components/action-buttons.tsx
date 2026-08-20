@@ -31,7 +31,10 @@ export function ActionButtons({ meetingData, meetId }: ActionButtonsProps) {
   const handleDownloadAudio = () => {
     if (meetingData.audio_link) {
       window.open(meetingData.audio_link, "_blank");
+      return;
     }
+    // No audio on the share payload — send them to the app instead.
+    handlePlayRecording();
   };
 
   const handleViewSummary = () => {
@@ -67,9 +70,7 @@ export function ActionButtons({ meetingData, meetId }: ActionButtonsProps) {
         variant="outline"
         size="lg"
         className="flex items-center gap-2"
-        // onClick={handleDownloadAudio}
-        onClick={handlePlayRecording}
-
+        onClick={handleDownloadAudio}
       >
         <Download className="h-5 w-5" />
         Download Audio
@@ -78,8 +79,7 @@ export function ActionButtons({ meetingData, meetId }: ActionButtonsProps) {
         variant="outline"
         size="lg"
         className="flex items-center gap-2"
-        onClick={handlePlayRecording}
-
+        onClick={handleViewSummary}
       >
         <FileText className="h-5 w-5" />
         View Summary
@@ -88,7 +88,7 @@ export function ActionButtons({ meetingData, meetId }: ActionButtonsProps) {
         variant="outline"
         size="lg"
         className="flex items-center gap-2"
-        onClick={handlePlayRecording}
+        onClick={handleShareTranscript}
       >
         <Share2 className="h-5 w-5" />
         Share Transcript

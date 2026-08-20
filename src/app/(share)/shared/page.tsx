@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { BackAction } from "@/components/back-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SharedMeetingResponse } from "@/lib/types/shared-meeting";
@@ -44,6 +45,50 @@ function formatTime(timestamp: string) {
   const [hours, minutes, seconds] = timestamp.split(":");
   const secs = parseFloat(seconds);
   return `${hours}:${minutes}:${secs.toFixed(0).padStart(2, "0")}`;
+}
+
+// Link previews (WhatsApp, Slack, iMessage…) showed the generic site metadata
+// because this page defined none. Use the meeting's own title/date instead.
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ meet_id?: string }>;
+}): Promise<Metadata> {
+  const { meet_id: meetId } = await searchParams;
+
+  const fallback: Metadata = {
+    title: "Shared Transcript | MeetSession",
+    description: "View a meeting transcript shared with you on MeetSession.",
+  };
+
+  if (!meetId) return fallback;
+
+  try {
+    const { data } = await getSharedMeeting(meetId);
+    const title = `${data.title} | MeetSession`;
+    const description = `Meeting transcript shared with you${
+      data.meeting_date ? ` — ${formatDate(data.meeting_date)}` : ""
+    }. Open in the MeetSession app to listen to the recording.`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        type: "article",
+        images: [{ url: "/image/ms-screenshot-text.png" }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: ["/image/ms-screenshot-text.png"],
+      },
+    };
+  } catch {
+    return fallback;
+  }
 }
 
 export default async function SharedMeetingPage({

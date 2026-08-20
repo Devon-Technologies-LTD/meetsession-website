@@ -7,6 +7,8 @@ import {
   loginSchema,
   partnerActivateSchema,
   resendOTPSchema,
+  resetPasswordSchema,
+  sendResetPasswordCodeSchema,
   signupSchema,
   trialStartSchema,
   validateCouponCodeSchema,
@@ -300,6 +302,106 @@ export async function resentOTPAction(formdata: FormData) {
       initialData: dirty,
     };
   }
+}
+
+// forgot password — request a reset code
+export async function sendResetPasswordCodeAction(formdata: FormData) {
+  const dirty = Object.fromEntries(formdata);
+  const result = sendResetPasswordCodeSchema.safeParse(dirty);
+  if (!result.success) {
+    const errs = z.flattenError(result.error).fieldErrors;
+    return {
+      success: false,
+      message: result.error.message,
+      errors: { email: errs.email ?? undefined },
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  const res = await apiClient.unauthenticated<{ message?: string }>(
+    "/auth/send_reset_password_code",
+    {
+      method: "POST",
+      data: result.data,
+    },
+  );
+
+  if (!res.ok) {
+    return {
+      success: false,
+      errors: { email: [res.error] },
+      message: res.error || "Failed to send reset code",
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  return {
+    success: true,
+    data: null,
+    errors: null,
+    message: res.data.message || "Reset code sent",
+    initialData: dirty,
+  };
+}
+
+// forgot password — submit code + new password
+export async function resetPasswordAction(formdata: FormData) {
+  const dirty = Object.fromEntries(formdata);
+  const result = resetPasswordSchema.safeParse(dirty);
+  if (!result.success) {
+    const errs = z.flattenError(result.error).fieldErrors;
+    return {
+      success: false,
+      message: result.error.message,
+      errors: {
+        otp: errs.otp ?? undefined,
+        password: errs.password ?? undefined,
+        password_confirm: errs.password_confirm ?? undefined,
+      },
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  const res = await apiClient.unauthenticated<{
+    message?: string;
+    data?: { token?: string };
+  }>("/auth/reset_password", {
+    method: "POST",
+    data: {
+      email: result.data.email,
+      password: result.data.password,
+      otp: result.data.otp,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      errors: { otp: [res.error] },
+      message: res.error || "Failed to reset password",
+      data: null,
+      initialData: dirty,
+    };
+  }
+
+  const token = res.data.data?.token;
+  if (token) {
+    // The backend logs the user in on a successful reset (no refresh
+    // token / user_details in this response) — a fresh /auth/login or
+    // reload will backfill user_details as usual once the session exists.
+    await auth.storeTokens({ tokens: { accessToken: token } });
+  }
+
+  return {
+    success: true,
+    data: res.data,
+    errors: null,
+    message: res.data.message || "Password reset successfully",
+    initialData: dirty,
+  };
 }
 
 export async function initializePaymentAction(

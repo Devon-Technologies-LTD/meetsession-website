@@ -78,6 +78,20 @@ export function useNavItems() {
     },
     {
       id: 8,
+      label: "Login",
+      render: (
+        <Link
+          href="/signin"
+          className={cn(buttonVariants({ variant: "outline" }))}
+        >
+          Login
+        </Link>
+      ),
+      type: "buttons",
+      link: "/signin",
+    },
+    {
+      id: 9,
       label: "Download App",
       render: (
         <Link
